@@ -1,0 +1,48 @@
+agora gere um modulo para controle de solicitações de taxi (SolicitacaoTaxi.cs). gere as tabelas e a estrutura do projeto em razor pages com asp.net core
+uma solicitação pode conter varios passageiros(Passageiro.cs)
+o motorista e veiculo deve ser um campo livre para preenchimento durante a solicitacao
+
+use como base para os passageiros a classe em anexo (VEmpAtivos.cs)
+
+gere todo o crud e tabelas que for necessario
+
+siga as diretivas abaixo:
+ 
+1 - inclua nos arquivos cshtml.cs as diretivas
+ 
+  private readonly FrotaveiculosContext _context;
+  private readonly FpwContext _fpwContext;
+  private IAppInfra _appInfra;
+  public DetailsModel(IAppInfra appInfra)
+  {
+      _appInfra = appInfra;
+      _context = appInfra.FrotaveiculosContext;
+	  _fpwContext = appInfra.FpwContext;
+  }
+  
+2 - inclua no inicio dos arquivos cshtml  as diretivas
+@page  
+@model INB.Frota.Web.Pages.Motoristas.CreateModel
+@inject IIdentityHelper identityHelper
+@{
+    ViewData["Title"] = "Cadastrar Motorista";
+
+    var perfil = identityHelper.Perfil;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+3 - Nas ações de salvar e editar, exclua as validações de tabelas que não são necessárias.
+Exemplo: Removi no momento de salvar uma multa 
+  ModelState.Remove("Multa.Veiculo");
+  ModelState.Remove("Multa.Motorista");
+  
+  
+4 Realize sempre as validações de Unidade que o usuario pertence para listar os dados
+exemplo : Motoristas = await (from p in _context.Motorista where p.Unidade == _(int)_appInfra.IdentityHelper.Perfil.LocalCodigo select p).OrderBy(m => m.NomeCompleto).ToListAsync();
+
+5 - padronize os divs de acordo com o abaixo e não use cards:
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">

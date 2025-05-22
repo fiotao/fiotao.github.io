@@ -1,0 +1,70 @@
+mantenha todas as funcionalidades atuais melhorando no que for possivel,remova duplicidades de codigos e estilos, etc
+gere todos os arquivos completos para download.
+
+
+Crie um sistema completo de controle financeiro pessoal com layout moderno e atualizado em HTML, CSS e JavaScript com as seguintes características:
+
+1. Interface:
+- Layout limpo e responsivo com abas para diferentes funcionalidades
+- Cores temáticas para receitas (verde), despesas (vermelho), investimentos (roxo) e cartões (azul)
+- Dashboard com KPIs e gráficos visuais
+
+2. Funcionalidades principais:
+- Registro de transações (receitas e despesas) com:
+  * Data, tipo, categoria, valor, descrição e conta bancária
+  * Formulário de cadastro com validação
+  * Edição e exclusão de registros
+- Gerenciamento de investimentos:
+  * Tipo (Poupança, CDB, Ações, etc.)
+  * Valor, data e conta relacionada
+- Controle de cartões de crédito:
+  * Cadastro com limite, vencimento e fechamento
+  * Registro de compras (à vista ou parceladas)
+- Gerenciamento de contas bancárias:
+  * Nome, tipo, banco e saldo inicial
+
+3. Dashboard completo:
+- KPIs principais (saldo, receitas, despesas, investimentos)
+- Gráficos:
+  * Evolução anual (receitas vs despesas)
+  * Patrimônio líquido
+  * Despesas por tipo e maiores despesas
+  * Utilização de cartões
+  * Metas financeiras
+- Tabelas resumo:
+  * Top 5 receitas e despesas
+  * Resumo de contas
+
+4. Importação de dados:
+- Leitura de arquivos CSV de extratos bancários contendo no minimo 'data', 'historico', 'valor'
+- Classificação automática usando palavras-chave configuráveis. Sugira e cadastre uma lista previa.
+- Pré-visualização com filtros antes da importação
+- Detecção de possíveis duplicatas
+
+5. Recursos adicionais:
+- Filtros avançados para transações
+- Cálculo automático de saldos
+- Comparativo com períodos anteriores
+- Exportação para Excel
+- Armazenamento local dos dados (localStorage)
+
+6. Requisitos técnicos:
+- HTML5 semântico
+- CSS moderno com Grid e Flexbox
+- JavaScript puro (sem bibliotecas externas, exceto Chart.js para gráficos e xlsx.js para exportação)
+- Design responsivo para mobile
+- Feedback visual para ações do usuário
+
+7. Dados iniciais:
+- Contas padrão: Carteira, BB Marcelo, BB Vanessa
+- Categorias pré-definidas para receitas e despesas
+- Palavras-chave para classificação automática
+
+O código deve ser bem organizado, comentado e seguir boas práticas de desenvolvimento. Inclua todos os estilos CSS no cabeçalho e scripts JavaScript no final do body.
+
+Priorize a experiência do usuário com:
+- Mensagens de status claras
+- Confirmações para ações destrutivas
+- Validação de formulários
+- Visualização imediata de alterações
+- Performance otimizada

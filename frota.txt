@@ -1,0 +1,84 @@
+Gere o código para um sistema web completo para controle de frota de veículos, abrangendo diversas funcionalidades essenciais para a gestão eficiente.
+
+Linguagem de Programação Primária: Asp.net core com razor pages
+
+Banco de Dados: (Escolha um banco de dados, por exemplo: SQL Server
+
+Funcionalidades Essenciais:
+
+Todos os cadastros devem ser separados por filial.
+
+Gerenciamento de Veículos:
+
+Cadastro de novos veículos (placa, modelo, marca, ano, chassi, cor, data de aquisição, valor de compra, tipo de combustível, capacidade do tanque, hodômetro inicial).
+Listagem, visualização, edição e exclusão de veículos.
+Controle de status do veículo (ativo, inativo, em manutenção).
+Associação de veículos a departamentos/setores (opcional).
+Gerenciamento de Motoristas:
+
+Cadastro de novos motoristas (nome completo, CPF, CNH, data de nascimento, endereço, telefone, e-mail, data de admissão).
+Listagem, visualização, edição e exclusão de motoristas.
+Controle de status do motorista (ativo, inativo, férias).
+Associação de motoristas a veículos (histórico de alocações).
+Controle de Abastecimentos:
+
+Registro de abastecimentos (veículo, motorista, data e hora, tipo de combustível, quantidade, valor por litro, valor total, local do abastecimento, odômetro atual).
+Listagem e filtragem de abastecimentos por veículo, motorista, período, etc.
+Cálculo de consumo médio por veículo.
+Alertas para abastecimentos com valores atípicos (opcional).
+Controle de Manutenção:
+
+Registro de manutenções (veículo, data, tipo de manutenção (preventiva/corretiva), descrição do serviço, peças trocadas, valor total, oficina/responsável).
+Listagem e filtragem de manutenções por veículo, tipo, período, etc.
+Agendamento de manutenções preventivas com base em KM rodados ou data.
+Histórico de manutenções por veículo.
+Controle de Saídas/Utilização:
+
+Registro de saídas de veículos (veículo, motorista, data e hora de saída, destino, motivo da saída, odômetro inicial).
+Registro de retornos de veículos (data e hora de retorno, odômetro final, observações).
+Cálculo de distância percorrida por saída.
+Relatórios de utilização de veículos por período, motorista, etc.
+Relatórios e Dashboards:
+
+Relatório de veículos ativos e inativos.
+Relatório de abastecimentos por veículo/período.
+Relatório de custos de manutenção por veículo/período.
+Relatório de utilização de veículos (quilometragem rodada, tempo de uso).
+Dashboard com indicadores chave (consumo médio da frota, custo total de manutenção, veículos com manutenções pendentes, etc.).
+
+Controle de Pneus: Cadastro de pneus, controle de trocas, rodízios, vida útil, alertas de desgaste.
+Controle de Documentos: Gerenciamento de documentos dos veículos (licenciamento, IPVA, seguro) e dos motoristas (CNH, exames), com alertas de vencimento.
+
+Rastreamento Veicular (Integração): Possibilidade de integrar com sistemas de rastreamento para visualização da localização dos veículos em tempo real e geração de relatórios de trajetos.
+
+Gestão de Multas: Registro de multas, responsáveis, status de pagamento.
+
+Controle de Custos Fixos: Registro de custos fixos da frota associado ao veiculo (seguro, depreciação, etc.).
+
+Agendamento de Tarefas: Agendamento de inspeções, revisões, lavagens.
+
+Notificações e Alertas: Alertas automáticos para vencimento de documentos, necessidade de manutenção, etc.
+
+Perfil de Usuários e Permissões: Diferentes níveis de acesso ao sistema para diferentes usuários (administrador, operador, etc.).
+
+Integração com Outros Sistemas: Possibilidade de integração com sistemas de contabilidade, RH, etc.
+
+Aplicativo Mobile (Opcional): Interface mobile para motoristas registrarem abastecimentos, saídas/retornos, e reportarem problemas.
+
+Requisitos Não Funcionais:
+
+Interface Intuitiva e Responsiva: O sistema deve ser fácil de usar e adaptar-se a diferentes tamanhos de tela (desktops, tablets, smartphones).
+Segurança: Implementar medidas de segurança para proteger os dados da frota.
+Escalabilidade: A arquitetura do sistema deve permitir o crescimento da frota e do número de usuários.
+Performance: O sistema deve ser rápido e eficiente na execução das operações.
+Instruções Adicionais:
+
+Considere a criação de um modelo de dados (entidades e seus relacionamentos) para o banco de dados.
+Estruture o código de forma modular e organizada para facilitar a manutenção e futuras extensões.
+Utilize boas práticas de programação e padrões de projeto.
+Inclua comentários no código para melhor compreensão.
+Formato de Saída Desejado:
+
+Código fonte completo do sistema, seguindo a linguagem e frameworks definidos.
+Instruções de instalação e configuração do sistema e do banco de dados.
+Documentação básica das principais funcionalidades e da estrutura do código (opcional, dependendo da capacidade da IA).

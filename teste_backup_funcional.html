@@ -1,0 +1,3449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro Pessoal</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .btn-edit {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 5px;
+        }
+        .btn-edit:hover {
+            background-color: #e67e22;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .filters {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .filters .form-group {
+            display: inline-block;
+            margin-right: 15px;
+            vertical-align: top;
+        }
+        .filters label {
+            font-weight: normal;
+        }
+        .filters select, .filters input {
+            width: auto;
+            min-width: 150px;
+        }
+        .receita {
+            color: #2ecc71;
+        }
+        .despesa {
+            color: #e74c3c;
+        }
+        .investimento {
+            color: #9b59b6;
+        }
+        .cartao {
+            color: #3498db;
+        }
+        .saldo {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .saldo.positivo {
+            color: #2ecc71;
+        }
+        .saldo.negativo {
+            color: #e74c3c;
+        }
+        .status-message {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        /* Nova Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .kpi-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 120px;
+        }
+        .kpi-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .kpi-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .kpi-receita {
+            border-top: 4px solid #2ecc71;
+        }
+        .kpi-despesa {
+            border-top: 4px solid #e74c3c;
+        }
+        .kpi-investimento {
+            border-top: 4px solid #9b59b6;
+        }
+        .kpi-saldo {
+            border-top: 4px solid #3498db;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th, .summary-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .summary-table th {
+            background-color: #f8f9fa;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .installment-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .installment-control input {
+            width: 60px;
+        }
+        .payment-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+        .status-paid {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .import-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .import-preview {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .keyword-config {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f7ff;
+            border-radius: 5px;
+        }
+        .keyword-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .keyword-item {
+            background-color: #e3f2fd;
+            padding: 5px 10px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .keyword-item button {
+            padding: 2px 5px;
+            font-size: 12px;
+            background-color: #e74c3c;
+        }
+        .import-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .highlight {
+            background-color: #fffde7;
+        }
+        .import-filter {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .import-filter .form-group {
+            display: inline-block;
+            margin-right: 15px;
+            vertical-align: top;
+        }
+        .import-filter label {
+            font-weight: normal;
+            margin-right: 5px;
+        }
+        .import-filter select, .import-filter input {
+            width: auto;
+            min-width: 150px;
+        }
+        .import-preview table {
+            margin-top: 15px;
+        }
+        .import-preview th, .import-preview td {
+            padding: 8px;
+            text-align: left;
+        }
+        .import-preview th {
+            background-color: #f8f9fa;
+        }
+        .import-checkbox {
+            text-align: center;
+        }
+        .duplicate-row {
+            background-color: #ffebee !important;
+        }
+        .import-selection {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        /* Grid classes for dashboard */
+        .grid-col-12 {
+            grid-column: span 12;
+        }
+        .grid-col-6 {
+            grid-column: span 6;
+        }
+        .grid-col-4 {
+            grid-column: span 4;
+        }
+        .grid-col-3 {
+            grid-column: span 3;
+        }
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .grid-col-12,
+            .grid-col-6,
+            .grid-col-4,
+            .grid-col-3 {
+                grid-column: span 1;
+            }
+        }		
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Controle Financeiro Pessoal</h1>
+
+        <div id="status-message" class="status-message"></div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('transactions-tab')">Transações</div>
+            <div class="tab" onclick="openTab('investments-tab')">Investimentos</div>
+            <div class="tab" onclick="openTab('creditcards-tab')">Cartões</div>
+            <div class="tab" onclick="openTab('accounts-tab')">Contas</div>
+            <div class="tab" onclick="openTab('import-tab')">Importar</div>
+			<div class="tab" onclick="openTab('full-dashboard-tab')">Dashboard Completo</div>
+
+        </div>
+<!-- DASHBOARD COMPLETO -->
+<div id="full-dashboard-tab" class="tab-content">  
+     <div class="dashboard">
+        <!-- KPIs Principais -->
+        <div class="dashboard-card kpi-card kpi-saldo grid-col-3">
+            <div class="kpi-label">Saldo Acumulado (Ano)</div>
+            <div class="kpi-value" id="full-kpi-saldo">R$ 0,00</div>
+            <div class="kpi-label" id="full-kpi-saldo-variacao">vs ano anterior: 0%</div>
+        </div>
+        
+        <div class="dashboard-card kpi-card kpi-receita grid-col-3">
+            <div class="kpi-label">Receitas (Ano)</div>
+            <div class="kpi-value" id="full-kpi-receita">R$ 0,00</div>
+            <div class="kpi-label" id="full-kpi-receita-variacao">vs ano anterior: 0%</div>
+        </div>
+        
+        <div class="dashboard-card kpi-card kpi-despesa grid-col-3">
+            <div class="kpi-label">Despesas (Ano)</div>
+            <div class="kpi-value" id="full-kpi-despesa">R$ 0,00</div>
+            <div class="kpi-label" id="full-kpi-despesa-variacao">vs ano anterior: 0%</div>
+        </div>
+        
+        <div class="dashboard-card kpi-card kpi-investimento grid-col-3">
+            <div class="kpi-label">Investimentos (Total)</div>
+            <div class="kpi-value" id="full-kpi-investimento">R$ 0,00</div>
+            <div class="kpi-label" id="full-kpi-investimento-variacao">vs mês anterior: 0%</div>
+        </div>
+        
+        <!-- Gráficos principais -->
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Evolução Anual (Receitas vs Despesas)</div>
+            <div class="chart-container">
+                <canvas id="annualTrendChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Patrimônio Líquido</div>
+            <div class="chart-container">
+                <canvas id="netWorthChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Novos gráficos de despesas -->
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Despesas por Tipo</div>
+            <div class="chart-container">
+                <canvas id="expensesByTypeChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Maiores Despesas por Grupo</div>
+            <div class="chart-container">
+                <canvas id="topExpensesByGroupChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Cartões de Crédito -->
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Utilização de Cartões</div>
+            <div class="chart-container">
+                <canvas id="creditCardsUsageChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Gastos por Cartão</div>
+            <div class="chart-container">
+                <canvas id="spendingByCardChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Tabelas resumo -->
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Top 5 Receitas do Ano</div>
+            <table class="summary-table" id="topIncomesTable">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div class="dashboard-card grid-col-6">
+            <div class="dashboard-title">Top 5 Despesas do Ano</div>
+            <table class="summary-table" id="topExpensesAnnualTable">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- Resumo de Contas -->
+        <div class="dashboard-card grid-col-12">
+            <div class="dashboard-title">Resumo das Contas</div>
+            <table class="summary-table" id="accountsSummaryTable">
+                <thead>
+                    <tr>
+                        <th>Conta</th>
+                        <th>Tipo</th>
+                        <th>Saldo Atual</th>
+                        <th>Variação (Mês)</th>
+                        <th>% do Total</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- Metas Financeiras -->
+        <div class="dashboard-card grid-col-12">
+            <div class="dashboard-title">Metas Financeiras</div>
+            <div class="chart-container">
+                <canvas id="financialGoalsChart"></canvas>
+            </div>
+        </div>
+    </div> */
+</div>
+        <!-- TABELA DE TRANSAÇÕES -->
+        <div id="transactions-tab" class="tab-content active">
+            <div class="filters">
+                <div class="form-group">
+                    <label for="filter-type">Tipo:</label>
+                    <select id="filter-type">
+                        <option value="all">Todos</option>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-category">Categoria:</label>
+                    <select id="filter-category">
+                        <option value="all">Todas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-account">Conta:</label>
+                    <select id="filter-account">
+                        <option value="all">Todas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-date">Período:</label>
+                    <input type="month" id="filter-date">
+                </div>
+                <div class="form-group">
+                    <button id="apply-filters" class="btn-success">Aplicar Filtros</button>
+                    <button id="reset-filters" class="btn-danger">Limpar Filtros</button>
+                </div>
+            </div>
+            
+            <!-- Nova Dashboard -->
+            <div class="dashboard">
+                <!-- KPIs -->
+                <div class="dashboard-card kpi-card kpi-receita grid-col-3">
+                    <div class="kpi-label">Receitas (Mês)</div>
+                    <div class="kpi-value" id="kpi-receita">R$ 0,00</div>
+                    <div class="kpi-label" id="kpi-receita-variacao">vs mês anterior: 0%</div>
+                </div>
+                
+                <div class="dashboard-card kpi-card kpi-despesa grid-col-3">
+                    <div class="kpi-label">Despesas (Mês)</div>
+                    <div class="kpi-value" id="kpi-despesa">R$ 0,00</div>
+                    <div class="kpi-label" id="kpi-despesa-variacao">vs mês anterior: 0%</div>
+                </div>
+                
+                <div class="dashboard-card kpi-card kpi-saldo grid-col-3">
+                    <div class="kpi-label">Saldo (Mês)</div>
+                    <div class="kpi-value" id="kpi-saldo">R$ 0,00</div>
+                    <div class="kpi-label" id="kpi-saldo-variacao">vs mês anterior: 0%</div>
+                </div>
+                
+                <div class="dashboard-card kpi-card kpi-investimento grid-col-3">
+                    <div class="kpi-label">Investimentos (Total)</div>
+                    <div class="kpi-value" id="kpi-investimento">R$ 0,00</div>
+                    <div class="kpi-label" id="kpi-investimento-variacao">vs mês anterior: 0%</div>
+                </div>
+                
+                <!-- Gráficos principais -->
+                <div class="dashboard-card grid-col-6">
+                    <div class="dashboard-title">Receitas vs Despesas (Últimos 6 meses)</div>
+                    <div class="chart-container">
+                        <canvas id="incomeVsExpensesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card grid-col-6">
+                    <div class="dashboard-title">Distribuição de Despesas por Categoria</div>
+                    <div class="chart-container">
+                        <canvas id="expensesByCategoryChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card grid-col-6">
+                    <div class="dashboard-title">Distribuição de Receitas por Categoria</div>
+                    <div class="chart-container">
+                        <canvas id="incomeByCategoryChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card grid-col-6">
+                    <div class="dashboard-title">Evolução do Saldo</div>
+                    <div class="chart-container">
+                        <canvas id="balanceEvolutionChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Tabelas resumo -->
+                <div class="dashboard-card grid-col-12">
+                    <div class="dashboard-title">Top 5 Despesas do Mês</div>
+                    <table class="summary-table" id="topExpensesTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <form id="transaction-form">
+                <div class="form-group">
+                    <label for="transaction-type">Tipo:</label>
+                    <select id="transaction-type" required>
+                        <option value="">Selecione...</option>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-category">Categoria:</label>
+                    <select id="transaction-category" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                    <input type="text" id="new-category" placeholder="Nova categoria" style="display: none; margin-top: 5px;">
+                    <button type="button" id="add-category-btn" style="display: none; margin-top: 5px;">Adicionar Categoria</button>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-account">Conta Bancária:</label>
+                    <select id="transaction-account" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-date">Data:</label>
+                    <input type="date" id="transaction-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-value">Valor:</label>
+                    <input type="number" id="transaction-value" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-description">Descrição:</label>
+                    <textarea id="transaction-description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn-success">Adicionar Lançamento</button>
+            </form>
+
+            <div class="saldo" id="balance">Saldo: R$ 0,00</div>
+
+            <table id="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Conta</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="actions">
+                <button id="export-excel" class="btn-success">Exportar para Excel</button>
+                <button id="clear-data" class="btn-danger">Limpar Todos os Dados</button>
+            </div>
+        </div>
+
+        <!-- TABELA DE INVESTIMENTOS -->
+       <div id="investments-tab" class="tab-content">
+            <form id="investment-form">
+                <div class="form-group">
+                    <label for="investment-type">Tipo de Investimento:</label>
+                    <select id="investment-type" required>
+                        <option value="">Selecione...</option>
+                        <option value="Poupança">Poupança</option>
+                        <option value="CDB">CDB</option>
+                        <option value="Tesouro Direto">Tesouro Direto</option>
+                        <option value="Ações">Ações</option>
+                        <option value="FII">Fundo Imobiliário (FII)</option>
+                        <option value="Previdência Privada">Previdência Privada</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                    <input type="text" id="new-investment-type" placeholder="Especifique o tipo" style="display: none; margin-top: 5px;">
+                </div>
+                <div class="form-group">
+                    <label for="investment-account">Conta Bancária:</label>
+                    <select id="investment-account" required>
+                        <option value="">Selecione...</option>
+                        <!-- As opções serão preenchidas dinamicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="investment-date">Data:</label>
+                    <input type="date" id="investment-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="investment-value">Valor Investido:</label>
+                    <input type="number" id="investment-value" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="investment-description">Descrição:</label>
+                    <textarea id="investment-description" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-success">Adicionar Investimento</button>
+            </form>
+
+            <table id="investments-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th>Conta</th>
+                        <th>Descrição</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+
+        <!-- TABELA DE CARTÕES DE CRÉDITO -->
+        <div id="creditcards-tab" class="tab-content">
+            <form id="creditcard-form">
+                <div class="form-group">
+                    <label for="creditcard-name">Nome do Cartão:</label>
+                    <input type="text" id="creditcard-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="creditcard-bank">Banco:</label>
+                    <input type="text" id="creditcard-bank" required>
+                </div>
+                <div class="form-group">
+                    <label for="creditcard-limit">Limite Total:</label>
+                    <input type="number" id="creditcard-limit" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="creditcard-duedate">Dia do Vencimento:</label>
+                    <input type="number" id="creditcard-duedate" min="1" max="31" required>
+                </div>
+                <div class="form-group">
+                    <label for="creditcard-closing">Dia do Fechamento:</label>
+                    <input type="number" id="creditcard-closing" min="1" max="31" required>
+                </div>
+                <button type="submit" class="btn-success">Adicionar Cartão</button>
+            </form>
+
+            <div class="dashboard">
+                <div class="dashboard-card">
+                    <div class="dashboard-title">Previsão de Pagamentos</div>
+                    <div class="chart-container">
+                        <canvas id="paymentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <form id="creditcard-purchase-form">
+                <div class="form-group">
+                    <label for="purchase-card">Cartão:</label>
+                    <select id="purchase-card" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="purchase-category">Categoria:</label>
+                    <select id="purchase-category" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="purchase-date">Data da Compra:</label>
+                    <input type="date" id="purchase-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="purchase-description">Descrição:</label>
+                    <input type="text" id="purchase-description" required>
+                </div>
+                <div class="form-group">
+                    <label for="purchase-value">Valor Total:</label>
+                    <input type="number" id="purchase-value" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="purchase-type">Tipo de Compra:</label>
+                    <select id="purchase-type" required>
+                        <option value="">Selecione...</option>
+                        <option value="avista">À Vista</option>
+                        <option value="parcelado">Parcelado</option>
+                    </select>
+                </div>
+                <div class="form-group" id="installment-control" style="display: none;">
+                    <label>Parcelamento:</label>
+                    <div class="installment-control">
+                        <input type="number" id="purchase-installments" min="2" max="24" placeholder="Parcelas">
+                        <span>de</span>
+                        <input type="number" id="purchase-current" min="1" max="24" placeholder="Atual">
+                    </div>
+                </div>
+                <button type="submit" class="btn-success">Adicionar Compra</button>
+            </form>
+
+            <table id="creditcards-table">
+                <thead>
+                    <tr>
+                        <th>Cartão</th>
+                        <th>Banco</th>
+                        <th>Limite</th>
+                        <th>Disponível</th>
+                        <th>Vencimento</th>
+                        <th>Fechamento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <table id="purchases-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Cartão</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                        <th>Parcelas</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- TABELA DE CONTAS BANCÁRIAS -->
+      <div id="accounts-tab" class="tab-content">
+            <form id="account-form">
+                <div class="form-group">
+                    <label for="account-name">Nome da Conta:</label>
+                    <input type="text" id="account-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="account-type">Tipo de Conta:</label>
+                    <select id="account-type" required>
+                        <option value="">Selecione...</option>
+                        <option value="Conta Corrente">Conta Corrente</option>
+                        <option value="Conta Poupança">Conta Poupança</option>
+                        <option value="Conta Investimento">Conta Investimento</option>
+                        <option value="Carteira">Carteira</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                    <input type="text" id="new-account-type" placeholder="Especifique o tipo" style="display: none; margin-top: 5px;">
+                </div>
+                <div class="form-group">
+                    <label for="account-bank">Banco/Instituição:</label>
+                    <input type="text" id="account-bank">
+                </div>
+                <div class="form-group">
+                    <label for="account-balance">Saldo Inicial:</label>
+                    <input type="number" id="account-balance" step="0.01" value="0">
+                </div>
+                <button type="submit" class="btn-success">Adicionar Conta</button>
+            </form>
+
+            <table id="accounts-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Banco</th>
+                        <th>Saldo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- ABA DE IMPORTAÇÃO -->
+        <div id="import-tab" class="tab-content">
+            <div class="keyword-config">
+                <h3>Configuração de Palavras-chave</h3>
+                <p>Configure palavras-chave para classificação automática de receitas e despesas.</p>
+
+                <div class="form-group">
+                    <label for="new-keyword">Nova Palavra-chave:</label>
+                    <input type="text" id="new-keyword" placeholder="Digite uma palavra ou frase">
+                </div>
+
+                <div class="form-group">
+                    <label for="keyword-type">Tipo:</label>
+                    <select id="keyword-type">
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="keyword-category">Categoria:</label>
+                    <select id="keyword-category">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <button id="add-keyword" class="btn-success">Adicionar Palavra-chave</button>
+
+                <div class="keyword-list" id="keywords-list"></div>
+            </div>
+            <div class="import-section">
+                <h2>Importar Lançamentos</h2>
+                <p>Selecione um arquivo CSV com os lançamentos bancários para importar.</p>
+
+                <div class="form-group">
+                    <label for="csv-file">Arquivo CSV:</label>
+                    <input type="file" id="csv-file" accept=".csv" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="import-account">Conta Bancária:</label>
+                    <select id="import-account" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <button id="preview-import" class="btn-success">Pré-visualizar Importação</button>
+            </div>
+
+            <div id="import-preview" class="import-preview" style="display: none;">
+                <h3>Pré-visualização da Importação</h3>
+                <p>Revise e ajuste as classificações antes de confirmar a importação.</p>
+
+                <div class="import-filter">
+                    <div class="form-group">
+                        <label for="preview-filter-type">Tipo:</label>
+                        <select id="preview-filter-type">
+                            <option value="all">Todos</option>
+                            <option value="receita">Receita</option>
+                            <option value="despesa">Despesa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="preview-filter-category">Categoria:</label>
+                        <select id="preview-filter-category">
+                            <option value="all">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="preview-filter-duplicates">Mostrar:</label>
+                        <select id="preview-filter-duplicates">
+                            <option value="all">Todos</option>
+                            <option value="duplicates">Apenas possíveis duplicatas</option>
+                            <option value="non-duplicates">Apenas novos</option>
+                        </select>
+                    </div>
+                    <button id="apply-preview-filters" class="btn-success">Aplicar Filtros</button>
+                </div>
+
+                <div class="import-selection" id="import-selection">
+                    Selecionados: 0 de 0
+                </div>
+
+                <table id="preview-table">
+                    <thead>
+                        <tr>
+                            <th class="import-checkbox"><input type="checkbox" id="select-all"></th>
+                            <th>Data</th>
+                            <th>Histórico</th>
+                            <th>Valor</th>
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <div class="import-actions">
+                    <button id="cancel-import" class="btn-danger">Cancelar</button>
+                    <button id="confirm-import" class="btn-success">Confirmar Importação</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let transactions = [];
+        let investments = [];
+        let creditCards = [];
+        let creditPurchases = [];
+        let accounts = [];
+
+        // Contas padrão
+        const defaultAccounts = [
+            { name: "Eva", type: "Carteira", bank: "Inter", balance: 0 },
+            { name: "BB Marcelo", type: "Conta Corrente", bank: "Banco do Brasil", balance: 0 },
+            { name: "BB Vanessa", type: "Conta Corrente", bank: "Banco do Brasil", balance: 0 }
+        ];
+
+        // Categorias por tipo
+        const categoryTypes = {
+            receita: ['Salário', 'Investimentos', 'Advocacia', 'Extra', 'Outros'],
+            despesa: ['Alimentação', 'Moradia','Investimentos', 'Transporte', 'Lazer', 'Presente', 'Saúde', 'Educação', 'Financeiros','Impostos', 'Outros']
+        };
+        
+        // Palavras-chave para classificação automática
+        let keywordRules = {
+            receita: [
+                { keyword: 'salário', category: 'Salário' },
+                { keyword: 'rendimento', category: 'Investimentos' },
+                { keyword: 'extra', category: 'Extra' },
+                { keyword: 'dividendo', category: 'Investimentos' },
+                { keyword: 'honorário', category: 'Advocacia' }
+            ],
+            despesa: [
+                { keyword: 'mercado', category: 'Alimentação' },
+                { keyword: 'supermercado', category: 'Alimentação' },
+                { keyword: 'impostos', category: 'Impostos' },
+                { keyword: 'aluguel', category: 'Moradia' },
+                { keyword: 'condomínio', category: 'Moradia' },
+                { keyword: 'luz', category: 'Moradia' },
+                { keyword: 'água', category: 'Moradia' },
+                { keyword: 'combustível', category: 'Transporte' },
+                { keyword: 'uber', category: 'Transporte' },
+                { keyword: 'cinema', category: 'Lazer' },
+                { keyword: 'restaurante', category: 'Alimentação' },
+                { keyword: 'farmacia', category: 'Saúde' },
+                { keyword: 'padaria', category: 'Alimentação' },
+                { keyword: 'alegria comercio de', category: 'Alimentação' },
+                { keyword: 'aenb', category: 'Alimentação' },
+                { keyword: 'posto', category: 'Transporte' },
+                { keyword: 'droga', category: 'Saúde' },
+                { keyword: 'unimed', category: 'Saúde' },
+                { keyword: 'escola', category: 'Educação' },
+                { keyword: 'pastelaria', category: 'Educação' },
+                { keyword: 'parking', category: 'Transporte' },
+                { keyword: 'cartão crédito', category: 'Financeiros' },
+                { keyword: 'banco bv', category: 'Financeiros' },
+                { keyword: 'clube de beneficios', category: 'Financeiros' },
+                { keyword: 'pacote de serviços', category: 'Financeiros' },
+                { keyword: 'seguro de vida', category: 'Financeiros' },
+                { keyword: 'asaas gestao', category: 'Educação' },
+                { keyword: 'pagam presta créd imobili', category: 'Moradia' },
+                { keyword: 'colegio', category: 'Educação' },
+                { keyword: 'pizza', category: 'Alimentação' },
+                { keyword: 'tele', category: 'Moradia' },
+                { keyword: 'Lanche', category: 'Alimentação' },
+                { keyword: 'ampla', category: 'Moradia' },
+                { keyword: 'médico', category: 'Saúde' },
+                { keyword: 'curso', category: 'Educação' }
+            ]
+        };
+        // Elementos do DOM - Adicionei os elementos que estavam faltando
+        const investmentDate = document.getElementById('investment-date');
+        const investmentForm = document.getElementById('investment-form');
+        const accountForm = document.getElementById('account-form');
+
+        // Dados temporários da importação
+        let importData = [];
+        let selectedImportItems = [];
+
+        // Elementos do DOM
+        const statusMessage = document.getElementById('status-message');
+        const transactionForm = document.getElementById('transaction-form');
+        const transactionType = document.getElementById('transaction-type');
+        const transactionCategory = document.getElementById('transaction-category');
+        const newCategoryInput = document.getElementById('new-category');
+        const addCategoryBtn = document.getElementById('add-category-btn');
+        const transactionAccount = document.getElementById('transaction-account');
+        const transactionDate = document.getElementById('transaction-date');
+        const transactionValue = document.getElementById('transaction-value');
+        const transactionDescription = document.getElementById('transaction-description');
+        const transactionsTable = document.getElementById('transactions-table').getElementsByTagName('tbody')[0];
+        const balanceElement = document.getElementById('balance');
+        const exportExcelBtn = document.getElementById('export-excel');
+        const clearDataBtn = document.getElementById('clear-data');
+        const filterType = document.getElementById('filter-type');
+        const filterCategory = document.getElementById('filter-category');
+        const filterAccount = document.getElementById('filter-account');
+        const filterDate = document.getElementById('filter-date');
+        const applyFiltersBtn = document.getElementById('apply-filters');
+        const resetFiltersBtn = document.getElementById('reset-filters');
+
+        // Elementos de importação
+        const csvFileInput = document.getElementById('csv-file');
+        const importAccount = document.getElementById('import-account');
+        const previewImportBtn = document.getElementById('preview-import');
+        const newKeywordInput = document.getElementById('new-keyword');
+        const keywordType = document.getElementById('keyword-type');
+        const keywordCategory = document.getElementById('keyword-category');
+        const addKeywordBtn = document.getElementById('add-keyword');
+        const keywordsList = document.getElementById('keywords-list');
+        const importPreview = document.getElementById('import-preview');
+        const previewTable = document.getElementById('preview-table').getElementsByTagName('tbody')[0];
+        const cancelImportBtn = document.getElementById('cancel-import');
+        const confirmImportBtn = document.getElementById('confirm-import');
+        const selectAllCheckbox = document.getElementById('select-all');
+
+        // Gráficos
+        let incomeVsExpensesChart, expensesByCategoryChart, incomeByCategoryChart, balanceEvolutionChart, paymentsChart;
+		let annualTrendChart, netWorthChart, creditCardsUsageChart, spendingByCardChart, financialGoalsChart;
+		let expensesByTypeChart, topExpensesByGroupChart;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function () {
+            // Configura a data atual como padrão
+            const today = new Date();
+            transactionDate.valueAsDate = today;
+            investmentDate.valueAsDate = today;
+            filterDate.value = today.toISOString().substring(0, 7);
+			
+			// Verifica se o elemento existe antes de definir a data
+            if (investmentDate) {
+                investmentDate.valueAsDate = today;
+            }
+			document.getElementById('creditcard-form').addEventListener('submit', function(e) {
+				e.preventDefault();
+				addCreditCard();
+			});
+            // Carrega as categorias e contas
+            loadCategories();
+            loadAccounts();
+            loadInvestmentAccounts(); // Nova função para carregar contas na tela de investimentos
+            loadKeywordCategories();
+
+            renderKeywords();
+			renderCreditCards();
+
+            // Carrega os dados do localStorage
+            loadLocalStorageData();
+
+            // Atualiza a interface
+            updateBalance();
+            updateDashboard();
+            renderTransactions();
+            renderInvestments(); // Nova função para renderizar investimentos
+            renderAccounts(); // Nova função para renderizar contas
+            
+            // Configura o evento para o tipo de compra parcelada
+            document.getElementById('purchase-type').addEventListener('change', function() {
+                const installmentControl = document.getElementById('installment-control');
+                installmentControl.style.display = this.value === 'parcelado' ? 'block' : 'none';
+            });
+
+            // Configura o evento para o formulário de contas
+            document.getElementById('account-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addAccount();
+            });
+
+            // Configura o evento para o formulário de investimentos
+            document.getElementById('investment-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addInvestment();
+            });
+        });
+		    // Adicionar estas novas funções para manipulação de cartões:
+    function addCreditCard() {
+        const name = document.getElementById('creditcard-name').value.trim();
+        const bank = document.getElementById('creditcard-bank').value.trim();
+        const limit = parseFloat(document.getElementById('creditcard-limit').value);
+        const dueDate = parseInt(document.getElementById('creditcard-duedate').value);
+        const closing = parseInt(document.getElementById('creditcard-closing').value);
+
+        if (!name || !bank || isNaN(limit) || limit <= 0 || isNaN(dueDate) || dueDate < 1 || dueDate > 31 || 
+            isNaN(closing) || closing < 1 || closing > 31) {
+            showStatus('Por favor, preencha todos os campos corretamente.', 'error');
+            return;
+        }
+
+        const card = {
+            id: Date.now(),
+            name,
+            bank,
+            limit,
+            dueDate,
+            closing,
+            available: limit
+        };
+
+        creditCards.push(card);
+        saveLocalStorageData();
+        renderCreditCards();
+        
+        // Limpa o formulário
+        document.getElementById('creditcard-form').reset();
+        
+        showStatus('Cartão adicionado com sucesso!', 'success');
+    }
+
+    function renderCreditCards() {
+        const tbody = document.querySelector('#creditcards-table tbody');
+        tbody.innerHTML = '';
+
+        creditCards.forEach(card => {
+            const row = document.createElement('tr');
+            const formattedLimit = card.limit.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            const formattedAvailable = card.available.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+
+            row.innerHTML = `
+                <td>${card.name}</td>
+                <td>${card.bank}</td>
+                <td>${formattedLimit}</td>
+                <td>${formattedAvailable}</td>
+                <td>${card.dueDate}</td>
+                <td>${card.closing}</td>
+                <td>
+                    <button class="btn-edit" onclick="editCreditCard(${card.id})">Editar</button>
+                    <button class="btn-danger" onclick="deleteCreditCard(${card.id})">Excluir</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+        
+        // Atualiza o select de cartões para compras
+        updateCreditCardSelect();
+    }
+
+    function updateCreditCardSelect() {
+        const select = document.getElementById('purchase-card');
+        select.innerHTML = '<option value="">Selecione...</option>';
+        
+        creditCards.forEach(card => {
+            const option = document.createElement('option');
+            option.value = card.id;
+            option.textContent = `${card.name} (${card.bank})`;
+            select.appendChild(option);
+        });
+    }
+
+    // Adicionar estas funções globais para manipulação de cartões:
+    window.deleteCreditCard = function(id) {
+        if (confirm('Tem certeza que deseja excluir este cartão?')) {
+            creditCards = creditCards.filter(card => card.id !== id);
+            saveLocalStorageData();
+            renderCreditCards();
+            showStatus('Cartão excluído com sucesso!', 'success');
+        }
+    };
+
+    window.editCreditCard = function(id) {
+        const card = creditCards.find(c => c.id === id);
+        if (!card) return;
+
+        // Preenche o formulário com os dados do cartão
+        document.getElementById('creditcard-name').value = card.name;
+        document.getElementById('creditcard-bank').value = card.bank;
+        document.getElementById('creditcard-limit').value = card.limit;
+        document.getElementById('creditcard-duedate').value = card.dueDate;
+        document.getElementById('creditcard-closing').value = card.closing;
+
+        // Remove o cartão da lista
+        creditCards = creditCards.filter(c => c.id !== id);
+        
+        // Rola a página até o formulário
+        document.getElementById('creditcard-form').scrollIntoView({ behavior: 'smooth' });
+        
+        showStatus('Cartão carregado para edição. Faça as alterações e clique em "Adicionar Cartão" para salvar.', 'success');
+    };
+
+        // Função para adicionar investimento
+        function addInvestment() {
+            let type = document.getElementById('investment-type').value;
+            const account = document.getElementById('investment-account').value;
+            const date = document.getElementById('investment-date').value;
+            const value = parseFloat(document.getElementById('investment-value').value);
+            const description = document.getElementById('investment-description').value.trim();
+
+            // Verifica se é um tipo personalizado
+            if (type === 'outro') {
+                type = document.getElementById('new-investment-type').value.trim();
+                if (!type) {
+                    showStatus('Por favor, especifique o tipo de investimento.', 'error');
+                    return;
+                }
+            }
+
+            if (!type || !account || !date || isNaN(value) || value <= 0) {
+                showStatus('Por favor, preencha todos os campos corretamente.', 'error');
+                return;
+            }
+
+            const investment = {
+                id: Date.now(),
+                type,
+                account,
+                date,
+                value,
+                description
+            };
+
+            investments.push(investment);
+            updateAccountBalance(account, -value); // Diminui o saldo da conta
+            saveLocalStorageData();
+            renderInvestments();
+            updateDashboard();
+            
+            // Limpa o formulário
+            document.getElementById('investment-form').reset();
+            document.getElementById('investment-date').valueAsDate = new Date();
+            
+            showStatus('Investimento registrado com sucesso!', 'success');
+        }
+
+        // Função para renderizar investimentos na tabela
+        function renderInvestments() {
+            const tbody = document.querySelector('#investments-table tbody');
+            tbody.innerHTML = '';
+
+            // Ordena por data (mais recente primeiro)
+            investments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            investments.forEach(investment => {
+                const row = document.createElement('tr');
+                const date = new Date(investment.date);
+                const formattedDate = date.toLocaleDateString('pt-BR');
+                const formattedValue = investment.value.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${investment.type}</td>
+                    <td>${formattedValue}</td>
+                    <td>${investment.account}</td>
+                    <td>${investment.description || '-'}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editInvestment(${investment.id})">Editar</button>
+                        <button class="btn-danger" onclick="deleteInvestment(${investment.id})">Excluir</button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+       // Funções globais para manipulação de contas
+        window.deleteAccount = function(name) {
+            if (confirm('Tem certeza que deseja excluir esta conta? Esta ação não pode ser desfeita.')) {
+                // Verifica se há transações ou investimentos associados a esta conta
+                const hasTransactions = transactions.some(t => t.account === name);
+                const hasInvestments = investments.some(i => i.account === name);
+                
+                if (hasTransactions || hasInvestments) {
+                    showStatus('Não é possível excluir uma conta que possui transações ou investimentos associados.', 'error');
+                    return;
+                }
+                
+                accounts = accounts.filter(account => account.name !== name);
+                saveLocalStorageData();
+                loadAccounts();
+                loadInvestmentAccounts();
+                renderAccounts();
+                showStatus('Conta excluída com sucesso!', 'success');
+            }
+        };
+
+        window.editAccount = function(name) {
+            const account = accounts.find(a => a.name === name);
+            if (!account) return;
+
+            // Preenche o formulário com os dados da conta
+            document.getElementById('account-name').value = account.name;
+            document.getElementById('account-type').value = account.type;
+            document.getElementById('account-bank').value = account.bank || '';
+            document.getElementById('account-balance').value = account.balance;
+
+            // Remove a conta da lista
+            accounts = accounts.filter(a => a.name !== name);
+            
+            // Rola a página até o formulário
+            document.getElementById('account-form').scrollIntoView({ behavior: 'smooth' });
+            
+            showStatus('Conta carregada para edição. Faça as alterações e clique em "Adicionar Conta" para salvar.', 'success');
+        };
+
+        // Funções globais para manipulação de investimentos
+        window.deleteInvestment = function(id) {
+            if (confirm('Tem certeza que deseja excluir este investimento?')) {
+                const investment = investments.find(i => i.id === id);
+                if (investment) {
+                    // Restaura o saldo da conta
+                    updateAccountBalance(investment.account, investment.value);
+                    investments = investments.filter(i => i.id !== id);
+                    saveLocalStorageData();
+                    renderInvestments();
+                    updateDashboard();
+                    showStatus('Investimento excluído com sucesso!', 'success');
+                }
+            }
+        };
+
+        window.editInvestment = function(id) {
+            const investment = investments.find(i => i.id === id);
+            if (!investment) return;
+
+            // Preenche o formulário com os dados do investimento
+            document.getElementById('investment-type').value = investment.type;
+            document.getElementById('investment-account').value = investment.account;
+            document.getElementById('investment-date').value = investment.date;
+            document.getElementById('investment-value').value = investment.value;
+            document.getElementById('investment-description').value = investment.description || '';
+
+            // Restaura o saldo da conta
+            updateAccountBalance(investment.account, investment.value);
+            
+            // Remove o investimento da lista
+            investments = investments.filter(i => i.id !== id);
+            
+            // Rola a página até o formulário
+            document.getElementById('investment-form').scrollIntoView({ behavior: 'smooth' });
+            
+            showStatus('Investimento carregado para edição. Faça as alterações e clique em "Adicionar Investimento" para salvar.', 'success');
+        };
+        // Funções para abas
+        function openTab(tabId) {
+            // Esconde todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove a classe active de todas as tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Mostra a aba selecionada
+            document.getElementById(tabId).classList.add('active');
+
+            // Adiciona a classe active na tab clicada
+            event.currentTarget.classList.add('active');
+        }
+        // Nova função para carregar contas na tela de investimentos
+        function loadInvestmentAccounts() {
+            const investmentAccountSelect = document.getElementById('investment-account');
+            investmentAccountSelect.innerHTML = '<option value="">Selecione...</option>';
+
+            accounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.name;
+                option.textContent = account.name;
+                investmentAccountSelect.appendChild(option);
+            });
+        }
+		        // Função para adicionar nova conta
+        function addAccount() {
+            const name = document.getElementById('account-name').value.trim();
+            let type = document.getElementById('account-type').value;
+            const bank = document.getElementById('account-bank').value.trim();
+            const balance = parseFloat(document.getElementById('account-balance').value) || 0;
+
+            // Verifica se é um tipo personalizado
+            if (type === 'outro') {
+                type = document.getElementById('new-account-type').value.trim();
+                if (!type) {
+                    showStatus('Por favor, especifique o tipo da conta.', 'error');
+                    return;
+                }
+            }
+
+            if (!name || !type) {
+                showStatus('Por favor, preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+
+            // Verifica se a conta já existe
+            if (accounts.some(account => account.name === name)) {
+                showStatus('Já existe uma conta com este nome.', 'error');
+                return;
+            }
+
+            const account = {
+                name,
+                type,
+                bank,
+                balance
+            };
+
+            accounts.push(account);
+            saveLocalStorageData();
+            loadAccounts();
+            loadInvestmentAccounts();
+            renderAccounts();
+            
+            // Limpa o formulário
+            document.getElementById('account-form').reset();
+            
+            showStatus('Conta adicionada com sucesso!', 'success');
+        }
+        // Funções para transações
+        transactionType.addEventListener('change', function () {
+            loadCategories(this.value);
+            
+            if (transactionCategory.value === 'new') {
+                newCategoryInput.style.display = 'block';
+                addCategoryBtn.style.display = 'block';
+            } else {
+                newCategoryInput.style.display = 'none';
+                addCategoryBtn.style.display = 'none';
+            }
+        });
+
+        transactionCategory.addEventListener('change', function () {
+            if (this.value === 'new') {
+                newCategoryInput.style.display = 'block';
+                addCategoryBtn.style.display = 'block';
+            } else {
+                newCategoryInput.style.display = 'none';
+                addCategoryBtn.style.display = 'none';
+            }
+        });
+
+        addCategoryBtn.addEventListener('click', function () {
+            const newCategory = newCategoryInput.value.trim();
+            const selectedType = transactionType.value;
+
+            if (newCategory && !categoryTypes.receita.includes(newCategory) && !categoryTypes.despesa.includes(newCategory)) {
+                categoryTypes[selectedType].push(newCategory);
+                loadCategories(selectedType);
+                transactionCategory.value = newCategory;
+                newCategoryInput.value = '';
+                newCategoryInput.style.display = 'none';
+                addCategoryBtn.style.display = 'none';
+                saveLocalStorageData();
+            }
+        });
+
+        transactionForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const type = transactionType.value;
+            const category = transactionCategory.value;
+            const account = transactionAccount.value;
+            const date = transactionDate.value;
+            const value = parseFloat(transactionValue.value);
+            const description = transactionDescription.value.trim();
+
+            if (!type || !category || !account || !date || isNaN(value) || !description) {
+                showStatus('Por favor, preencha todos os campos corretamente.', 'error');
+                return;
+            }
+
+            const transaction = {
+                id: Date.now(), // Novo ID (mesmo para edições para simplificar)
+                type,
+                category,
+                account,
+                date,
+                value,
+                description
+            };
+
+            transactions.push(transaction);
+            updateAccountBalance(account, type === 'receita' ? value : -value);
+            saveLocalStorageData();
+            renderTransactions();
+            updateBalance();
+            updateDashboard();
+
+            // Limpa o formulário
+            transactionForm.reset();
+            transactionDate.valueAsDate = new Date();
+
+            showStatus('Lançamento salvo com sucesso!', 'success');
+        });
+
+        // Funções para filtros
+        applyFiltersBtn.addEventListener('click', function () {
+            renderTransactions();
+            updateBalance();
+            updateDashboard();
+        });
+
+        resetFiltersBtn.addEventListener('click', function () {
+            filterType.value = 'all';
+            filterCategory.value = 'all';
+            filterAccount.value = 'all';
+            filterDate.value = new Date().toISOString().substring(0, 7);
+            renderTransactions();
+            updateBalance();
+            updateDashboard();
+        });
+        // Função para renderizar contas na tabela
+        function renderAccounts() {
+            const tbody = document.querySelector('#accounts-table tbody');
+            tbody.innerHTML = '';
+
+            accounts.forEach(account => {
+                const row = document.createElement('tr');
+                const formattedBalance = account.balance.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+
+                row.innerHTML = `
+                    <td>${account.name}</td>
+                    <td>${account.type}</td>
+                    <td>${account.bank || '-'}</td>
+                    <td>${formattedBalance}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editAccount('${account.name}')">Editar</button>
+                        <button class="btn-danger" onclick="deleteAccount('${account.name}')">Excluir</button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+        // Funções para palavras-chave
+        addKeywordBtn.addEventListener('click', function () {
+            const keyword = newKeywordInput.value.trim().toLowerCase();
+            const type = keywordType.value;
+            const category = keywordCategory.value;
+
+            if (!keyword) {
+                showStatus('Digite uma palavra-chave.', 'error');
+                return;
+            }
+
+            if (!category) {
+                showStatus('Selecione uma categoria.', 'error');
+                return;
+            }
+
+            // Verifica se a palavra-chave já existe
+            const exists = keywordRules[type].some(rule => rule.keyword === keyword);
+            if (exists) {
+                showStatus('Esta palavra-chave já está cadastrada para este tipo.', 'error');
+                return;
+            }
+
+            // Adiciona a nova regra
+            keywordRules[type].push({ keyword, category });
+            saveLocalStorageData();
+            renderKeywords();
+
+            // Limpa o campo
+            newKeywordInput.value = '';
+
+            showStatus('Palavra-chave adicionada com sucesso!', 'success');
+        });
+
+        // Funções para importação
+        previewImportBtn.addEventListener('click', function () {
+            if (!csvFileInput.files.length) {
+                showStatus('Selecione um arquivo CSV para importar.', 'error');
+                return;
+            }
+
+            if (!importAccount.value) {
+                showStatus('Selecione uma conta bancária para associar os lançamentos.', 'error');
+                return;
+            }
+
+            const file = csvFileInput.files[0];
+            const reader = new FileReader();
+
+            reader.readAsText(file, 'ISO-8859-1');
+
+            reader.onload = function (e) {
+                try {
+                    const csvData = e.target.result;
+                    importData = parseCSV(csvData);
+
+                    // Corrige palavras-chave no histórico antes da classificação
+                    importData.forEach(item => {
+                        item.historico = fixKeywordEncoding(item.historico);
+                    });
+
+                    classifyImportedData();
+                    renderImportPreview();
+                    importPreview.style.display = 'block';
+                } catch (error) {
+                    console.error('Erro ao processar CSV:', error);
+                    showStatus('Erro ao processar o arquivo CSV. Verifique o formato.', 'error');
+                }
+            };
+
+            reader.onerror = function () {
+                showStatus('Erro ao ler o arquivo.', 'error');
+            };
+        });
+
+        selectAllCheckbox.addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('#preview-table tbody input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+                const index = parseInt(checkbox.dataset.index);
+                if (checkbox.checked && !selectedImportItems.includes(index)) {
+                    selectedImportItems.push(index);
+                } else if (!checkbox.checked) {
+                    selectedImportItems = selectedImportItems.filter(i => i !== index);
+                }
+            });
+            updateSelectionCount();
+        });
+
+        cancelImportBtn.addEventListener('click', function () {
+            importData = [];
+            importPreview.style.display = 'none';
+            csvFileInput.value = '';
+        });
+
+        confirmImportBtn.addEventListener('click', function () {
+            if (selectedImportItems.length === 0) {
+                showStatus('Selecione pelo menos um item para importar.', 'error');
+                return;
+            }
+
+            let importedCount = 0;
+            selectedImportItems.forEach(index => {
+                const item = importData[index];
+                const transaction = {
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    type: item.type,
+                    category: item.category,
+                    account: importAccount.value,
+                    date: item.date,
+                    value: Math.abs(item.value),
+                    description: item.description
+                };
+
+                transactions.push(transaction);
+                updateAccountBalance(importAccount.value, item.type === 'receita' ? item.value : -item.value);
+                importedCount++;
+            });
+
+            saveLocalStorageData();
+            renderTransactions();
+            updateBalance();
+            updateDashboard();
+
+            // Limpa a importação
+            importData = [];
+            selectedImportItems = [];
+            importPreview.style.display = 'none';
+            csvFileInput.value = '';
+
+            showStatus(`${importedCount} lançamentos importados com sucesso!`, 'success');
+        });
+
+        // Funções auxiliares
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function loadCategories(selectedType = null) {
+            // Garante que as categorias padrão existam
+            if (!categoryTypes.receita.includes('Extra')) {
+                categoryTypes.receita.push('Extra');
+            }
+            if (!categoryTypes.despesa.includes('Financeiros')) {
+                categoryTypes.despesa.push('Financeiros');
+            }
+            if (!categoryTypes.despesa.includes('Impostos')) {
+                categoryTypes.despesa.push('Impostos');
+            }
+            if (!categoryTypes.despesa.includes('Investimentos')) {
+                categoryTypes.despesa.push('Investimentos');
+            }
+            
+            let categoriesToShow = [];
+            if (selectedType === 'receita') {
+                categoriesToShow = [...categoryTypes.receita];
+            } else if (selectedType === 'despesa') {
+                categoriesToShow = [...categoryTypes.despesa];           
+            }
+            categoriesToShow.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            // Atualiza select de transações
+            transactionCategory.innerHTML = '<option value="">Selecione...</option>';
+            categoriesToShow.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                transactionCategory.appendChild(option);
+            });
+
+            // Atualiza select de filtro
+            filterCategory.innerHTML = '<option value="all">Todas</option>';
+            [...new Set([...categoryTypes.receita, ...categoryTypes.despesa])]
+                .sort((a, b) => a.localeCompare(b, 'pt-BR'))
+                .forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    filterCategory.appendChild(option);
+                });
+
+            // Adiciona opção para nova categoria
+            const newOption = document.createElement('option');
+            newOption.value = 'new';
+            newOption.textContent = 'Outra categoria...';
+            transactionCategory.appendChild(newOption);
+
+            // Atualiza select de categorias para palavras-chave
+            keywordCategory.innerHTML = '<option value="">Selecione...</option>';
+            [...new Set([...categoryTypes.receita, ...categoryTypes.despesa])]
+                .sort((a, b) => a.localeCompare(b, 'pt-BR'))
+                .forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    keywordCategory.appendChild(option);
+                });
+        }
+
+        function loadAccounts() {
+            // Limpa e popula os selects de contas
+            transactionAccount.innerHTML = '<option value="">Selecione...</option>';
+            filterAccount.innerHTML = '<option value="all">Todas</option>';
+            importAccount.innerHTML = '<option value="">Selecione...</option>';
+
+            // Verifica se há contas, senão usa as padrão
+            if (accounts.length === 0) {
+                accounts = [...defaultAccounts];
+            }
+
+            accounts.forEach(account => {
+                const option1 = document.createElement('option');
+                option1.value = account.name;
+                option1.textContent = account.name;
+                transactionAccount.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = account.name;
+                option2.textContent = account.name;
+                filterAccount.appendChild(option2);
+
+                const option3 = document.createElement('option');
+                option3.value = account.name;
+                option3.textContent = account.name;
+                importAccount.appendChild(option3);
+            });
+        }
+
+        function loadKeywordCategories() {
+            keywordCategory.innerHTML = '<option value="">Selecione...</option>';
+
+            const allCategories = [...new Set([...categoryTypes.receita, ...categoryTypes.despesa])];
+            allCategories.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            allCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                keywordCategory.appendChild(option);
+            });
+        }
+
+        function updateAccountBalance(accountName, amount, isEdit = false, oldTransaction = null) {
+            const account = accounts.find(acc => acc.name === accountName);
+            if (account) {
+                // Se for uma edição, primeiro reverte o valor antigo
+                if (isEdit && oldTransaction) {
+                    account.balance += oldTransaction.type === 'receita' ? oldTransaction.value : -oldTransaction.value;
+                }
+                // Aplica o novo valor
+                account.balance += amount;
+                saveLocalStorageData();
+            }
+        }
+
+         function renderKeywords() {
+            keywordsList.innerHTML = '';
+
+            // Renderiza palavras-chave de receita
+            keywordRules.receita.forEach((rule, index) => {
+                const keywordItem = document.createElement('div');
+                keywordItem.className = 'keyword-item';
+                keywordItem.innerHTML = `
+                    <span>[Receita] ${rule.keyword} → ${rule.category}</span>
+                    <button onclick="removeKeyword('receita', ${index})">×</button>
+                `;
+                keywordsList.appendChild(keywordItem);
+            });
+
+            // Renderiza palavras-chave de despesa
+            keywordRules.despesa.forEach((rule, index) => {
+                const keywordItem = document.createElement('div');
+                keywordItem.className = 'keyword-item';
+                keywordItem.innerHTML = `
+                    <span>[Despesa] ${rule.keyword} → ${rule.category}</span>
+                    <button onclick="removeKeyword('despesa', ${index})">×</button>
+                `;
+                keywordsList.appendChild(keywordItem);
+            });
+        }
+
+        function renderImportPreview() {
+            previewTable.innerHTML = '';
+            selectedImportItems = [];
+
+            const typeFilter = document.getElementById('preview-filter-type').value;
+            const categoryFilter = document.getElementById('preview-filter-category').value;
+            const duplicatesFilter = document.getElementById('preview-filter-duplicates').value;
+
+            let filteredData = [...importData];
+
+            // Aplica filtros
+            if (typeFilter !== 'all') {
+                filteredData = filteredData.filter(item => item.type === typeFilter);
+            }
+
+            if (categoryFilter !== 'all') {
+                filteredData = filteredData.filter(item => item.category === categoryFilter);
+            }
+
+            if (duplicatesFilter === 'duplicates') {
+                filteredData = filteredData.filter(item => checkForDuplicates(item));
+            } else if (duplicatesFilter === 'non-duplicates') {
+                filteredData = filteredData.filter(item => !checkForDuplicates(item));
+            }
+
+            filteredData.forEach((item, index) => {
+                const isDuplicate = checkForDuplicates(item);
+                const row = document.createElement('tr');
+                if (isDuplicate) row.classList.add('duplicate-row');
+
+                const formattedValue = Math.abs(item.value).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.dataset.index = index;
+                checkbox.checked = !isDuplicate;
+                checkbox.addEventListener('change', function () {
+                    if (this.checked) {
+                        selectedImportItems.push(index);
+                    } else {
+                        selectedImportItems = selectedImportItems.filter(i => i !== index);
+                    }
+                    updateSelectionCount();
+                });
+
+                if (!isDuplicate) selectedImportItems.push(index);
+
+                const typeSelect = document.createElement('select');
+                typeSelect.className = 'form-control';
+                typeSelect.innerHTML = `
+                    <option value="receita" ${item.type === 'receita' ? 'selected' : ''}>Receita</option>
+                    <option value="despesa" ${item.type === 'despesa' ? 'selected' : ''}>Despesa</option>
+                `;
+                typeSelect.addEventListener('change', function () {
+                    importData[index].type = this.value;
+                    updateRowCategories(row, index);
+                });
+
+                const categorySelect = document.createElement('select');
+                categorySelect.className = 'form-control';
+                updateCategorySelect(categorySelect, item.type);
+                categorySelect.value = item.category;
+                categorySelect.addEventListener('change', function () {
+                    importData[index].category = this.value;
+                });
+
+                const descriptionInput = document.createElement('input');
+                descriptionInput.type = 'text';
+                descriptionInput.className = 'form-control';
+                descriptionInput.value = item.description;
+                descriptionInput.addEventListener('change', function () {
+                    importData[index].description = this.value;
+                });
+
+                row.innerHTML = `
+                    <td class="import-checkbox"></td>
+                    <td>${item.originalDate}</td>
+                    <td>${item.historico}</td>
+                    <td class="${item.type}">${formattedValue}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>${isDuplicate ? 'Possível duplicata' : 'Novo'}</td>
+                `;
+                
+                row.cells[0].appendChild(checkbox);
+                row.cells[4].appendChild(typeSelect);
+                row.cells[5].appendChild(categorySelect);
+                row.cells[6].appendChild(descriptionInput);
+
+                if (Math.abs(item.value) > 1000) row.classList.add('highlight');
+                previewTable.appendChild(row);
+            });
+
+            updateSelectionCount();
+        }
+
+        function updateSelectionCount() {
+            const totalItems = document.querySelectorAll('#preview-table tbody tr').length;
+            const selectedCount = selectedImportItems.length;
+            document.getElementById('import-selection').textContent =
+                `Selecionados: ${selectedCount} de ${totalItems}`;
+        }
+
+        function updateRowCategories(row, index) {
+            const typeSelect = row.cells[4].querySelector('select');
+            const categorySelect = row.cells[5].querySelector('select');
+            importData[index].type = typeSelect.value;
+            updateCategorySelect(categorySelect, typeSelect.value);
+            
+            const validCategories = categoryTypes[typeSelect.value];
+            if (!validCategories.includes(importData[index].category)) {
+                importData[index].category = validCategories[0] || 'Outros';
+            }
+            categorySelect.value = importData[index].category;
+            row.cells[2].className = typeSelect.value;
+        }
+
+        function updateCategorySelect(selectElement, type) {
+            selectElement.innerHTML = '';
+            const categories = categoryTypes[type] || [];
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function checkForDuplicates(item) {
+            return transactions.some(t => {
+                const sameDate = t.date === item.date;
+                const sameValue = Math.abs(t.value - Math.abs(item.value)) < 0.01;
+                const similarDescription = t.description.toLowerCase().includes(item.historico.toLowerCase().substring(0, 20)) ||
+                    item.historico.toLowerCase().includes(t.description.toLowerCase().substring(0, 20));
+                return sameDate && sameValue && similarDescription;
+            });
+        }
+
+        function classifyImportedData() {
+            importData.forEach(item => {
+                const historicoLower = item.historico.toLowerCase();
+
+                if (historicoLower.includes('saldo') || historicoLower.includes('s a l d o')) {
+                    return false;
+                }
+
+                // Verifica regras de receita
+                for (const rule of keywordRules.receita) {
+                    if (historicoLower.includes(rule.keyword)) {
+                        item.type = 'receita';
+                        item.category = rule.category;
+                        item.isDuplicate = checkForDuplicates(item);
+                        return;
+                    }
+                }
+
+                // Verifica regras de despesa
+                for (const rule of keywordRules.despesa) {
+                    if (historicoLower.includes(rule.keyword)) {
+                        item.type = 'despesa';
+                        item.category = rule.category;
+                        item.isDuplicate = checkForDuplicates(item);
+                        return;
+                    }
+                }
+
+                // Classificação padrão
+                if (item.type === 'receita') {
+                    item.category = 'Outros';
+                } else {
+                    item.category = 'Outros';
+                }
+
+                item.isDuplicate = checkForDuplicates(item);
+            });
+        }
+
+        function fixKeywordEncoding(text) {
+            const corrections = {
+                'automýtico': 'automático',
+                'crýd': 'créd',
+                'pagto': 'pagamento',
+                'pagtos': 'pagamentos'
+            };
+
+            let correctedText = text;
+            for (const [wrong, correct] of Object.entries(corrections)) {
+                correctedText = correctedText.replace(new RegExp(wrong, 'gi'), correct);
+            }
+
+            return correctedText;
+        }
+
+        // Funções para manipulação de dados
+        function saveLocalStorageData() {
+            try {
+                localStorage.setItem('financeData', JSON.stringify({
+                    transactions,
+                    investments,
+                    creditCards,
+                    creditPurchases,
+                    accounts,
+                    categoryTypes,
+                    keywordRules
+                }));
+            } catch (error) {
+                console.error('Erro ao salvar dados no localStorage:', error);
+                showStatus('Erro ao salvar dados.', 'error');
+            }
+        }
+
+           // Corrigir a função loadLocalStorageData para carregar todas as tabelas:
+    function loadLocalStorageData() {
+        try {
+            const savedData = localStorage.getItem('financeData');
+            if (!savedData) {
+                // Se não há dados salvos, usa as contas padrão
+                accounts = [...defaultAccounts];
+                return;
+            }
+
+            const data = JSON.parse(savedData);
+
+            if (data.transactions) transactions = data.transactions;
+            if (data.investments) investments = data.investments;
+            if (data.creditCards) creditCards = data.creditCards;
+            if (data.creditPurchases) creditPurchases = data.creditPurchases;
+            
+            // Garante que as contas padrão sempre existam, mesclando com as salvas
+            if (data.accounts && data.accounts.length > 0) {
+                accounts = [...defaultAccounts];
+                // Mescla contas salvas que não são padrão
+                data.accounts.forEach(savedAccount => {
+                    if (!accounts.some(acc => acc.name === savedAccount.name)) {
+                        accounts.push(savedAccount);
+                    }
+                });
+            } else {
+                accounts = [...defaultAccounts];
+            }
+
+            if (data.categoryTypes) {
+                categoryTypes.receita = data.categoryTypes.receita || categoryTypes.receita;
+                categoryTypes.despesa = data.categoryTypes.despesa || categoryTypes.despesa;
+            }
+            if (data.keywordRules) {
+                keywordRules.receita = data.keywordRules.receita || keywordRules.receita;
+                keywordRules.despesa = data.keywordRules.despesa || keywordRules.despesa;
+            }
+
+            // Renderizar todos os dados
+            loadCategories();
+            loadAccounts();
+            loadKeywordCategories();
+            renderKeywords();
+            renderTransactions();
+            renderInvestments();
+            renderCreditCards();
+            renderAccounts();
+            updateBalance();
+            updateDashboard();
+			updateFullDashboard(); // Adicionado esta linha
+
+        } catch (error) {
+            console.error('Erro ao carregar dados:', error);
+            showStatus('Erro ao carregar dados salvos.', 'error');
+            // Carrega contas padrão em caso de erro
+            accounts = [...defaultAccounts];
+            loadAccounts();
+        }
+    }
+
+        // Funções para o dashboard
+        function updateDashboard() {
+            const dashboardData = generateDashboardData();
+            updateKPIs(dashboardData);
+            renderCharts(dashboardData);
+            updateTopExpensesTable(dashboardData.topExpenses);
+        }
+function renderTransactions() {
+    transactionsTable.innerHTML = '';
+
+    // Aplica filtros
+    const typeFilter = filterType.value;
+    const categoryFilter = filterCategory.value;
+    const accountFilter = filterAccount.value;
+    const dateFilter = filterDate.value;
+
+    console.log('Total transactions:', transactions.length); // Debug
+    console.log('Filters:', {typeFilter, categoryFilter, accountFilter, dateFilter}); // Debug
+
+    const filteredTransactions = transactions.filter(transaction => {
+        if (typeFilter !== 'all' && transaction.type !== typeFilter) return false;
+        if (categoryFilter !== 'all' && transaction.category !== categoryFilter) return false;
+        if (accountFilter !== 'all' && transaction.account !== accountFilter) return false;
+        if (dateFilter && !transaction.date.startsWith(dateFilter)) return false;
+        return true;
+    });
+
+    console.log('Filtered transactions:', filteredTransactions.length); // Debug
+
+    // Ordena por data (mais recente primeiro)
+    filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (filteredTransactions.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="7" style="text-align: center;">Nenhuma transação encontrada</td>';
+        transactionsTable.appendChild(row);
+        return;
+    }
+
+    filteredTransactions.forEach(transaction => {
+        const row = document.createElement('tr');
+        const date = new Date(transaction.date);
+        const formattedDate = date.toLocaleDateString('pt-BR');
+        const formattedValue = transaction.value.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+
+        row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td class="${transaction.type}">${transaction.type === 'receita' ? 'Receita' : 'Despesa'}</td>
+            <td>${transaction.category}</td>
+            <td>${transaction.description}</td>
+            <td class="${transaction.type}">${formattedValue}</td>
+            <td>${transaction.account}</td>
+            <td>
+                <button class="btn-edit" onclick="editTransaction(${transaction.id})">Editar</button>
+                <button class="btn-danger" onclick="deleteTransaction(${transaction.id})">Excluir</button>
+            </td>
+        `;
+
+        transactionsTable.appendChild(row);
+    });
+}
+        function generateDashboardData() {
+            // Filtra transações do mês atual
+            const currentMonth = filterDate.value || new Date().toISOString().substring(0, 7);
+            const allTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+            
+            // Separa receitas e despesas
+            const incomes = allTransactions.filter(t => t.type === 'receita');
+            const expenses = allTransactions.filter(t => t.type === 'despesa');
+            
+            // Calcula totais
+            const totalIncome = incomes.reduce((sum, t) => sum + t.value, 0);
+            const totalExpense = expenses.reduce((sum, t) => sum + t.value, 0);
+            const currentBalance = totalIncome - totalExpense;
+            
+            // Calcula variação em relação ao mês anterior
+            const prevMonthData = getPreviousMonthData(currentMonth);
+            const incomeVariation = prevMonthData.totalIncome > 0 ? 
+                ((totalIncome - prevMonthData.totalIncome) / prevMonthData.totalIncome) * 100 : 0;
+            const expenseVariation = prevMonthData.totalExpense > 0 ? 
+                ((totalExpense - prevMonthData.totalExpense) / prevMonthData.totalExpense) * 100 : 0;
+            const balanceVariation = prevMonthData.balance !== 0 ? 
+                ((currentBalance - prevMonthData.balance) / Math.abs(prevMonthData.balance)) * 100 : 0;
+            
+            // Agrupa por categoria
+            const incomeByCategory = {};
+            incomes.forEach(t => {
+                incomeByCategory[t.category] = (incomeByCategory[t.category] || 0) + t.value;
+            });
+            
+            const expenseByCategory = {};
+            expenses.forEach(t => {
+                expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + t.value;
+            });
+            
+            // Ordena categorias por valor
+            const sortedIncomeCategories = Object.keys(incomeByCategory).sort(
+                (a, b) => incomeByCategory[b] - incomeByCategory[a]
+            );
+            const sortedExpenseCategories = Object.keys(expenseByCategory).sort(
+                (a, b) => expenseByCategory[b] - expenseByCategory[a]
+            );
+            
+            // Top 5 despesas
+            const topExpenses = [...expenses]
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 5);
+            
+            // Dados históricos (últimos 6 meses)
+            const last6Months = getLast6Months(currentMonth);
+            const monthlyData = {
+                labels: last6Months.map(m => formatMonthLabel(m)),
+                income: [],
+                expense: [],
+                balance: []
+            };
+            
+            last6Months.forEach(month => {
+                const monthIncomes = transactions
+                    .filter(t => t.type === 'receita' && t.date.startsWith(month))
+                    .reduce((sum, t) => sum + t.value, 0);
+                
+                const monthExpenses = transactions
+                    .filter(t => t.type === 'despesa' && t.date.startsWith(month))
+                    .reduce((sum, t) => sum + t.value, 0);
+                
+                monthlyData.income.push(monthIncomes);
+                monthlyData.expense.push(monthExpenses);
+                monthlyData.balance.push(monthIncomes - monthExpenses);
+            });
+            
+            // Total investimentos
+            const totalInvestments = investments.reduce((sum, i) => sum + i.value, 0);
+            const prevMonthInvestments = getPreviousMonthInvestments(currentMonth);
+            const investmentVariation = prevMonthInvestments > 0 ? 
+                ((totalInvestments - prevMonthInvestments) / prevMonthInvestments) * 100 : 0;
+            
+            return {
+                currentMonth,
+                totalIncome,
+                totalExpense,
+                currentBalance,
+                incomeVariation,
+                expenseVariation,
+                balanceVariation,
+                incomeByCategory: {
+                    labels: sortedIncomeCategories,
+                    data: sortedIncomeCategories.map(c => incomeByCategory[c])
+                },
+                expenseByCategory: {
+                    labels: sortedExpenseCategories,
+                    data: sortedExpenseCategories.map(c => expenseByCategory[c])
+                },
+                monthlyData,
+                topExpenses,
+                totalInvestments,
+                investmentVariation
+            };
+        }
+        
+        function getPreviousMonthData(currentMonth) {
+            const [year, month] = currentMonth.split('-').map(Number);
+            let prevYear = year;
+            let prevMonth = month - 1;
+            
+            if (prevMonth === 0) {
+                prevMonth = 12;
+                prevYear--;
+            }
+            
+            const prevMonthStr = `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
+            
+            const prevIncomes = transactions
+                .filter(t => t.type === 'receita' && t.date.startsWith(prevMonthStr))
+                .reduce((sum, t) => sum + t.value, 0);
+            
+            const prevExpenses = transactions
+                .filter(t => t.type === 'despesa' && t.date.startsWith(prevMonthStr))
+                .reduce((sum, t) => sum + t.value, 0);
+            
+            return {
+                totalIncome: prevIncomes,
+                totalExpense: prevExpenses,
+                balance: prevIncomes - prevExpenses
+            };
+        }
+        
+        function getPreviousMonthInvestments(currentMonth) {
+            const [year, month] = currentMonth.split('-').map(Number);
+            let prevYear = year;
+            let prevMonth = month - 1;
+            
+            if (prevMonth === 0) {
+                prevMonth = 12;
+                prevYear--;
+            }
+            
+            const prevMonthStr = `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
+            
+            return investments
+                .filter(i => i.date.startsWith(prevMonthStr))
+                .reduce((sum, i) => sum + i.value, 0);
+        }
+        
+        function getLast6Months(currentMonth) {
+            const [year, month] = currentMonth.split('-').map(Number);
+            const months = [];
+            
+            for (let i = 5; i >= 0; i--) {
+                let m = month - i;
+                let y = year;
+                
+                if (m < 1) {
+                    m += 12;
+                    y--;
+                }
+                
+                months.push(`${y}-${m.toString().padStart(2, '0')}`);
+            }
+            
+            return months;
+        }
+        
+        function formatMonthLabel(monthStr) {
+            const [year, month] = monthStr.split('-');
+            const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return `${monthNames[parseInt(month) - 1]}/${year.substring(2)}`;
+        }
+        
+        function updateKPIs(data) {
+            // Atualiza KPIs
+            document.getElementById('kpi-receita').textContent = 
+                data.totalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            document.getElementById('kpi-despesa').textContent = 
+                data.totalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            document.getElementById('kpi-saldo').textContent = 
+                data.currentBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            document.getElementById('kpi-investimento').textContent = 
+                data.totalInvestments.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            // Atualiza variações
+            updateVariationElement('kpi-receita-variacao', data.incomeVariation);
+            updateVariationElement('kpi-despesa-variacao', data.expenseVariation);
+            updateVariationElement('kpi-saldo-variacao', data.balanceVariation);
+            updateVariationElement('kpi-investimento-variacao', data.investmentVariation);
+        }
+        
+        function updateVariationElement(elementId, variation) {
+            const element = document.getElementById(elementId);
+            const absVariation = Math.abs(variation);
+            const variationText = variation >= 0 ? 
+                `+${absVariation.toFixed(2)}%` : 
+                `-${absVariation.toFixed(2)}%`;
+            
+            element.textContent = `vs mês anterior: ${variationText}`;
+            element.style.color = variation >= 0 ? '#2ecc71' : '#e74c3c';
+        }
+        
+        function updateTopExpensesTable(topExpenses) {
+            const tbody = document.querySelector('#topExpensesTable tbody');
+            tbody.innerHTML = '';
+            
+            topExpenses.forEach(expense => {
+                const row = document.createElement('tr');
+                const date = new Date(expense.date);
+                const formattedDate = date.toLocaleDateString('pt-BR');
+                const formattedValue = expense.value.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${expense.description}</td>
+                    <td>${expense.category}</td>
+                    <td class="despesa">${formattedValue}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            if (topExpenses.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" style="text-align: center;">Nenhuma despesa registrada este mês</td>';
+                tbody.appendChild(row);
+            }
+        }
+
+        function renderCharts(dashboardData) {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ': ' +
+                                    context.raw.toLocaleString('pt-BR', {
+                                        style: 'currency',
+                                        currency: 'BRL'
+                                    });
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Gráfico Receitas vs Despesas
+            const incomeVsExpensesCtx = document.getElementById('incomeVsExpensesChart').getContext('2d');
+            if (incomeVsExpensesChart) incomeVsExpensesChart.destroy();
+            incomeVsExpensesChart = new Chart(incomeVsExpensesCtx, {
+                type: 'bar',
+                data: {
+                    labels: dashboardData.monthlyData.labels,
+                    datasets: [
+                        {
+                            label: 'Receitas',
+                            data: dashboardData.monthlyData.income,
+                            backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Despesas',
+                            data: dashboardData.monthlyData.expense,
+                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: chartOptions
+            });
+
+            // Gráfico Despesas por Categoria
+            const expensesByCategoryCtx = document.getElementById('expensesByCategoryChart').getContext('2d');
+            if (expensesByCategoryChart) expensesByCategoryChart.destroy();
+            expensesByCategoryChart = new Chart(expensesByCategoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: dashboardData.expenseByCategory.labels,
+                    datasets: [{
+                        label: 'Despesas por Categoria',
+                        data: dashboardData.expenseByCategory.data,
+                        backgroundColor: [
+                            'rgba(231, 76, 60, 0.7)',
+                            'rgba(241, 148, 138, 0.7)',
+                            'rgba(245, 183, 177, 0.7)',
+                            'rgba(192, 57, 43, 0.7)',
+                            'rgba(169, 50, 38, 0.7)',
+                            'rgba(217, 136, 128, 0.7)',
+                            'rgba(242, 215, 213, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // Gráfico Receitas por Categoria
+            const incomeByCategoryCtx = document.getElementById('incomeByCategoryChart').getContext('2d');
+            if (incomeByCategoryChart) incomeByCategoryChart.destroy();
+            incomeByCategoryChart = new Chart(incomeByCategoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: dashboardData.incomeByCategory.labels,
+                    datasets: [{
+                        label: 'Receitas por Categoria',
+                        data: dashboardData.incomeByCategory.data,
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(84, 230, 149, 0.7)',
+                            'rgba(149, 242, 186, 0.7)',
+                            'rgba(39, 174, 96, 0.7)',
+                            'rgba(33, 150, 83, 0.7)',
+                            'rgba(111, 207, 151, 0.7)',
+                            'rgba(213, 245, 227, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // Gráfico Evolução do Saldo
+            const balanceEvolutionCtx = document.getElementById('balanceEvolutionChart').getContext('2d');
+            if (balanceEvolutionChart) balanceEvolutionChart.destroy();
+            balanceEvolutionChart = new Chart(balanceEvolutionCtx, {
+                type: 'line',
+                data: {
+                    labels: dashboardData.monthlyData.labels,
+                    datasets: [{
+                        label: 'Evolução do Saldo',
+                        data: dashboardData.monthlyData.balance,
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return [];
+
+            const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
+            const headerMap = {
+                'data': 'data',
+                'histórico': 'historico',
+                'hist�rico': 'historico',
+                'histýrico': 'historico',
+                'valor': 'valor'
+            };
+
+            const normalizedHeaders = headers.map(header => {
+                const cleanHeader = header.toLowerCase().replace(/[^\w\s]/gi, '').trim();
+                return headerMap[cleanHeader] || header;
+            });
+
+            const requiredColumns = ['data', 'historico', 'valor'];
+            const missingColumns = requiredColumns.filter(col => !normalizedHeaders.includes(col));
+            if (missingColumns.length > 0) {
+                throw new Error(`Colunas obrigatórias não encontradas: ${missingColumns.join(', ')}`);
+            }
+
+            const dataIndex = normalizedHeaders.indexOf('data');
+            const historicoIndex = normalizedHeaders.indexOf('historico');
+            const valorIndex = normalizedHeaders.indexOf('valor');
+
+            const results = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+
+                const values = lines[i].split(';').map(v => v.trim());
+                if (values.length <= Math.max(dataIndex, historicoIndex, valorIndex)) continue;
+
+                const historico = values[historicoIndex].toLowerCase();
+                if (historico.includes('saldo') || historico.includes('s a l d o')) continue;
+
+                const dateParts = values[dataIndex].split('/');
+                if (dateParts.length === 3) {
+                    const day = dateParts[0].padStart(2, '0');
+                    const month = dateParts[1].padStart(2, '0');
+                    const formattedDate = `${dateParts[2]}-${month}-${day}`;
+
+                    const valorStr = values[valorIndex]
+                        .replace(/\./g, ',')
+                        .replace(',', '.');
+                    
+                    const valor = parseFloat(valorStr);
+
+                    if (isNaN(valor)) continue;
+
+                    const type = valor >= 0 ? 'receita' : 'despesa';
+                    results.push({
+                        originalDate: values[dataIndex],
+                        date: formattedDate,
+                        description: values[historicoIndex],
+                        historico: values[historicoIndex],
+                        value: valor,
+                        type: type,
+                        category: ''
+                    });
+                }
+            }
+
+            return results;
+        }
+
+        // Funções globais
+        window.deleteTransaction = function (id) {
+            if (confirm('Tem certeza que deseja excluir este lançamento?')) {
+                const transaction = transactions.find(t => t.id === id);
+                if (transaction) {
+                    updateAccountBalance(transaction.account, transaction.type === 'receita' ? -transaction.value : transaction.value);
+                    transactions = transactions.filter(t => t.id !== id);
+                    saveLocalStorageData();
+                    renderTransactions();
+                    updateBalance();
+                    updateDashboard();
+                    showStatus('Lançamento excluído com sucesso!', 'success');
+                }
+            }
+        }
+
+        window.removeKeyword = function (type, index) {
+            keywordRules[type].splice(index, 1);
+            saveLocalStorageData();
+            renderKeywords();
+        };
+
+        // Exportar para Excel
+        exportExcelBtn.addEventListener('click', function() {
+            saveExcelData(true);
+        });
+
+        function saveExcelData(forceDownload = false) {
+            try {
+                const wb = XLSX.utils.book_new();
+
+                // Planilha de transações
+                const transactionsWS = XLSX.utils.json_to_sheet(transactions.map(t => ({
+                    'ID': t.id,
+                    'Data': t.date,
+                    'Tipo': t.type === 'receita' ? 'Receita' : 'Despesa',
+                    'Categoria': t.category,
+                    'Conta': t.account,
+                    'Descrição': t.description,
+                    'Valor': t.value
+                })));
+
+                // Planilha de categorias
+                const categoriesWS = XLSX.utils.json_to_sheet([
+                    { 'Tipo': 'Receita', 'Categorias': categoryTypes.receita.join(', ') },
+                    { 'Tipo': 'Despesa', 'Categorias': categoryTypes.despesa.join(', ') }
+                ]);
+
+                // Planilha de palavras-chave
+                const keywordsWS = XLSX.utils.json_to_sheet([
+                    { 'Tipo': 'Receita', 'Palavras-chave': keywordRules.receita.map(k => `${k.keyword} → ${k.category}`).join(', ') },
+                    { 'Tipo': 'Despesa', 'Palavras-chave': keywordRules.despesa.map(k => `${k.keyword} → ${k.category}`).join(', ') }
+                ]);
+
+                // Adiciona as planilhas
+                XLSX.utils.book_append_sheet(wb, transactionsWS, "Transações");
+                XLSX.utils.book_append_sheet(wb, categoriesWS, "Categorias");
+                XLSX.utils.book_append_sheet(wb, keywordsWS, "Palavras-chave");
+
+                if (forceDownload) {
+                    XLSX.writeFile(wb, 'controle_financeiro.xlsx');
+                    showStatus('Planilha exportada com sucesso!', 'success');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar dados no Excel:', error);
+                showStatus('Erro ao salvar dados no Excel.', 'error');
+            }
+        }
+
+        // Limpar todos os dados
+        clearDataBtn.addEventListener('click', function () {
+            if (confirm('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.')) {
+                transactions = [];
+                investments = [];
+                creditCards = [];
+                creditPurchases = [];
+                accounts = [...defaultAccounts];
+
+                // Restaura palavras-chave padrão
+                keywordRules = {
+                    receita: [
+                        { keyword: 'salário', category: 'Salário' },
+                        { keyword: 'rendimento', category: 'Investimentos' },
+                        { keyword: 'extra', category: 'Extra' },
+                        { keyword: 'dividendo', category: 'Investimentos' },
+                        { keyword: 'honorário', category: 'Advocacia' }
+                    ],
+                    despesa: [
+                        { keyword: 'mercado', category: 'Alimentação' },
+                        { keyword: 'supermercado', category: 'Alimentação' },
+                        { keyword: 'aluguel', category: 'Moradia' },
+                        { keyword: 'condomínio', category: 'Moradia' },
+                        { keyword: 'luz', category: 'Moradia' },
+                        { keyword: 'água', category: 'Moradia' },
+                        { keyword: 'combustível', category: 'Transporte' },
+                        { keyword: 'uber', category: 'Transporte' },
+                        { keyword: 'cinema', category: 'Lazer' },
+                        { keyword: 'restaurante', category: 'Alimentação' },
+                        { keyword: 'farmacia', category: 'Saúde' },
+                        { keyword: 'padaria', category: 'Alimentação' },
+                        { keyword: 'alegria comercio de', category: 'Alimentação' },
+                        { keyword: 'aenb', category: 'Alimentação' },
+                        { keyword: 'posto', category: 'Transporte' },
+                        { keyword: 'droga', category: 'Saúde' },
+                        { keyword: 'unimed', category: 'Saúde' },
+                        { keyword: 'escola', category: 'Educação' },
+                        { keyword: 'pastelaria', category: 'Educação' },
+                        { keyword: 'parking', category: 'Transporte' },
+                        { keyword: 'cartão crédito', category: 'Financeiros' },
+                        { keyword: 'banco bv', category: 'Financeiros' },
+                        { keyword: 'clube de beneficios', category: 'Financeiros' },
+                        { keyword: 'pacote de serviços', category: 'Financeiros' },
+                        { keyword: 'seguro de vida', category: 'Financeiros' },
+                        { keyword: 'asaas gestao', category: 'Educação' },
+                        { keyword: 'pagam presta créd imobili', category: 'Moradia' },
+                        { keyword: 'colegio', category: 'Educação' },
+                        { keyword: 'pizza', category: 'Alimentação' },
+                        { keyword: 'tele', category: 'Moradia' },
+                        { keyword: 'Lanche', category: 'Alimentação' },
+                        { keyword: 'ampla', category: 'Moradia' },
+                        { keyword: 'médico', category: 'Saúde' },
+                        { keyword: 'curso', category: 'Educação' }
+                    ]
+                };
+                
+                saveLocalStorageData();
+                renderTransactions();
+                renderKeywords();
+                updateBalance();
+                updateDashboard();                
+                showStatus('Todos os dados foram removidos e as contas padrão foram restauradas.', 'success');
+            }
+        });
+
+        // Atualiza o select de categorias na pré-visualização
+        document.getElementById('preview-filter-type').addEventListener('change', function () {
+            updatePreviewCategorySelect();
+        });
+
+        function updatePreviewCategorySelect() {
+            const typeFilter = document.getElementById('preview-filter-type').value;
+            const categorySelect = document.getElementById('preview-filter-category');
+
+            categorySelect.innerHTML = '<option value="all">Todas</option>';
+
+            let categories = [];
+            if (typeFilter === 'receita' || typeFilter === 'all') {
+                categories = [...categories, ...categoryTypes.receita];
+            }
+            if (typeFilter === 'despesa' || typeFilter === 'all') {
+                categories = [...categories, ...categoryTypes.despesa];
+            }
+
+            categories = [...new Set(categories)].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+        }
+
+        // Aplica filtros na pré-visualização
+        document.getElementById('apply-preview-filters').addEventListener('click', function () {
+            renderImportPreview();
+        });
+
+        // Atualiza o saldo
+        function updateBalance() {
+            const typeFilter = filterType.value;
+            const categoryFilter = filterCategory.value;
+            const accountFilter = filterAccount.value;
+            const dateFilter = filterDate.value;
+
+            const filteredTransactions = transactions.filter(transaction => {
+                if (typeFilter !== 'all' && transaction.type !== typeFilter) return false;
+                if (categoryFilter !== 'all' && transaction.category !== categoryFilter) return false;
+                if (accountFilter !== 'all' && transaction.account !== accountFilter) return false;
+                if (dateFilter && !transaction.date.startsWith(dateFilter)) return false;
+                return true;
+            });
+
+            const balance = filteredTransactions.reduce((total, transaction) => {
+                return transaction.type === 'receita' ? total + transaction.value : total - transaction.value;
+            }, 0);
+
+            const formattedBalance = balance.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+
+            balanceElement.textContent = `Saldo: ${formattedBalance}`;
+            balanceElement.className = balance >= 0 ? 'saldo positivo' : 'saldo negativo';
+        }
+        
+        window.editTransaction = function(id) {
+            const transaction = transactions.find(t => t.id === id);
+            if (!transaction) return;
+
+            // Preenche o formulário com os dados da transação
+            transactionType.value = transaction.type;
+            loadCategories(transaction.type);
+            transactionCategory.value = transaction.category;
+            transactionAccount.value = transaction.account;
+            transactionDate.value = transaction.date;
+            transactionValue.value = transaction.value;
+            transactionDescription.value = transaction.description;
+
+            // Remove a transação da lista (será readicionada ao salvar)
+            transactions = transactions.filter(t => t.id !== id);
+            // Atualiza o saldo da conta (reverte o valor antigo)
+            updateAccountBalance(transaction.account, 0, true, transaction);
+            
+            // Rola a página até o formulário
+            document.getElementById('transaction-form').scrollIntoView({ behavior: 'smooth' });
+            
+            showStatus('Transação carregada para edição. Faça as alterações e clique em "Adicionar Lançamento" para salvar.', 'success');
+        }
+		
+
+// Atualiza o dashboard completo
+function updateFullDashboard() {
+    const dashboardData = generateFullDashboardData();
+    updateFullKPIs(dashboardData);
+    renderFullCharts(dashboardData);
+    updateAnnualTopTables(dashboardData);
+    updateAccountsSummary(dashboardData);
+}
+
+// Gera dados para o dashboard completo
+function generateFullDashboardData() {
+    const currentYear = new Date().getFullYear();
+    const currentYearStr = currentYear.toString();
+    const lastYearStr = (currentYear - 1).toString();
+    
+    // Filtra transações do ano atual
+    const currentYearTransactions = transactions.filter(t => t.date.startsWith(currentYearStr));
+    const lastYearTransactions = transactions.filter(t => t.date.startsWith(lastYearStr));
+    
+    // Separa receitas e despesas
+    const currentYearIncomes = currentYearTransactions.filter(t => t.type === 'receita');
+    const currentYearExpenses = currentYearTransactions.filter(t => t.type === 'despesa');
+    const lastYearIncomes = lastYearTransactions.filter(t => t.type === 'receita');
+    const lastYearExpenses = lastYearTransactions.filter(t => t.type === 'despesa');
+    
+    // Calcula totais
+    const totalIncomeCurrentYear = currentYearIncomes.reduce((sum, t) => sum + t.value, 0);
+    const totalExpenseCurrentYear = currentYearExpenses.reduce((sum, t) => sum + t.value, 0);
+    const currentYearBalance = totalIncomeCurrentYear - totalExpenseCurrentYear;
+    
+    const totalIncomeLastYear = lastYearIncomes.reduce((sum, t) => sum + t.value, 0);
+    const totalExpenseLastYear = lastYearExpenses.reduce((sum, t) => sum + t.value, 0);
+    const lastYearBalance = totalIncomeLastYear - totalExpenseLastYear;
+    
+    // Calcula variação anual
+    const incomeVariation = totalIncomeLastYear > 0 ? 
+        ((totalIncomeCurrentYear - totalIncomeLastYear) / totalIncomeLastYear) * 100 : 0;
+    const expenseVariation = totalExpenseLastYear > 0 ? 
+        ((totalExpenseCurrentYear - totalExpenseLastYear) / totalExpenseLastYear) * 100 : 0;
+    const balanceVariation = lastYearBalance !== 0 ? 
+        ((currentYearBalance - lastYearBalance) / Math.abs(lastYearBalance)) * 100 : 0;
+    
+    // Dados mensais para o ano atual
+    const monthlyData = [];
+    for (let month = 1; month <= 12; month++) {
+        const monthStr = month.toString().padStart(2, '0');
+        const monthKey = `${currentYearStr}-${monthStr}`;
+        
+        const monthIncomes = currentYearTransactions
+            .filter(t => t.type === 'receita' && t.date.startsWith(monthKey))
+            .reduce((sum, t) => sum + t.value, 0);
+        
+        const monthExpenses = currentYearTransactions
+            .filter(t => t.type === 'despesa' && t.date.startsWith(monthKey))
+            .reduce((sum, t) => sum + t.value, 0);
+        
+        monthlyData.push({
+            month: monthStr,
+            income: monthIncomes,
+            expense: monthExpenses,
+            balance: monthIncomes - monthExpenses
+        });
+    }
+    
+    // Total investimentos
+    const totalInvestments = investments.reduce((sum, i) => sum + i.value, 0);
+    const prevMonthInvestments = getPreviousMonthInvestments(new Date().toISOString().substring(0, 7));
+    const investmentVariation = prevMonthInvestments > 0 ? 
+        ((totalInvestments - prevMonthInvestments) / prevMonthInvestments) * 100 : 0;
+    
+    // Top receitas e despesas do ano
+    const topIncomes = [...currentYearIncomes]
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
+    
+    const topExpenses = [...currentYearExpenses]
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
+    const expenseByCategory = {};
+    currentYearExpenses.forEach(expense => {
+        expenseByCategory[expense.category] = (expenseByCategory[expense.category] || 0) + expense.value;
+    });
+    
+    // Ordena categorias por valor
+    const sortedExpenseCategories = Object.keys(expenseByCategory).sort(
+        (a, b) => expenseByCategory[b] - expenseByCategory[a]
+    );
+    
+    // Dados de cartões de crédito
+    const cardsUsage = creditCards.map(card => {
+        const cardPurchases = creditPurchases.filter(p => p.cardId === card.id);
+        const totalSpent = cardPurchases.reduce((sum, p) => sum + p.value, 0);
+        return {
+            name: card.name,
+            limit: card.limit,
+            available: card.available,
+            spent: totalSpent,
+            usagePercentage: (totalSpent / card.limit) * 100
+        };
+    });
+    
+    // Saldo das contas
+    const accountsSummary = accounts.map(account => {
+        const accountTransactions = transactions.filter(t => t.account === account.name);
+        const currentMonth = new Date().toISOString().substring(0, 7);
+        
+        const monthTransactions = accountTransactions.filter(t => t.date.startsWith(currentMonth));
+        const monthVariation = monthTransactions.reduce((sum, t) => {
+            return t.type === 'receita' ? sum + t.value : sum - t.value;
+        }, 0);
+        
+        return {
+            name: account.name,
+            type: account.type,
+            balance: account.balance,
+            monthVariation: monthVariation
+        };
+    });
+    
+    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    
+    return {
+        currentYear: currentYearStr,
+        totalIncome: totalIncomeCurrentYear,
+        totalExpense: totalExpenseCurrentYear,
+        currentBalance: currentYearBalance,
+        incomeVariation,
+        expenseVariation,
+        balanceVariation,
+        monthlyData,
+        totalInvestments,
+        investmentVariation,
+        topIncomes,
+        topExpenses,
+        cardsUsage,
+        accountsSummary,
+        totalBalance,
+		expenseByCategory: {
+            labels: sortedExpenseCategories,
+            data: sortedExpenseCategories.map(c => expenseByCategory[c])
+        },
+        topExpenses: [...currentYearExpenses]
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5)
+    };
+}
+
+// Atualiza os KPIs do dashboard completo
+function updateFullKPIs(data) {
+    document.getElementById('full-kpi-receita').textContent = 
+        data.totalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    document.getElementById('full-kpi-despesa').textContent = 
+        data.totalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    document.getElementById('full-kpi-saldo').textContent = 
+        data.currentBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    document.getElementById('full-kpi-investimento').textContent = 
+        data.totalInvestments.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    // Atualiza variações
+    updateFullVariationElement('full-kpi-receita-variacao', data.incomeVariation);
+    updateFullVariationElement('full-kpi-despesa-variacao', data.expenseVariation);
+    updateFullVariationElement('full-kpi-saldo-variacao', data.balanceVariation);
+    updateFullVariationElement('full-kpi-investimento-variacao', data.investmentVariation);
+}
+
+function updateFullVariationElement(elementId, variation) {
+    const element = document.getElementById(elementId);
+    const absVariation = Math.abs(variation);
+    const variationText = variation >= 0 ? 
+        `+${absVariation.toFixed(2)}%` : 
+        `-${absVariation.toFixed(2)}%`;
+    
+    element.textContent = variation >= 0 ? 
+        `vs ano anterior: ${variationText}` : 
+        `vs ano anterior: ${variationText}`;
+    element.style.color = variation >= 0 ? '#2ecc71' : '#e74c3c';
+}
+
+// Renderiza os gráficos do dashboard completo
+function renderFullCharts(data) {
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        return context.dataset.label + ': ' +
+                            context.raw.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL'
+                            });
+                    }
+                }
+            }
+        }
+    };
+
+    // Gráfico de Tendência Anual
+    const annualTrendCtx = document.getElementById('annualTrendChart').getContext('2d');
+    if (annualTrendChart) annualTrendChart.destroy();
+    annualTrendChart = new Chart(annualTrendCtx, {
+        type: 'line',
+        data: {
+            labels: data.monthlyData.map(m => formatMonthLabel(`${data.currentYear}-${m.month}`)),
+            datasets: [
+                {
+                    label: 'Receitas',
+                    data: data.monthlyData.map(m => m.income),
+                    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Despesas',
+                    data: data.monthlyData.map(m => m.expense),
+                    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: chartOptions
+    });
+
+    // Gráfico de Patrimônio Líquido
+    const netWorthCtx = document.getElementById('netWorthChart').getContext('2d');
+    if (netWorthChart) netWorthChart.destroy();
+    netWorthChart = new Chart(netWorthCtx, {
+        type: 'bar',
+        data: {
+            labels: data.monthlyData.map(m => formatMonthLabel(`${data.currentYear}-${m.month}`)),
+            datasets: [{
+                label: 'Patrimônio Líquido',
+                data: data.monthlyData.map(m => m.balance),
+                backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                borderColor: 'rgba(52, 152, 219, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Gráfico de Utilização de Cartões
+    const creditCardsUsageCtx = document.getElementById('creditCardsUsageChart').getContext('2d');
+    if (creditCardsUsageChart) creditCardsUsageChart.destroy();
+    creditCardsUsageChart = new Chart(creditCardsUsageCtx, {
+        type: 'doughnut',
+        data: {
+            labels: data.cardsUsage.map(c => c.name),
+            datasets: [{
+                label: 'Utilização de Limite',
+                data: data.cardsUsage.map(c => c.usagePercentage),
+                backgroundColor: [
+                    'rgba(155, 89, 182, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(241, 196, 15, 0.7)',
+                    'rgba(230, 126, 34, 0.7)',
+                    'rgba(231, 76, 60, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            ...chartOptions,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const card = data.cardsUsage[context.dataIndex];
+                            return [
+                                `${card.name}`,
+                                `Limite: ${card.limit.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`,
+                                `Utilizado: ${card.spent.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`,
+                                `Disponível: ${card.available.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`,
+                                `Utilização: ${card.usagePercentage.toFixed(2)}%`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+  // Novo Gráfico de Despesas por Tipo
+    const expensesByTypeCtx = document.getElementById('expensesByTypeChart').getContext('2d');
+    if (expensesByTypeChart) expensesByTypeChart.destroy();
+    
+    // Agrupa despesas por tipo (categoria)
+    const expenseCategories = {};
+    const currentYearExpenses = transactions.filter(t => 
+        t.type === 'despesa' && t.date.startsWith(data.currentYear)
+    );
+    
+    currentYearExpenses.forEach(expense => {
+        expenseCategories[expense.category] = (expenseCategories[expense.category] || 0) + expense.value;
+    });
+    
+    const sortedCategories = Object.keys(expenseCategories).sort(
+        (a, b) => expenseCategories[b] - expenseCategories[a]
+    );
+    
+    expensesByTypeChart = new Chart(expensesByTypeCtx, {
+        type: 'bar',
+        data: {
+            labels: sortedCategories,
+            datasets: [{
+                label: 'Valor Gasto',
+                data: sortedCategories.map(cat => expenseCategories[cat]),
+                backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                borderColor: 'rgba(231, 76, 60, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            ...chartOptions,
+            indexAxis: 'y', // Gráfico horizontal
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Novo Gráfico de Maiores Despesas por Grupo
+    const topExpensesByGroupCtx = document.getElementById('topExpensesByGroupChart').getContext('2d');
+    if (topExpensesByGroupChart) topExpensesByGroupChart.destroy();
+    
+    // Pega as 5 maiores despesas
+    const topExpenses = [...currentYearExpenses]
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
+    
+    topExpensesByGroupChart = new Chart(topExpensesByGroupCtx, {
+        type: 'bar',
+        data: {
+            labels: topExpenses.map(exp => exp.description.substring(0, 20) + (exp.description.length > 20 ? '...' : '')),
+            datasets: [{
+                label: 'Maiores Despesas',
+                data: topExpenses.map(exp => exp.value),
+                backgroundColor: topExpenses.map(exp => {
+                    // Cores diferentes para cada categoria
+                    const colors = [
+                        'rgba(231, 76, 60, 0.7)',
+                        'rgba(230, 126, 34, 0.7)',
+                        'rgba(241, 196, 15, 0.7)',
+                        'rgba(155, 89, 182, 0.7)',
+                        'rgba(52, 152, 219, 0.7)'
+                    ];
+                    const categoryIndex = sortedCategories.indexOf(exp.category) % colors.length;
+                    return colors[categoryIndex];
+                }),
+                borderColor: 'rgba(231, 76, 60, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            ...chartOptions,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const expense = topExpenses[context.dataIndex];
+                            return `Categoria: ${expense.category}\n` +
+                                   `Data: ${new Date(expense.date).toLocaleDateString('pt-BR')}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    // Gráfico de Gastos por Cartão
+    const spendingByCardCtx = document.getElementById('spendingByCardChart').getContext('2d');
+    if (spendingByCardChart) spendingByCardChart.destroy();
+    spendingByCardChart = new Chart(spendingByCardCtx, {
+        type: 'bar',
+        data: {
+            labels: data.cardsUsage.map(c => c.name),
+            datasets: [{
+                label: 'Gastos por Cartão',
+                data: data.cardsUsage.map(c => c.spent),
+                backgroundColor: 'rgba(155, 89, 182, 0.7)',
+                borderColor: 'rgba(155, 89, 182, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Gráfico de Metas Financeiras (exemplo)
+    const financialGoalsCtx = document.getElementById('financialGoalsChart').getContext('2d');
+    if (financialGoalsChart) financialGoalsChart.destroy();
+    financialGoalsChart = new Chart(financialGoalsCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Economias', 'Investimentos', 'Redução de Dívidas', 'Controle de Gastos', 'Aumento de Renda'],
+            datasets: [{
+                label: 'Progresso das Metas',
+                data: [75, 60, 40, 80, 50], // Valores fictícios - pode ser personalizado
+                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                borderColor: 'rgba(46, 204, 113, 1)',
+                pointBackgroundColor: 'rgba(46, 204, 113, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(46, 204, 113, 1)'
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            }
+        }
+    });
+}
+
+// Atualiza as tabelas de top receitas/despesas anuais
+function updateAnnualTopTables(data) {
+    // Top receitas
+    const incomesTbody = document.querySelector('#topIncomesTable tbody');
+    incomesTbody.innerHTML = '';
+    
+    data.topIncomes.forEach(income => {
+        const row = document.createElement('tr');
+        const date = new Date(income.date);
+        const formattedDate = date.toLocaleDateString('pt-BR');
+        const formattedValue = income.value.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+        
+        row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td>${income.description}</td>
+            <td>${income.category}</td>
+            <td class="receita">${formattedValue}</td>
+        `;
+        
+        incomesTbody.appendChild(row);
+    });
+    
+    if (data.topIncomes.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="4" style="text-align: center;">Nenhuma receita registrada este ano</td>';
+        incomesTbody.appendChild(row);
+    }
+    
+    // Top despesas
+    const expensesTbody = document.querySelector('#topExpensesAnnualTable tbody');
+    expensesTbody.innerHTML = '';
+    
+    data.topExpenses.forEach(expense => {
+        const row = document.createElement('tr');
+        const date = new Date(expense.date);
+        const formattedDate = date.toLocaleDateString('pt-BR');
+        const formattedValue = expense.value.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+        
+        row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td>${expense.description}</td>
+            <td>${expense.category}</td>
+            <td class="despesa">${formattedValue}</td>
+        `;
+        
+        expensesTbody.appendChild(row);
+    });
+    
+    if (data.topExpenses.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="4" style="text-align: center;">Nenhuma despesa registrada este ano</td>';
+        expensesTbody.appendChild(row);
+    }
+}
+
+// Atualiza o resumo das contas
+function updateAccountsSummary(data) {
+    const tbody = document.querySelector('#accountsSummaryTable tbody');
+    tbody.innerHTML = '';
+    
+    data.accountsSummary.forEach(account => {
+        const formattedBalance = account.balance.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+        
+        const formattedVariation = account.monthVariation.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+        
+        const percentage = data.totalBalance > 0 ? 
+            ((account.balance / data.totalBalance) * 100).toFixed(2) + '%' : '0%';
+        
+        const variationColor = account.monthVariation >= 0 ? '#2ecc71' : '#e74c3c';
+        const variationSymbol = account.monthVariation >= 0 ? '+' : '';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${account.name}</td>
+            <td>${account.type}</td>
+            <td>${formattedBalance}</td>
+            <td style="color: ${variationColor}">${variationSymbol}${formattedVariation}</td>
+            <td>${percentage}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+    
+    // Adiciona linha de total
+    const totalRow = document.createElement('tr');
+    totalRow.className = 'total-row';
+    totalRow.innerHTML = `
+        <td colspan="2">Total</td>
+        <td>${data.totalBalance.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</td>
+        <td colspan="2"></td>
+    `;
+    tbody.appendChild(totalRow);
+}
+
+    </script>
+</body>
+</html>
