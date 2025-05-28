@@ -133,6 +133,13 @@
             font-size: 0.9rem;
         }
 
+        .last-workout-date {
+            font-size: 0.8rem;
+            color: var(--info-color);
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
         /* Lista de exercícios */
         .exercise-list {
             background-color: white;
@@ -242,6 +249,23 @@
             background-color: #0d1a26; /* Um tom mais escuro */
         }
 
+        /* Botão de registrar treino */
+        .register-workout-button {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 15px 0;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-workout-button:hover {
+            background-color: #218838;
+        }
+
         /* Barra de progresso */
         .progress-bar {
             height: 10px;
@@ -331,6 +355,23 @@
             opacity: 1;
         }
 
+        /* Estilos do histórico */
+        .history-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .history-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
 
         /* Media Queries para responsividade */
         @media (max-width: 600px) {
@@ -399,7 +440,15 @@
         <div id="daysView">
             <h2>Seus Dias de Treino</h2>
             <div class="workout-days" id="workoutDays">
+                <!-- Dias de treino serão inseridos aqui via JavaScript -->
+            </div>
+            
+            <div class="history-container" id="historyContainer">
+                <h3>Histórico Recente</h3>
+                <div id="historyList">
+                    <!-- Histórico será inserido aqui via JavaScript -->
                 </div>
+            </div>
         </div>
 
         <div id="exercisesView">
@@ -412,8 +461,10 @@
                 <button id="startTimer">Iniciar Descanso</button>
                 <button id="stopTimer" style="display:none;">Parar Descanso</button>
             </div>
+            <button id="registerWorkoutButton" class="register-workout-button">Registrar Treino Hoje</button>
             <div class="exercise-list" id="exerciseList">
-                </div>
+                <!-- Exercícios serão inseridos aqui via JavaScript -->
+            </div>
         </div>
     </div>
 
@@ -675,6 +726,8 @@
         const exercisesView = document.getElementById('exercisesView');
         const backButton = document.getElementById('backButton');
         const dayProgress = document.getElementById('dayProgress');
+        const registerWorkoutButton = document.getElementById('registerWorkoutButton');
+        const historyList = document.getElementById('historyList');
 
         // Elementos do Timer
         const timerElement = document.getElementById('timer');
@@ -691,11 +744,16 @@
 
         // Armazenamento local para progresso
         let workoutProgress = {};
+        let workoutHistory = [];
+        let currentDay = null;
+
         try {
             workoutProgress = JSON.parse(localStorage.getItem('workoutProgress')) || {};
+            workoutHistory = JSON.parse(localStorage.getItem('workoutHistory')) || [];
         } catch (e) {
             console.error("Erro ao carregar progresso do localStorage:", e);
             workoutProgress = {}; // Resetar se houver erro de parsing
+            workoutHistory = [];
             showCustomAlert("Erro ao carregar progresso. Reiniciando dados.", 'danger');
         }
 
@@ -722,12 +780,27 @@
         }
 
         /**
+         * Formata uma data para exibição amigável
+         * @param {Date} date - Data a ser formatada
+         * @returns {string} Data formatada
+         */
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('pt-BR', options);
+        }
+
+        /**
          * Inicializa a visualização dos dias de treino, criando os cartões para cada dia.
          */
         function initWorkoutDays() {
             workoutDaysContainer.innerHTML = ''; // Limpa o contêiner antes de adicionar novos dias
 
             workoutData.forEach(dayData => {
+                // Encontra a última data em que este treino foi realizado
+                const lastWorkout = workoutHistory
+                    .filter(item => item.day === dayData.day)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
                 const dayElement = document.createElement('div');
                 dayElement.className = 'workout-day';
                 dayElement.innerHTML = `
@@ -736,12 +809,51 @@
                         <h3>Dia ${dayData.day}</h3>
                         <p>${dayData.title}</p>
                         <p>${dayData.exercises.length} exercícios</p>
+                        ${lastWorkout ? `<p class="last-workout-date">Último treino: ${formatDate(new Date(lastWorkout.date))}</p>` : ''}
                     </div>
                 `;
 
                 // Adiciona um event listener para mostrar os exercícios ao clicar no dia
-                dayElement.addEventListener('click', () => showExercises(dayData));
+                dayElement.addEventListener('click', () => {
+                    currentDay = dayData.day;
+                    showExercises(dayData);
+                });
                 workoutDaysContainer.appendChild(dayElement);
+            });
+
+            // Atualiza o histórico
+            updateHistoryView();
+        }
+
+        /**
+         * Atualiza a visualização do histórico de treinos
+         */
+        function updateHistoryView() {
+            historyList.innerHTML = '';
+            
+            // Ordena o histórico do mais recente para o mais antigo
+            const sortedHistory = [...workoutHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Mostra apenas os 5 mais recentes
+            const recentHistory = sortedHistory.slice(0, 5);
+            
+            if (recentHistory.length === 0) {
+                historyList.innerHTML = '<p>Nenhum treino registrado ainda.</p>';
+                return;
+            }
+            
+            recentHistory.forEach(item => {
+                const dayData = workoutData.find(d => d.day === item.day);
+                if (!dayData) return;
+                
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <p><strong>Dia ${item.day}: ${dayData.title}</strong></p>
+                    <p>${formatDate(new Date(item.date))}</p>
+                    <p>${item.completedSets} sets completos de ${item.totalSets}</p>
+                `;
+                historyList.appendChild(historyItem);
             });
         }
 
@@ -842,6 +954,47 @@
         }
 
         /**
+         * Registra a conclusão do treino do dia atual
+         */
+        function registerWorkout() {
+            if (!currentDay) return;
+            
+            const dayData = workoutData.find(d => d.day == currentDay);
+            if (!dayData) return;
+            
+            // Calcula o progresso atual
+            let totalSets = 0;
+            let completedSets = 0;
+            
+            dayData.exercises.forEach(exercise => {
+                totalSets += exercise.sets;
+                const exerciseCompletedSets = workoutProgress[`day-${dayData.day}-${exercise.name}`] || 0;
+                completedSets += exerciseCompletedSets;
+            });
+            
+            // Adiciona ao histórico
+            const workoutRecord = {
+                day: currentDay,
+                date: new Date().toISOString(),
+                totalSets,
+                completedSets
+            };
+            
+            workoutHistory.push(workoutRecord);
+            
+            try {
+                localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+                showCustomAlert(`Treino do Dia ${currentDay} registrado com sucesso!`, 'success');
+            } catch (e) {
+                console.error("Erro ao salvar histórico no localStorage:", e);
+                showCustomAlert("Erro ao registrar treino. Tente novamente.", 'danger');
+            }
+            
+            // Atualiza a visualização
+            initWorkoutDays();
+        }
+
+        /**
          * Inicia o cronômetro de descanso.
          * @param {number} duration - Duração do descanso em segundos.
          */
@@ -888,6 +1041,8 @@
         startTimerButton.addEventListener('click', () => startRestTimer(DEFAULT_REST_TIME));
         stopTimerButton.addEventListener('click', stopRestTimer);
 
+        // Event listener para o botão de registrar treino
+        registerWorkoutButton.addEventListener('click', registerWorkout);
 
         // Voltar para a visualização dos dias de treino
         backButton.addEventListener('click', () => {
@@ -900,6 +1055,7 @@
             secondsRemaining = 0;
             startTimerButton.style.display = 'inline-block'; // Garante que o botão de iniciar esteja visível
             stopTimerButton.style.display = 'none'; // Garante que o botão de parar esteja oculto
+            currentDay = null;
         });
 
         // Inicializar o app
