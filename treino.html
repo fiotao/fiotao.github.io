@@ -155,6 +155,13 @@
             display: flex;
             gap: 15px;
             align-items: flex-start; /* Alinha itens ao topo */
+            transition: all 0.3s ease;
+        }
+
+        .exercise.current-exercise {
+            border-left: 4px solid var(--secondary-color);
+            background-color: rgba(255, 127, 80, 0.05);
+            padding-left: 11px; /* 15px - 4px da borda */
         }
 
         .exercise:last-child {
@@ -298,7 +305,7 @@
             text-align: center;
             margin-top: 20px;
             margin-bottom: 20px;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: var(--primary-color);
             background-color: white;
@@ -307,8 +314,8 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        #startTimer, #stopTimer {
-            margin-left: 15px;
+        #timer button {
+            margin-top: 10px;
             padding: 8px 15px;
             background-color: var(--secondary-color);
             color: white;
@@ -319,17 +326,11 @@
             font-size: 1rem;
         }
 
-        #stopTimer {
+        #timer button#stopTimer {
             background-color: var(--danger-color);
         }
 
-        #startTimer:hover {
-            background-color: #e66a3e;
-            transform: translateY(-2px);
-        }
-
-        #stopTimer:hover {
-            background-color: #c82333;
+        #timer button:hover {
             transform: translateY(-2px);
         }
 
@@ -353,6 +354,14 @@
 
         #customAlert.show {
             opacity: 1;
+        }
+
+        #customAlert.alert-info {
+            background-color: var(--info-color);
+        }
+
+        #customAlert.alert-danger {
+            background-color: var(--danger-color);
         }
 
         /* Estilos do histórico */
@@ -412,7 +421,7 @@
                 font-size: 1rem;
             }
 
-            #startTimer, #stopTimer {
+            #timer button {
                 margin: 10px 5px 0 5px;
                 display: block;
                 width: calc(100% - 20px);
@@ -457,9 +466,7 @@
                 <div class="progress" id="dayProgress"></div>
             </div>
             <div id="timer">
-                Descanso: <span id="timerSeconds">0</span> segundos
-                <button id="startTimer">Iniciar Descanso</button>
-                <button id="stopTimer" style="display:none;">Parar Descanso</button>
+                <!-- Conteúdo do timer será inserido dinamicamente -->
             </div>
             <button id="registerWorkoutButton" class="register-workout-button">Registrar Treino Hoje</button>
             <div class="exercise-list" id="exerciseList">
@@ -470,248 +477,339 @@
 
     <script>
         // Dados dos treinos com URLs de imagens e detalhes adicionais
-        const workoutData = [
+     const workoutData = [
             {
                 day: 1,
-                title: "Peito, ombro e tríceps",
-                image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Imagem de peito
+                title: "Peito, ombro, tríceps e antebraço",
+                image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 exercises: [
                     {
                         name: "Supino máquina", sets: 3, reps: "6-8",
-                        image: "./images/supino_maquina.png", // Imagem local
+                        image: "./images/supino_maquina.png",
                         description: "Foco no peitoral e ombros, com segurança da máquina.",
-                        videoUrl: "https://musclewiki.com/exercises/female/chest", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/exercises/female/chest",
                         muscleGroup: "Peito, Ombro, Tríceps"
                     },
                     {
                         name: "Supino inclinado", sets: 2, reps: "8-10",
-                        image: "./images/supino_inclinado.png", // Imagem local
+                        image: "./images/supino_inclinado.png",
                         description: "Trabalha a parte superior do peitoral.",
-                        videoUrl: "https://musclewiki.com/barbell/male/anterior-deltoid/barbell-incline-bench-press/", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/barbell/male/anterior-deltoid/barbell-incline-bench-press/",
                         muscleGroup: "Peito (Superior), Ombro, Tríceps"
                     },
                     {
                         name: "Crucifixo com halter", sets: 2, reps: "8-12",
-                        image: "./images/cruxifixo_halter.png", // Imagem local
+                        image: "./images/cruxifixo_halter.png",
                         description: "Isolamento do peitoral, alongando as fibras musculares.",
-                        videoUrl: "https://www.youtube.com/watch?v=_kpKlYexyXs", // YouTube link
+                        videoUrl: "https://www.youtube.com/watch?v=_kpKlYexyXs",
                         muscleGroup: "Peito"
                     },
                     {
-                        name: "Desenvolvimento", sets: 3, reps: "6-10",
-                        image: "./images/desenvolvimento.png", // Imagem local
+                        name: "Desenvolvimento com halteres", sets: 3, reps: "6-10",
+                        image: "./images/desenvolvimento_halteres.png",
                         description: "Exercício composto para ombros, trabalha deltoides.",
-                        videoUrl: "https://musclewiki.com/exercises/male/posterior-deltoid", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-shoulder-press/",
                         muscleGroup: "Ombro, Tríceps"
                     },
                     {
+                        name: "Elevação lateral", sets: 3, reps: "10-12",
+                        image: "./images/elevacao_lateral.png",
+                        description: "Isolamento do deltoide lateral para maior largura.",
+                        videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-lateral-raise/",
+                        muscleGroup: "Ombro"
+                    },
+                    {
                         name: "Tríceps paralela", sets: 3, reps: "8-12",
-                        image: "./images/triceps_paralela.png", // Imagem local
+                        image: "./images/triceps_paralela.png",
                         description: "Exercício eficaz para o tríceps, pode ser feito em máquina ou barra.",
-                        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder, no direct MuscleWiki found
+                        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                         muscleGroup: "Tríceps"
                     },
                     {
                         name: "Tríceps francês na polia", sets: 2, reps: "8-12",
-                        image: "./images/triceps_frances.png", // Imagem local
+                        image: "./images/triceps_frances.png",
                         description: "Foco na cabeça longa do tríceps.",
-                        videoUrl: "https://musclewiki.com/pt-br/cables/male/triceps/cable-rope-overhead-tricep-extension/", // Placeholder, no direct MuscleWiki found
+                        videoUrl: "https://musclewiki.com/pt-br/cables/male/triceps/cable-rope-overhead-tricep-extension/",
                         muscleGroup: "Tríceps"
+                    },
+                    {
+                        name: "Rosca punho inversa", sets: 3, reps: "12-15",
+                        image: "./images/rosca_punho_inversa.png",
+                        description: "Fortalecimento dos extensores do antebraço.",
+                        videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I",
+                        muscleGroup: "Antebraço"
+                    },
+                    {
+                        name: "Rosca punho", sets: 3, reps: "12-15",
+                        image: "./images/rosca_punho.png",
+                        description: "Fortalecimento dos flexores do antebraço.",
+                        videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I",
+                        muscleGroup: "Antebraço"
                     }
                 ]
             },
             {
                 day: 2,
                 title: "Costas, bíceps e ombro",
-                image: "https://images.unsplash.com/photo-1549476468-382a93796d11?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Imagem de costas
+                image: "https://images.unsplash.com/photo-1549476468-382a93796d11?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 exercises: [
                     {
                         name: "Puxada triângulo", sets: 3, reps: "6-8",
-                        image: "./images/puxada_triangulo.png", // Imagem local
+                        image: "./images/puxada_triangulo.png",
                         description: "Trabalha a largura das costas, com foco nos dorsais.",
-                        videoUrl: "https://musclewiki.com/barbell/male/biceps/barbell-bent-over-row", // MuscleWiki link (Remada Curvada com Barra - Dorsais)
+                        videoUrl: "https://musclewiki.com/barbell/male/biceps/barbell-bent-over-row",
                         muscleGroup: "Costas, Bíceps"
                     },
                     {
                         name: "Remada curvada", sets: 3, reps: "6-10",
-                        image: "./images/remada_curvada.png" , // Imagem local
+                        image: "./images/remada_curvada.png",
                         description: "Exercício composto para espessura das costas.",
-                        videoUrl: "https://musclewiki.com/Barbell/Female/Shoulders/Barbell-Upright-Row", // MuscleWiki link (Remada Alta com Barra - Ombros)
+                        videoUrl: "https://musclewiki.com/Barbell/Female/Shoulders/Barbell-Upright-Row",
                         muscleGroup: "Costas, Bíceps"
                     },
                     {
                         name: "Remada aberta", sets: 3, reps: "8-10",
-                        image: "./images/remada_aberta.png", // Imagem local
+                        image: "./images/remada_aberta.png",
                         description: "Foco na parte superior das costas e trapézio.",
-                        videoUrl: "https://musclewiki.com/barbell/male/lats/barbell-bent-over-row/", // MuscleWiki link (Remada Curvada com Barra - Dorsais)
+                        videoUrl: "https://musclewiki.com/barbell/male/lats/barbell-bent-over-row/",
                         muscleGroup: "Costas"
                     },
                     {
                         name: "Rosca scott", sets: 3, reps: "8-12",
-                        image: "./images/rosca_scott.png" , // Imagem local
+                        image: "./images/rosca_scott.png",
                         description: "Isolamento do bíceps, com apoio para evitar roubo.",
-                        videoUrl: "https://musclewiki.com/pt-br/barbell/male/biceps/ez-bar-reverse-preacher-curl", // TotalPass link (found in search)
+                        videoUrl: "https://musclewiki.com/pt-br/barbell/male/biceps/ez-bar-reverse-preacher-curl",
                         muscleGroup: "Bíceps"
                     },
                     {
                         name: "Rosca no banco inclinado", sets: 2, reps: "8-12",
-                         image: "./images/rosca_banco_inclinado.png" , // Imagem local
+                        image: "./images/rosca_banco_inclinado.png",
                         description: "Alongamento máximo do bíceps, ideal para pico.",
-                        videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-seated-single-arm-arnold-press", // MuscleWiki link (Rosca Arnold com Halter Sentado com Um Braço - Ombros)
+                        videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-seated-single-arm-arnold-press",
                         muscleGroup: "Bíceps"
                     },
                     {
-                        name: "Elevação lateral", sets: 3, reps: "8-12",
-                        image: "./images/elevacao_lateral.png", // Imagem local
-                        description: "Foco na parte lateral do ombro, para largura.",
-                        videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-bayesian-lateral-raise/", // MuscleWiki link
+                        name: "Elevação frontal", sets: 3, reps: "10-12",
+                        image: "./images/elevacao_frontal.png",
+                        description: "Foco na parte anterior do ombro.",
+                        videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-front-raise/",
                         muscleGroup: "Ombro"
+                    },
+                    {
+                        name: "Remada alta", sets: 3, reps: "8-10",
+                        image: "./images/remada_alta.png",
+                        description: "Trabalha os trapézios e deltoides laterais.",
+                        videoUrl: "https://musclewiki.com/barbell/male/traps/barbell-upright-row/",
+                        muscleGroup: "Ombro, Trapézio"
                     }
                 ]
             },
             {
                 day: 3,
                 title: "Pernas completo 1",
-                image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Imagem de pernas
+                image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 exercises: [
                     {
-                        name: "Agachamento", sets: 3, reps: "6-8",
-                        image: "./images/agachamento.png" , // Imagem local
+                        name: "Agachamento livre", sets: 4, reps: "6-8",
+                        image: "./images/agachamento_livre.png",
                         description: "Exercício fundamental para pernas e glúteos.",
-                        videoUrl: "https://musclewiki.com/bodyweight/male/glutes", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/barbell/male/quadriceps/barbell-back-squat/",
                         muscleGroup: "Pernas, Glúteos"
                     },
                     {
                         name: "Stiff com barra", sets: 3, reps: "6-8",
-                      image: "./images/stiff_barra.png", // Imagem local
+                        image: "./images/stiff_barra.png",
                         description: "Trabalha isquiotibiais e glúteos, com foco na posterior.",
-                        videoUrl: "https://musclewiki.com/barbell/male/gluteus-maximus/barbell-stiff-leg-deadlifts", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/barbell/male/gluteus-maximus/barbell-stiff-leg-deadlifts",
                         muscleGroup: "Isquiotibiais, Glúteos"
                     },
                     {
                         name: "Cadeira extensora", sets: 3, reps: "8-12",
-                        image: "./images/cadeira_extensora.png" , // Imagem local
+                        image: "./images/cadeira_extensora.png",
                         description: "Isolamento do quadríceps.",
-                        videoUrl: "https://totalpass.com/br/blog/atividade-fisica/cadeira-extensora-o-que-e-e-como-fazer/", // TotalPass link (found in search)
+                        videoUrl: "https://totalpass.com/br/blog/atividade-fisica/cadeira-extensora-o-que-e-e-como-fazer/",
                         muscleGroup: "Quadríceps"
                     },
                     {
                         name: "Cadeira flexora", sets: 3, reps: "8-12",
-                         image: "./images/cadeira_flexora.png" , // Imagem local
+                        image: "./images/cadeira_flexora.png",
                         description: "Isolamento dos isquiotibiais.",
-                        videoUrl: "https://www.youtube.com/watch?v=e0_xHkXw350", // YouTube link
+                        videoUrl: "https://www.youtube.com/watch?v=e0_xHkXw350",
                         muscleGroup: "Isquiotibiais"
                     },
                     {
-                        name: "Panturrilha no smith", sets: 3, reps: "8-10",
-                         image: "./images/panturrilha_smith.png" , // Imagem local
-                        description: "Fortalecimento da panturrilha, com estabilidade da máquina.",
-                        videoUrl: "https://musclewiki.com/exercises/male/soleus", // MuscleWiki link
+                        name: "Afundo com halteres", sets: 3, reps: "8-10",
+                        image: "./images/afundo_halteres.png",
+                        description: "Exercício unilateral para pernas e glúteos.",
+                        videoUrl: "https://musclewiki.com/dumbbells/male/quadriceps/dumbbell-lunges/",
+                        muscleGroup: "Pernas, Glúteos"
+                    },
+                    {
+                        name: "Panturrilha no leg press", sets: 4, reps: "15-20",
+                        image: "./images/panturrilha_legpress.png",
+                        description: "Amplitude maior para trabalhar a panturrilha.",
+                        videoUrl: "https://www.youtube.com/watch?v=Gf7B6Mr4fC4",
                         muscleGroup: "Panturrilha"
                     },
                     {
-                        name: "Abdominal supra", sets: 3, reps: "8-12",
-                        image: "./images/abdominal_supra.png", // Imagem local
+                        name: "Panturrilha sentado", sets: 4, reps: "15-20",
+                        image: "./images/panturrilha_sentado.png",
+                        description: "Foco no sóleo (parte inferior da panturrilha).",
+                        videoUrl: "https://www.youtube.com/watch?v=Bx6elAOgxMI",
+                        muscleGroup: "Panturrilha"
+                    },					
+                    {
+                        name: "Panturrilha em pé", sets: 4, reps: "15-20",
+                        image: "./images/panturrilha_pe.png",
+                        description: "Foco no gastrocnêmio (parte superior da panturrilha).",
+                        videoUrl: "https://musclewiki.com/bodyweight/male/calves/standing-calf-raise/",
+                        muscleGroup: "Panturrilha"
+                    },
+                    {
+                        name: "Abdominal supra", sets: 3, reps: "12-15",
+                        image: "./images/abdominal_supra.png",
                         description: "Trabalha a parte superior do abdômen.",
-                        videoUrl: "https://musclewiki.com/bodyweight/male/abdominals/2", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/bodyweight/male/abdominals/2",
                         muscleGroup: "Abdômen"
                     }
                 ]
             },
             {
                 day: 4,
-                title: "Superiores completo",
-                image: "https://images.unsplash.com/photo-1541592106381-b31649479354?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Imagem de superiores
+                title: "Superiores completo e antebraço",
+                image: "https://images.unsplash.com/photo-1541592106381-b31649479354?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 exercises: [
                     {
                         name: "Supino máquina", sets: 3, reps: "6-8",
-                         image: "./images/supino_maquina.png", // Imagem local
+                        image: "./images/supino_maquina.png",
                         description: "Foco no peitoral e ombros, com segurança da máquina.",
-                        videoUrl: "https://musclewiki.com/exercises/female/chest", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/exercises/female/chest",
                         muscleGroup: "Peito, Ombro, Tríceps"
                     },
                     {
                         name: "Supino inclinado", sets: 2, reps: "8-10",
-                       image: "./images/supino_inclinado.png", // Imagem local
+                        image: "./images/supino_inclinado.png",
                         description: "Variação para a parte superior do peito.",
-                        videoUrl: "https://musclewiki.com/barbell/male/anterior-deltoid/barbell-incline-bench-press/", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/barbell/male/anterior-deltoid/barbell-incline-bench-press/",
                         muscleGroup: "Peito (Superior), Ombro, Tríceps"
                     },
                     {
                         name: "Puxada triângulo", sets: 3, reps: "6-8",
-                         image: "./images/puxada_triangulo.png", // Imagem local
+                        image: "./images/puxada_triangulo.png",
                         description: "Trabalha a largura das costas, com foco nos dorsais.",
-                        videoUrl: "https://musclewiki.com/barbell/male/biceps/barbell-bent-over-row", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/barbell/male/biceps/barbell-bent-over-row",
                         muscleGroup: "Costas, Bíceps"
                     },
                     {
                         name: "Remada aberta", sets: 2, reps: "8-10",
-                        image: "./images/remada_aberta.png", // Imagem local
+                        image: "./images/remada_aberta.png",
                         description: "Foco na parte superior das costas e trapézio.",
-                        videoUrl: "https://musclewiki.com/barbell/male/lats/barbell-bent-over-row/", // MuscleWiki link
+                        videoUrl: "https://musclewiki.com/barbell/male/lats/barbell-bent-over-row/",
                         muscleGroup: "Costas"
                     },
                     {
-                        name: "Rosca scott", sets: 2, reps: "8-12",
-                        image: "./images/rosca_scott.png", // Imagem local
-                        description: "Isolamento do bíceps, com apoio para evitar roubo.",
-                        videoUrl: "https://totalpass.com/br/blog/atividade-fisica/rosca-scott-aprenda-a-definir-o-biceps/", // TotalPass link
-                        muscleGroup: "Bíceps"
+                        name: "Desenvolvimento Arnold", sets: 3, reps: "8-10",
+                        image: "./images/desenvolvimento_arnold.png",
+                        description: "Variação completa para ombros com rotação.",
+                        videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-arnold-press/",
+                        muscleGroup: "Ombro"
+                    },
+                    {
+                        name: "Elevação lateral inclinada", sets: 3, reps: "10-12",
+                        image: "./images/elevacao_lateral_inclinada.png",
+                        description: "Maior ênfase na parte posterior do deltoide.",
+                        videoUrl: "https://www.youtube.com/watch?v=Z2G8DBaT9U4",
+                        muscleGroup: "Ombro"
                     },
                     {
                         name: "Tríceps na polia", sets: 2, reps: "8-12",
-                        image: "./images/triceps_polia.png" , // Imagem local
+                        image: "./images/triceps_polia.png",
                         description: "Variação para o tríceps, com foco na contração.",
-                        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder, no direct MuscleWiki found
+                        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                         muscleGroup: "Tríceps"
+                    },
+                    {
+                        name: "Rosca punho inversa", sets: 3, reps: "12-15",
+                        image: "./images/rosca_punho_inversa.png",
+                        description: "Fortalecimento dos extensores do antebraço.",
+                        videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I",
+                        muscleGroup: "Antebraço"
+                    },
+                    {
+                        name: "Rosca punho", sets: 3, reps: "12-15",
+                        image: "./images/rosca_punho.png",
+                        description: "Fortalecimento dos flexores do antebraço.",
+                        videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I",
+                        muscleGroup: "Antebraço"
                     }
                 ]
             },
             {
                 day: 5,
                 title: "Pernas completo 2",
-                image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Imagem de pernas
+                image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 exercises: [
                     {
-                        name: "Leg press 45°", sets: 3, reps: "6-8",
-                         image: "./images/leg_press.png", // Imagem local
+                        name: "Leg press 45°", sets: 4, reps: "6-8",
+                        image: "./images/leg_press.png",
                         description: "Exercício composto para pernas, com foco em quadríceps e glúteos.",
-                        videoUrl: "https://gears.com.br/produto/leg-press-45-gym-line-gears/", // Gears Fitness link (found in search)
+                        videoUrl: "https://gears.com.br/produto/leg-press-45-gym-line-gears/",
                         muscleGroup: "Pernas, Glúteos"
                     },
                     {
                         name: "Cadeira flexora", sets: 3, reps: "6-10",
-                        image: "./images/cadeira_flexora.png", // Imagem local
+                        image: "./images/cadeira_flexora.png",
                         description: "Isolamento dos isquiotibiais.",
-                        videoUrl: "https://www.youtube.com/watch?v=e0_xHkXw350", // YouTube link
+                        videoUrl: "https://www.youtube.com/watch?v=e0_xHkXw350",
                         muscleGroup: "Isquiotibiais"
                     },
                     {
                         name: "Cadeira extensora", sets: 3, reps: "8-12",
-                        image: "./images/cadeira_extensora.png", // Imagem local
+                        image: "./images/cadeira_extensora.png",
                         description: "Isolamento do quadríceps.",
-                        videoUrl: "https://totalpass.com/br/blog/atividade-fisica/cadeira-extensora-o-que-e-e-como-fazer/", // TotalPass link (found in search)
+                        videoUrl: "https://totalpass.com/br/blog/atividade-fisica/cadeira-extensora-o-que-e-e-como-fazer/",
                         muscleGroup: "Quadríceps"
                     },
                     {
                         name: "Mesa flexora", sets: 3, reps: "8-12",
-                        image: "./images/mesa_flexora.png" , // Imagem local
+                        image: "./images/mesa_flexora.png",
                         description: "Outra opção para isolar os isquiotibiais, deitado.",
-                        videoUrl: "https://www.tuasaude.com/mesa-flexora/", // Tua Saúde link (found in search)
+                        videoUrl: "https://www.tuasaude.com/mesa-flexora/",
                         muscleGroup: "Isquiotibiais"
                     },
                     {
-                        name: "Panturrilha sentado", sets: 3, reps: "8-10",
-                        image: "./images/panturrilha_sentado.png", // Imagem local
-                        description: "Foco na parte inferior da panturrilha (sóleo).",
-                        videoUrl: "https://www.youtube.com/watch?v=Bx6elAOgxMI", // YouTube link
+                        name: "Agachamento búlgaro", sets: 3, reps: "8-10",
+                        image: "./images/agachamento_bulgaro.png",
+                        description: "Exercício unilateral intenso para pernas e glúteos.",
+                        videoUrl: "https://musclewiki.com/dumbbells/male/quadriceps/dumbbell-bulgarian-split-squat/",
+                        muscleGroup: "Pernas, Glúteos"
+                    },
+                    {
+                        name: "Panturrilha unilateral", sets: 4, reps: "12-15",
+                        image: "./images/panturrilha_unilateral.png",
+                        description: "Trabalho individualizado para cada panturrilha.",
+                        videoUrl: "https://www.youtube.com/watch?v=9CPrrmusOu8",
                         muscleGroup: "Panturrilha"
                     },
                     {
-                        name: "Abdominal máquina", sets: 3, reps: "8-12",
-                        image: "./images/abdominal_maquina.png", // Imagem local
+                        name: "Panturrilha no burrinho", sets: 4, reps: "15-20",
+                        image: "./images/panturrilha_burrinho.png",
+                        description: "Exercício tradicional com foco na amplitude.",
+                        videoUrl: "https://www.youtube.com/watch?v=JbyjNymZOt0",
+                        muscleGroup: "Panturrilha"
+                    },
+                    {
+                        name: "Panturrilha no smith", sets: 4, reps: "15-20",
+                        image: "./images/panturrilha_smith.png",
+                        description: "Fortalecimento da panturrilha com estabilidade.",
+                        videoUrl: "https://musclewiki.com/exercises/male/soleus",
+                        muscleGroup: "Panturrilha"
+                    },
+                    {
+                        name: "Abdominal máquina", sets: 3, reps: "12-15",
+                        image: "./images/abdominal_maquina.png",
                         description: "Trabalha o abdômen com assistência da máquina.",
-                        videoUrl: "https://www.youtube.com/watch?v=4SR93vi2ZKw&pp=0gcJCdgAo7VqN5tD", // YouTube link
+                        videoUrl: "https://www.youtube.com/watch?v=4SR93vi2ZKw&pp=0gcJCdgAo7VqN5tD",
                         muscleGroup: "Abdômen"
                     }
                 ]
@@ -728,31 +826,28 @@
         const dayProgress = document.getElementById('dayProgress');
         const registerWorkoutButton = document.getElementById('registerWorkoutButton');
         const historyList = document.getElementById('historyList');
-
-        // Elementos do Timer
         const timerElement = document.getElementById('timer');
-        const timerSecondsElement = document.getElementById('timerSeconds');
-        const startTimerButton = document.getElementById('startTimer');
-        const stopTimerButton = document.getElementById('stopTimer');
+        const customAlertElement = document.getElementById('customAlert');
+
+        // Variáveis do Timer
         let timerInterval;
         let resting = false;
         let secondsRemaining = 0;
         const DEFAULT_REST_TIME = 60; // Tempo de descanso padrão em segundos
-
-        // Elemento do Custom Alert
-        const customAlertElement = document.getElementById('customAlert');
+        let currentExerciseIndex = 0;
+        let currentExerciseName = "";
+        let currentDay = null;
 
         // Armazenamento local para progresso
         let workoutProgress = {};
         let workoutHistory = [];
-        let currentDay = null;
 
         try {
             workoutProgress = JSON.parse(localStorage.getItem('workoutProgress')) || {};
             workoutHistory = JSON.parse(localStorage.getItem('workoutHistory')) || [];
         } catch (e) {
             console.error("Erro ao carregar progresso do localStorage:", e);
-            workoutProgress = {}; // Resetar se houver erro de parsing
+            workoutProgress = {};
             workoutHistory = [];
             showCustomAlert("Erro ao carregar progresso. Reiniciando dados.", 'danger');
         }
@@ -764,11 +859,12 @@
          */
         function showCustomAlert(message, type = 'info') {
             customAlertElement.textContent = message;
-            customAlertElement.className = `alert-${type}`; // Define a classe para o estilo
+            customAlertElement.className = ''; // Limpa classes anteriores
+            customAlertElement.classList.add(`alert-${type}`);
             customAlertElement.style.display = 'block';
             setTimeout(() => {
                 customAlertElement.classList.add('show');
-            }, 10); // Pequeno delay para a transição CSS
+            }, 10);
 
             setTimeout(() => {
                 customAlertElement.classList.remove('show');
@@ -776,7 +872,7 @@
                     customAlertElement.style.display = 'none';
                     customAlertElement.removeEventListener('transitionend', handler);
                 });
-            }, 3000); // Oculta a mensagem após 3 segundos
+            }, 3000);
         }
 
         /**
@@ -793,10 +889,9 @@
          * Inicializa a visualização dos dias de treino, criando os cartões para cada dia.
          */
         function initWorkoutDays() {
-            workoutDaysContainer.innerHTML = ''; // Limpa o contêiner antes de adicionar novos dias
+            workoutDaysContainer.innerHTML = '';
 
             workoutData.forEach(dayData => {
-                // Encontra a última data em que este treino foi realizado
                 const lastWorkout = workoutHistory
                     .filter(item => item.day === dayData.day)
                     .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
@@ -813,7 +908,6 @@
                     </div>
                 `;
 
-                // Adiciona um event listener para mostrar os exercícios ao clicar no dia
                 dayElement.addEventListener('click', () => {
                     currentDay = dayData.day;
                     showExercises(dayData);
@@ -821,7 +915,6 @@
                 workoutDaysContainer.appendChild(dayElement);
             });
 
-            // Atualiza o histórico
             updateHistoryView();
         }
 
@@ -831,10 +924,7 @@
         function updateHistoryView() {
             historyList.innerHTML = '';
             
-            // Ordena o histórico do mais recente para o mais antigo
             const sortedHistory = [...workoutHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            // Mostra apenas os 5 mais recentes
             const recentHistory = sortedHistory.slice(0, 5);
             
             if (recentHistory.length === 0) {
@@ -865,30 +955,37 @@
             daysView.style.display = 'none';
             exercisesView.style.display = 'block';
             backButton.style.display = 'inline-block';
-            timerElement.style.display = 'block'; // Agora o timer é exibido ao carregar a lista de exercícios
+            timerElement.style.display = 'block';
+            
+            currentExerciseIndex = 0;
+            currentExerciseName = dayData.exercises[0]?.name || "";
 
             dayTitleElement.textContent = `Dia ${dayData.day}: ${dayData.title}`;
-            exerciseListContainer.innerHTML = ''; // Limpa a lista de exercícios
+            exerciseListContainer.innerHTML = '';
 
             let totalSets = 0;
             let completedSets = 0;
 
-            dayData.exercises.forEach(exercise => {
+            dayData.exercises.forEach((exercise, index) => {
                 totalSets += exercise.sets;
-                // Obtém o número de sets completados para este exercício neste dia
                 const exerciseCompletedSets = workoutProgress[`day-${dayData.day}-${exercise.name}`] || 0;
                 completedSets += exerciseCompletedSets;
 
                 const exerciseElement = document.createElement('div');
                 exerciseElement.className = 'exercise';
+                exerciseElement.id = `exercise-${index}`;
+                
+                if (index === currentExerciseIndex) {
+                    exerciseElement.classList.add('current-exercise');
+                    currentExerciseName = exercise.name;
+                }
 
                 let setsHTML = '';
-                // Cria os botões de sets
                 for (let i = 0; i < exercise.sets; i++) {
                     setsHTML += `<div class="set ${i < exerciseCompletedSets ? 'completed' : ''}"
-                                      data-exercise="${exercise.name}"
-                                      data-day="${dayData.day}"
-                                      data-set="${i + 1}">${i + 1}</div>`;
+                                  data-exercise="${exercise.name}"
+                                  data-day="${dayData.day}"
+                                  data-set="${i + 1}">${i + 1}</div>`;
                 }
 
                 exerciseElement.innerHTML = `
@@ -905,14 +1002,37 @@
                 exerciseListContainer.appendChild(exerciseElement);
             });
 
-            // Atualizar barra de progresso
             const progressPercentage = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
             dayProgress.style.width = `${progressPercentage}%`;
 
-            // Adicionar event listeners aos sets recém-criados
             document.querySelectorAll('.set').forEach(set => {
                 set.addEventListener('click', toggleSet);
             });
+
+            updateTimerDisplay();
+        }
+
+        /**
+         * Atualiza o display do timer com o exercício atual
+         */
+        function updateTimerDisplay() {
+            if (resting) {
+                timerElement.innerHTML = `
+                    Descanso para: <strong>${currentExerciseName}</strong><br>
+                    Tempo restante: <span id="timerSeconds">${secondsRemaining}</span> segundos
+                    <button id="stopTimer">Parar Descanso</button>
+                `;
+            } else {
+                timerElement.innerHTML = `
+                    Próximo exercício: <strong>${currentExerciseName}</strong><br>
+                    <button id="startTimer">Iniciar Descanso (60s)</button>
+                    <button id="stopTimer" style="display:none;">Parar Descanso</button>
+                `;
+            }
+            
+            // Reatribui os event listeners
+            document.getElementById('startTimer')?.addEventListener('click', () => startRestTimer(DEFAULT_REST_TIME));
+            document.getElementById('stopTimer')?.addEventListener('click', stopRestTimer);
         }
 
         /**
@@ -929,16 +1049,37 @@
             const currentCompleted = workoutProgress[key] || 0;
 
             if (setNumber <= currentCompleted) {
-                // Marcar como incompleto (desmarcar o set clicado e todos os posteriores)
                 workoutProgress[key] = setNumber - 1;
                 showCustomAlert(`Set ${setNumber} de ${exerciseName} desmarcado.`, 'info');
             } else {
-                // Marcar como completo (marcar o set clicado e todos os anteriores)
                 workoutProgress[key] = setNumber;
                 showCustomAlert(`Set ${setNumber} de ${exerciseName} completado!`, 'success');
+                
+                // Avança para o próximo exercício se todos os sets deste foram completados
+                const dayData = workoutData.find(d => d.day == dayNumber);
+                if (dayData) {
+                    const exercise = dayData.exercises.find(ex => ex.name === exerciseName);
+                    if (exercise && setNumber === exercise.sets) {
+                        const currentIndex = dayData.exercises.findIndex(ex => ex.name === exerciseName);
+                        if (currentIndex < dayData.exercises.length - 1) {
+                            currentExerciseIndex = currentIndex + 1;
+                            currentExerciseName = dayData.exercises[currentExerciseIndex].name;
+                            
+                            // Destaca o próximo exercício
+                            document.querySelectorAll('.exercise').forEach((el, idx) => {
+                                if (idx === currentExerciseIndex) {
+                                    el.classList.add('current-exercise');
+                                } else {
+                                    el.classList.remove('current-exercise');
+                                }
+                            });
+                            
+                            updateTimerDisplay();
+                        }
+                    }
+                }
             }
 
-            // Salvar no localStorage com tratamento de erro
             try {
                 localStorage.setItem('workoutProgress', JSON.stringify(workoutProgress));
             } catch (e) {
@@ -946,7 +1087,6 @@
                 showCustomAlert("Erro ao salvar progresso. Tente novamente.", 'danger');
             }
 
-            // Recarregar exercícios para atualizar visualização (necessário para atualizar cores dos sets e barra de progresso)
             const dayData = workoutData.find(d => d.day == dayNumber);
             if (dayData) {
                 showExercises(dayData);
@@ -962,7 +1102,6 @@
             const dayData = workoutData.find(d => d.day == currentDay);
             if (!dayData) return;
             
-            // Calcula o progresso atual
             let totalSets = 0;
             let completedSets = 0;
             
@@ -972,7 +1111,6 @@
                 completedSets += exerciseCompletedSets;
             });
             
-            // Adiciona ao histórico
             const workoutRecord = {
                 day: currentDay,
                 date: new Date().toISOString(),
@@ -990,7 +1128,6 @@
                 showCustomAlert("Erro ao registrar treino. Tente novamente.", 'danger');
             }
             
-            // Atualiza a visualização
             initWorkoutDays();
         }
 
@@ -999,26 +1136,21 @@
          * @param {number} duration - Duração do descanso em segundos.
          */
         function startRestTimer(duration) {
-            if (resting) return; // Evita iniciar múltiplos timers
+            if (resting) return;
 
             resting = true;
             secondsRemaining = duration;
-            timerSecondsElement.textContent = secondsRemaining;
-            timerElement.style.display = 'block'; // Mostrar o timer
-            startTimerButton.style.display = 'none'; // Ocultar botão de iniciar
-            stopTimerButton.style.display = 'inline-block'; // Mostrar botão de parar
-
+            updateTimerDisplay();
+            
             timerInterval = setInterval(() => {
                 secondsRemaining--;
-                timerSecondsElement.textContent = secondsRemaining;
+                updateTimerDisplay();
 
                 if (secondsRemaining <= 0) {
                     clearInterval(timerInterval);
                     resting = false;
-                    timerElement.style.display = 'block'; // Manter o timer visível, mas resetar estado
-                    startTimerButton.style.display = 'inline-block'; // Mostrar botão de iniciar novamente
-                    stopTimerButton.style.display = 'none'; // Ocultar botão de parar
                     showCustomAlert("Tempo de descanso finalizado!", 'success');
+                    updateTimerDisplay();
                 }
             }, 1000);
         }
@@ -1030,16 +1162,9 @@
             clearInterval(timerInterval);
             resting = false;
             secondsRemaining = 0;
-            timerSecondsElement.textContent = secondsRemaining;
-            timerElement.style.display = 'block'; // Manter o timer visível, mas resetar estado
-            startTimerButton.style.display = 'inline-block'; // Mostrar botão de iniciar novamente
-            stopTimerButton.style.display = 'none'; // Ocultar botão de parar
             showCustomAlert("Descanso interrompido.", 'info');
+            updateTimerDisplay();
         }
-
-        // Event listeners para os botões do timer
-        startTimerButton.addEventListener('click', () => startRestTimer(DEFAULT_REST_TIME));
-        stopTimerButton.addEventListener('click', stopRestTimer);
 
         // Event listener para o botão de registrar treino
         registerWorkoutButton.addEventListener('click', registerWorkout);
@@ -1049,12 +1174,10 @@
             daysView.style.display = 'block';
             exercisesView.style.display = 'none';
             backButton.style.display = 'none';
-            timerElement.style.display = 'none'; // Oculta o timer ao voltar para a visualização de dias
-            clearInterval(timerInterval); // Limpa qualquer timer ativo
-            resting = false; // Reseta o estado do timer
+            timerElement.style.display = 'none';
+            clearInterval(timerInterval);
+            resting = false;
             secondsRemaining = 0;
-            startTimerButton.style.display = 'inline-block'; // Garante que o botão de iniciar esteja visível
-            stopTimerButton.style.display = 'none'; // Garante que o botão de parar esteja oculto
             currentDay = null;
         });
 
@@ -1063,7 +1186,7 @@
             initWorkoutDays();
             exercisesView.style.display = 'none';
             backButton.style.display = 'none';
-            timerElement.style.display = 'none'; // Garante que o timer esteja oculto na inicialização
+            timerElement.style.display = 'none';
         }
 
         // Iniciar quando o DOM estiver carregado
