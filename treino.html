@@ -259,11 +259,20 @@
             display: flex;
             gap: 10px;
             margin-bottom: 8px;
+            align-items: center; /* Alinha verticalmente os itens no flexbox */
+        }
+
+        .exercise-sets .set-input span {
+            min-width: 60px; /* Garante que "Set X:" tenha largura suficiente */
+            text-align: right;
+            font-weight: 500;
+            color: var(--primary-color);
         }
 
         .exercise-sets .set-input input {
-            flex: 1;
-            max-width: 100px;
+            flex: 1; /* Permite que os inputs ocupem o espaço disponível */
+            max-width: 80px; /* Limita a largura máxima para evitar inputs muito grandes */
+            text-align: center;
         }
 
         .timer-display {
@@ -449,6 +458,11 @@
             margin-bottom: 15px;
         }
 
+        /* Added style to control chart height */
+        .chart-card canvas {
+            max-height: 300px; /* Limits the height of the chart canvases */
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
@@ -474,11 +488,48 @@
                 justify-content: flex-end;
             }
             .exercise-sets .set-input {
-                flex-direction: column;
+                flex-direction: row; /* Mantém em linha */
+                flex-wrap: wrap; /* Permite quebrar se não houver espaço */
                 gap: 5px;
             }
             .exercise-sets .set-input input {
-                max-width: 100%;
+                flex: 1; /* Permite o crescimento */
+                max-width: 100px; /* Garante que não ocupem 100% da largura */
+            }
+            .exercise-sets .set-input span {
+                min-width: unset; /* Remove min-width em mobile para flexibilidade */
+                text-align: left;
+            }
+
+            /* Specific adjustments for EXECUTION view inputs on mobile */
+            .exercise-execution-sets .set-input {
+                flex-direction: column; /* Force each item to be on its own line */
+                align-items: center; /* Center items in the column */
+                gap: 5px; /* Adjust gap for mobile */
+            }
+
+            .exercise-execution-sets .set-input span {
+                min-width: unset; /* Allow label to be flexible */
+                text-align: center; /* Center label */
+                width: 100%; /* Take full width */
+                margin-bottom: 5px; /* Add space below label */
+                font-size: 1.1em; /* Ensure label is readable */
+            }
+
+            .exercise-execution-sets .set-input input {
+                width: 100%; /* Make inputs take full width */
+                max-width: 250px; /* Limit max width for overall readability */
+                font-size: 1.2em; /* Increase font size for better readability */
+                padding: 12px 15px; /* Increase padding for larger touch targets */
+                box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            }
+
+            .exercise-execution-sets .set-input .complete-set-btn {
+                width: 100%; /* Make button span full width */
+                max-width: 250px; /* Limit max width for consistency */
+                margin-top: 10px; /* Add space above the button */
+                padding: 12px 15px; /* Increase padding for larger touch targets */
+                font-size: 1.1em; /* Ensure button text is readable */
             }
         }
 
@@ -549,8 +600,12 @@
 
         .exercise-execution-sets .set-input input {
             flex: 1;
-            max-width: 120px;
+            /* Aumenta a largura máxima para melhor visualização dos campos de repetições e peso */
+            max-width: 150px; /* Increased from 120px to 150px */
+            min-width: 80px; /* Added minimum width */
             text-align: center;
+            padding: 8px 12px; /* Slightly more padding */
+            font-size: 1.1em; /* Slightly larger font */
         }
 
         .exercise-execution-sets .set-input input[type="number"] {
@@ -601,6 +656,7 @@
             opacity: 0.6; /* Dim completed sets */
             pointer-events: none; /* Disable interaction */
         }
+		
     </style>
 </head>
 <body>
@@ -693,7 +749,7 @@
                         <select id="exercise-select" class="form-control"></select>
                         <canvas id="prChart" style="display: none;"></canvas>
                         <p id="no-pr-data" style="display: none;">Nenhum dado de PR para este exercício.</p>
-                    </div>
+                        </div>
                 </div>
                 <div class="chart-card">
                     <h3>Exercícios Mais Frequentes</h3>
@@ -1014,80 +1070,10 @@
                         muscleGroup: "Antebraço"
                     }
                 ]
-            },
-            {
-                day: 5,
-                title: "Pernas completo 2",
-                image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                exercises: [
-                    {
-                        name: "Leg press 45°", sets: 4, reps: "6-8", rest: 90,
-                        image: "./images/leg_press.png",
-                        description: "Exercício composto para pernas, com foco em quadríceps e glúteos.",
-                        videoUrl: "https://gears.com.br/produto/leg-press-45-gym-line-gears/",
-                        muscleGroup: "Pernas, Glúteos"
-                    },
-                    {
-                        name: "Cadeira flexora", sets: 3, reps: "6-10", rest: 60,
-                        image: "./images/cadeira_flexora.png",
-                        description: "Isolamento dos isquiotibiais.",
-                        videoUrl: "https://www.youtube.com/watch?v=e0_xHkXw350",
-                        muscleGroup: "Isquiotibiais"
-                    },
-                    {
-                        name: "Cadeira extensora", sets: 3, reps: "8-12", rest: 45,
-                        image: "./images/cadeira_extensora.png",
-                        description: "Isolamento do quadríceps.",
-                        videoUrl: "https://totalpass.com/br/blog/atividade-fisica/cadeira-extensora-o-que-e-e-como-fazer/",
-                        muscleGroup: "Quadríceps"
-                    },
-                    {
-                        name: "Mesa flexora", sets: 3, reps: "8-12", rest: 45,
-                        image: "./images/mesa_flexora.png",
-                        description: "Outra opção para isolar os isquiotibiais, deitado.",
-                        videoUrl: "https://www.tuasaude.com/mesa-flexora/",
-                        muscleGroup: "Isquiotibiais"
-                    },
-                    {
-                        name: "Agachamento búlgaro", sets: 3, reps: "8-10", rest: 60,
-                        image: "./images/agachamento_bulgaro.png",
-                        description: "Exercício unilateral intenso para pernas e glúteos.",
-                        videoUrl: "https://musclewiki.com/dumbbells/male/quadriceps/dumbbell-bulgarian-split-squat/",
-                        muscleGroup: "Pernas, Glúteos"
-                    },
-                    {
-                        name: "Panturrilha unilateral", sets: 4, reps: "12-15", rest: 30,
-                        image: "./images/panturrilha_unilateral.png",
-                        description: "Trabalho individualizado para cada panturrilha.",
-                        videoUrl: "https://www.youtube.com/watch?v=9CPrrmusOu8",
-                        muscleGroup: "Panturrilha"
-                    },
-                    {
-                        name: "Panturrilha no burrinho", sets: 4, reps: "15-20", rest: 30,
-                        image: "./images/panturrilha_burrinho.png",
-                        description: "Exercício tradicional com foco na amplitude.",
-                        videoUrl: "https://www.youtube.com/watch?v=JbyjNymZOt0",
-                        muscleGroup: "Panturrilha"
-                    },
-                    {
-                        name: "Panturrilha no smith", sets: 4, reps: "15-20", rest: 30,
-                        image: "./images/panturrilha_smith.png",
-                        description: "Fortalecimento da panturrilha com estabilidade.",
-                        videoUrl: "https://musclewiki.com/exercises/male/soleus",
-                        muscleGroup: "Panturrilha"
-                    },
-                    {
-                        name: "Abdominal máquina", sets: 3, reps: "12-15", rest: 30,
-                        image: "./images/abdominal_maquina.png",
-                        description: "Trabalha o abdômen com assistência da máquina.",
-                        videoUrl: "https://www.youtube.com/watch?v=4SR93vi2ZKw&pp=0gcJCdgAo7VqN5tD",
-                        muscleGroup: "Abdômen"
-                    }
-                ]
             }
         ];
 
-        // --- Helper Functions ---
+        // --- Funções Auxiliares ---
 
         /**
          * Exibe uma mensagem de "toast" temporária na tela.
@@ -1146,7 +1132,7 @@
             confirmNo.addEventListener('click', handleNo);
         }
 
-        // --- Data Persistence ---
+        // --- Persistência de Dados ---
 
         /**
          * Salva allWorkoutData e workoutHistory no localStorage.
@@ -1171,29 +1157,29 @@
                 const storedWorkoutData = localStorage.getItem('allWorkoutData');
                 const storedWorkoutHistory = localStorage.getItem('workoutHistory');
 
-                // Load and normalize allWorkoutData
+                // Carrega e normaliza allWorkoutData
                 if (storedWorkoutData) {
                     allWorkoutData = JSON.parse(storedWorkoutData);
-                    // Normalize sets for all loaded workouts (custom or predefined that might have been saved incorrectly)
+                    // Normaliza os sets para todos os treinos carregados (personalizados ou predefinidos que podem ter sido salvos incorretamente)
                     for (const dayId in allWorkoutData) {
                         if (allWorkoutData.hasOwnProperty(dayId)) {
                             allWorkoutData[dayId].exercises = allWorkoutData[dayId].exercises.map(exercise => {
                                 let normalizedSets = [];
                                 if (Array.isArray(exercise.sets)) {
-                                    // If it's already an array, ensure each item is an object with reps/weight
+                                    // Se já é um array, garante que cada item seja um objeto com reps/weight
                                     normalizedSets = exercise.sets.map(set => {
                                         if (typeof set === 'object' && set !== null && 'reps' in set && 'weight' in set) {
                                             return { reps: parseInt(set.reps) || 0, weight: parseFloat(set.weight) || 0 };
                                         } else {
-                                            // If array contains non-object (e.g., just numbers), convert to proper object
+                                            // Se o array contém um não-objeto (por exemplo, apenas números), converte para objeto adequado
                                             return { reps: parseInt(set) || 0, weight: 0 };
                                         }
                                     });
                                 } else if (typeof exercise.sets === 'number') {
-                                    // If sets is a number, create an array of empty sets
+                                    // Se sets é um número, cria um array de sets vazios
                                     normalizedSets = Array.from({ length: exercise.sets }, () => ({ reps: 0, weight: 0 }));
                                 } else {
-                                    // Default to a single empty set if unknown format
+                                    // Padrão para um único set vazio se o formato for desconhecido
                                     normalizedSets = [{ reps: 0, weight: 0 }];
                                 }
                                 return { ...exercise, sets: normalizedSets };
@@ -1216,7 +1202,7 @@
                     });
                 }
 
-                // Load and normalize workoutHistory (similarly for completed sets)
+                // Carrega e normaliza workoutHistory (similarmente para sets concluídos)
                 if (storedWorkoutHistory) {
                     workoutHistory = JSON.parse(storedWorkoutHistory);
                     workoutHistory = workoutHistory.map(workout => ({
@@ -1232,10 +1218,10 @@
                                     }
                                 });
                             } else if (typeof exercise.sets === 'number') {
-                                // If sets is a number, convert to an array of empty sets (or based on initial reps/weight if available)
+                                // Se sets é um número, converte para um array de sets vazios (ou baseado em reps/weight iniciais, se disponível)
                                 normalizedSets = Array.from({ length: exercise.sets }, () => ({ reps: 0, weight: 0 }));
                             } else {
-                                // Default to a single empty set if unknown format
+                                // Padrão para um único set vazio se o formato for desconhecido
                                 normalizedSets = [{ reps: 0, weight: 0 }];
                             }
                             return { ...exercise, sets: normalizedSets };
@@ -1248,7 +1234,7 @@
             } catch (e) {
                 console.error("Erro ao carregar dados do localStorage:", e);
                 showToast('Erro ao carregar dados salvos. Dados redefinidos.', 'danger');
-                // Original error handling for resetting data
+                // Tratamento de erro original para redefinir dados
                 workoutHistory = [];
                 allWorkoutData = {};
                 predefinedWorkoutTemplates.forEach((dayData) => {
@@ -1263,11 +1249,11 @@
                         }))
                     };
                 });
-                applyTheme(false); // Default to light mode on error
+                applyTheme(false); // Padrão para o modo claro em caso de erro
             }
         }
 
-        // --- Theme Toggler ---
+        // --- Alternador de Tema ---
         const darkModeToggle = document.getElementById('darkModeToggle');
 
         /**
@@ -1284,7 +1270,7 @@
             applyTheme(darkModeToggle.checked);
         });
 
-        // --- View Management ---
+        // --- Gerenciamento de Views ---
 
         /**
          * Mostra a seção da aplicação correspondente ao viewId.
@@ -1305,7 +1291,7 @@
             }
         }
 
-        // --- Workout Day Management (Days View) ---
+        // --- Gerenciamento de Dias de Treino (Days View) ---
 
         /**
          * Inicializa e renderiza a lista de dias de treino.
@@ -1315,8 +1301,8 @@
             workoutDaysList.innerHTML = '';
 
             const sortedWorkoutKeys = Object.keys(allWorkoutData).sort((a, b) => {
-                // Keep predefined first, then sort by day number, then by name for custom
-                const dayA = allWorkoutData[a].day || Infinity; // Use day number for sorting predefined
+                // Mantém os predefinidos primeiro, depois ordena por número do dia, depois por nome para personalizados
+                const dayA = allWorkoutData[a].day || Infinity; // Usa o número do dia para ordenar os predefinidos
                 const dayB = allWorkoutData[b].day || Infinity;
 
                 const isAPredefined = allWorkoutData[a].isCustom === false;
@@ -1326,7 +1312,7 @@
                 if (!isAPredefined && isBPredefined) return 1;
 
                 if (isAPredefined && isBPredefined) {
-                    return dayA - dayB; // Sort predefined by day number
+                    return dayA - dayB; // Ordena os predefinidos por número do dia
                 }
 
                 return (allWorkoutData[a].title || allWorkoutData[a].name).localeCompare(allWorkoutData[b].title || allWorkoutData[b].name);
@@ -1341,9 +1327,17 @@
                 const dayData = allWorkoutData[dayId];
                 const dayItem = document.createElement('div');
                 dayItem.classList.add('workout-day-item', 'card');
+
+                let displayTitle;
+                if (dayData.isCustom === false) {
+                    displayTitle = `Dia ${dayData.day} - ${dayData.title || dayData.name}`;
+                } else {
+                    displayTitle = dayData.title || dayData.name;
+                }
+
                 dayItem.innerHTML = `
                     <div>
-                        <h3>${dayData.title || dayData.name}</h3>
+                        <h3>${displayTitle}</h3>
                         <p>${dayData.exercises.length} exercícios</p>
                     </div>
                     <div class="actions">
@@ -1367,20 +1361,20 @@
             });
         }
 
-        // Event listener for adding a new day
+        // Event listener para adicionar um novo dia
         document.getElementById('add-day-btn').addEventListener('click', () => {
-            currentDayId = 'new-day-' + Date.now(); // Generate a unique ID for a new day
+            currentDayId = 'new-day-' + Date.now(); // Gera um ID único para um novo dia
             allWorkoutData[currentDayId] = {
                 id: currentDayId,
                 name: 'Novo Treino',
-                title: 'Novo Treino Personalizado', // Use title for display in the main list
+                title: 'Novo Treino Personalizado', // Usa o título para exibição na lista principal
                 isCustom: true,
                 exercises: []
             };
             editWorkoutDay(currentDayId);
         });
 
-        // --- Day Details View Management ---
+        // --- Gerenciamento da View de Detalhes do Dia ---
 
         /**
          * Carrega os detalhes de um dia de treino para edição ou criação.
@@ -1393,7 +1387,7 @@
             document.getElementById('day-details-title').textContent = dayData.title || dayData.name;
             document.getElementById('day-name-input').value = dayData.title || dayData.name;
 
-            // Show delete button for custom days, hide for predefined
+            // Mostra o botão de exclusão para dias personalizados, oculta para predefinidos
             const deleteBtn = document.getElementById('delete-day-btn');
             if (dayData.isCustom) {
                 deleteBtn.style.display = 'inline-flex';
@@ -1428,8 +1422,8 @@
                             ${exercise.sets.map((set, setIndex) => `
                                 <div class="set-input">
                                     <span>Set ${setIndex + 1}:</span>
-                                    <input type="number" class="form-control set-reps" value="${set.reps}" placeholder="Reps">
-                                    <input type="number" class="form-control set-weight" value="${set.weight}" placeholder="Peso (kg)">
+                                    <input type="number" class="form-control set-reps" value="${set.reps}" placeholder="Reps" min="0">
+                                    <input type="number" class="form-control set-weight" value="${set.weight}" placeholder="Peso (kg)" min="0" step="0.5">
                                     <button class="btn btn-danger btn-sm remove-set-btn" data-exercise-index="${exIndex}" data-set-index="${setIndex}"><i class="fas fa-minus-circle"></i></button>
                                 </div>
                             `).join('')}
@@ -1451,7 +1445,7 @@
                 exercisesList.appendChild(exerciseItem);
             });
 
-            // Attach event listeners for dynamic elements
+            // Anexa listeners de eventos a elementos dinâmicos
             attachExerciseDetailListeners();
         }
 
@@ -1482,7 +1476,7 @@
                     showConfirmModal('Tem certeza que deseja remover este exercício?', () => {
                         allWorkoutData[currentDayId].exercises.splice(exIndex, 1);
                         renderExercisesForDay(allWorkoutData[currentDayId].exercises);
-                        saveData(); // Save changes after deleting exercise
+                        saveData(); // Salva as alterações após a exclusão do exercício
                         showToast('Exercício removido!', 'success');
                     });
                 };
@@ -1490,7 +1484,7 @@
 
             document.getElementById('day-name-input').onchange = (e) => {
                 allWorkoutData[currentDayId].name = e.target.value;
-                allWorkoutData[currentDayId].title = e.target.value; // Also update title for display
+                allWorkoutData[currentDayId].title = e.target.value; // Também atualiza o título para exibição
                 document.getElementById('day-details-title').textContent = e.target.value;
                 saveData();
             };
@@ -1506,18 +1500,26 @@
             document.querySelectorAll('.set-reps').forEach(input => {
                 input.onchange = (e) => {
                     const exIndex = parseInt(e.target.closest('.exercise-sets').dataset.exerciseIndex);
-                    const setIndex = parseInt(e.target.closest('.set-input').querySelector('.remove-set-btn').dataset.setIndex);
-                    allWorkoutData[currentDayId].exercises[exIndex].sets[setIndex].reps = parseInt(e.target.value) || 0;
-                    saveData();
+                    // Encontra o setIndex usando um método mais robusto, caso a ordem mude
+                    const setInputDivs = Array.from(e.target.closest('.exercise-sets').querySelectorAll('.set-input'));
+                    const setIndex = setInputDivs.indexOf(e.target.closest('.set-input'));
+                    if (setIndex !== -1) {
+                        allWorkoutData[currentDayId].exercises[exIndex].sets[setIndex].reps = parseInt(e.target.value) || 0;
+                        saveData();
+                    }
                 };
             });
 
             document.querySelectorAll('.set-weight').forEach(input => {
                 input.onchange = (e) => {
                     const exIndex = parseInt(e.target.closest('.exercise-sets').dataset.exerciseIndex);
-                    const setIndex = parseInt(e.target.closest('.set-input').querySelector('.remove-set-btn').dataset.setIndex);
-                    allWorkoutData[currentDayId].exercises[exIndex].sets[setIndex].weight = parseFloat(e.target.value) || 0;
-                    saveData();
+                    // Encontra o setIndex usando um método mais robusto, caso a ordem mude
+                    const setInputDivs = Array.from(e.target.closest('.exercise-sets').querySelectorAll('.set-input'));
+                    const setIndex = setInputDivs.indexOf(e.target.closest('.set-input'));
+                    if (setIndex !== -1) {
+                        allWorkoutData[currentDayId].exercises[exIndex].sets[setIndex].weight = parseFloat(e.target.value) || 0;
+                        saveData();
+                    }
                 };
             });
 
@@ -1538,7 +1540,7 @@
             });
         }
 
-        // Event listener for adding a new exercise
+        // Event listener para adicionar um novo exercício
         document.getElementById('add-exercise-btn').addEventListener('click', () => {
             allWorkoutData[currentDayId].exercises.push({
                 name: 'Novo Exercício',
@@ -1550,14 +1552,14 @@
             saveData();
         });
 
-        // Event listener for saving the day
+        // Event listener para salvar o dia
         document.getElementById('save-day-btn').addEventListener('click', () => {
-            // Already saving on change, so this button primarily navigates back
+            // Já salvando na mudança, então este botão principalmente navega de volta
             showToast('Treino salvo com sucesso!', 'success');
             showView('days-view');
         });
 
-        // Event listener for deleting a workout day
+        // Event listener para excluir um dia de treino
         document.getElementById('delete-day-btn').addEventListener('click', () => {
             showConfirmModal('Tem certeza que deseja excluir este dia de treino? Esta ação é irreversível.', () => {
                 if (allWorkoutData[currentDayId] && allWorkoutData[currentDayId].isCustom) {
@@ -1571,27 +1573,28 @@
             });
         });
 
-        // --- Workout Execution View ---
+        // --- View de Execução de Treino ---
 
         /**
          * Inicia a execução de um treino.
          * @param {string} dayId - O ID do dia de treino a ser executado.
          */
         function startWorkout(dayId) {
-            currentWorkout = JSON.parse(JSON.stringify(allWorkoutData[dayId])); // Deep copy
-            currentWorkout.originalId = dayId; // Keep track of the original template ID
+            currentWorkout = JSON.parse(JSON.stringify(allWorkoutData[dayId])); // Cópia profunda
+            currentWorkout.originalId = dayId; // Mantém o controle do ID do template original
             currentWorkout.executionExercises = currentWorkout.exercises.map(ex => ({
                 ...ex,
-                completedSets: Array.from({ length: ex.sets.length }, () => ({ reps: 0, weight: 0 })), // Initialize completedSets with empty objects
+                completedSets: Array.from({ length: ex.sets.length }, () => ({ reps: 0, weight: 0 })), // Inicializa completedSets com objetos vazios
                 isCompleted: false
             }));
 
             document.getElementById('workout-execution-title').textContent = currentWorkout.title || currentWorkout.name;
-            currentExerciseIndex = 0; // Start with the first exercise
-            currentSetIndex = 0; // Start with the first set of the first exercise
-            renderWorkoutExecution();
+            currentExerciseIndex = 0; // Começa com o primeiro exercício
+            currentSetIndex = 0; // Começa com o primeiro set do primeiro exercício
+            
+            showView('workout-execution-view'); // Move this UP to ensure the section is visible
+            renderWorkoutExecution(); // Agora, quando esta função é executada, os elementos devem estar disponíveis
             startTotalWorkoutTimer();
-            showView('workout-execution-view');
         }
 
         /**
@@ -1599,34 +1602,50 @@
          */
         function renderWorkoutExecution() {
            const executionList = document.getElementById('workout-execution-exercises');
-    if (!executionList) return; // Se o elemento não existir, sair da função
+            if (!executionList) return; 
+
+            // Salvaguarda: Garante que currentWorkout e seus exercícios existam.
+            // Isso evita erros se renderWorkoutExecution for chamada quando o treino não estiver ativo.
+            if (!currentWorkout || !Array.isArray(currentWorkout.executionExercises)) {
+                executionList.innerHTML = '<p style="text-align: center;">Nenhum treino ativo para exibir.</p>';
+                const currentExerciseDisplay = document.getElementById('current-exercise-display');
+                const finishWorkoutBtn = document.getElementById('finish-workout-btn');
+                const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
+
+                if (currentExerciseDisplay) currentExerciseDisplay.style.display = 'none';
+                if (finishWorkoutBtn) finishWorkoutBtn.style.display = 'none'; // Verificação adicionada
+                if (cancelWorkoutBtn) cancelWorkoutBtn.style.display = 'none'; // Verificação adicionada
+                
+                stopTotalWorkoutTimer(); // Garante que o timer seja parado se nenhum treino estiver ativo.
+                stopGlobalRestTimer(); // Garante que o timer de descanso global seja parado.
+                return;
+            }
     
-    executionList.innerHTML = ''; // Clear previous exercise card
+            executionList.innerHTML = ''; 
 
-    const currentExercise = currentWorkout.executionExercises[currentExerciseIndex];
-    const currentExerciseDisplay = document.getElementById('current-exercise-display');
-    const finishWorkoutBtn = document.getElementById('finish-workout-btn');
-    const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
+            const currentExercise = currentWorkout.executionExercises[currentExerciseIndex];
+            const currentExerciseDisplay = document.getElementById('current-exercise-display');
+            const finishWorkoutBtn = document.getElementById('finish-workout-btn');
+            const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
 
-    // Verificar se os elementos existem antes de manipular
-    if (currentExerciseDisplay) {
-        if (!currentExercise) {
-            // All exercises completed in the workout
-            currentExerciseDisplay.style.display = 'none';
-            executionList.innerHTML = '<p style="text-align: center;">Todos os exercícios do treino foram concluídos!</p>';
+            // Este bloco lida com o caso em que todos os exercícios são concluídos.
+            if (!currentExercise) { // Isso será verdadeiro se currentExerciseIndex estiver fora dos limites
+                if (currentExerciseDisplay) currentExerciseDisplay.style.display = 'none';
+                executionList.innerHTML = '<p style="text-align: center;">Todos os exercícios do treino foram concluídos!</p>';
+                
+                if (finishWorkoutBtn) finishWorkoutBtn.style.display = 'inline-flex';
+                if (cancelWorkoutBtn) cancelWorkoutBtn.style.display = 'inline-flex';
+                
+                showToast('Todos os exercícios do treino concluídos!', 'success');
+                stopTotalWorkoutTimer(); // Para o timer total do treino quando o treino termina
+                return; 
+            }
+            // Se chegarmos aqui, currentExercise ESTÁ definido.
+            if (currentExerciseDisplay) {
+                currentExerciseDisplay.style.display = 'block';
+                currentExerciseDisplay.textContent = `Exercício Atual: ${currentExercise.name} (${currentExerciseIndex + 1}/${currentWorkout.executionExercises.length})`;
+            }
             
-            if (finishWorkoutBtn) finishWorkoutBtn.style.display = 'inline-flex';
-            if (cancelWorkoutBtn) cancelWorkoutBtn.style.display = 'inline-flex';
-            
-            showToast('Todos os exercícios do treino concluídos!', 'success');
-            stopTotalWorkoutTimer(); // Stop total workout timer when workout finishes
-            return;
-        }
-
-        currentExerciseDisplay.style.display = 'block';
-        currentExerciseDisplay.textContent = `Exercício Atual: ${currentExercise.name} (${currentExerciseIndex + 1}/${currentWorkout.executionExercises.length})`;
-    }
-
             const exerciseEl = document.createElement('div');
             exerciseEl.classList.add('exercise-execution-card', 'card');
             exerciseEl.dataset.index = currentExerciseIndex;
@@ -1650,11 +1669,11 @@
                 </div>
                 <div class="exercise-execution-sets">
                     ${currentExercise.sets.map((set, setIndex) => `
-                        <div class="set-input ${setIndex === currentSetIndex ? 'current-set-highlight' : (setIndex < currentSetIndex ? 'completed-set-overlay' : '')}">
+                        <div class="set-input ${setIndex === currentSetIndex && !currentExercise.isCompleted ? 'current-set-highlight' : (setIndex < currentSetIndex || currentExercise.isCompleted ? 'completed-set-overlay' : '')}">
                             <span>Set ${setIndex + 1}:</span>
-                            <input type="number" class="form-control execution-reps" data-set-index="${setIndex}" value="${currentExercise.completedSets[setIndex]?.reps || set.reps}" placeholder="Reps" ${setIndex !== currentSetIndex ? 'disabled' : ''}>
-                            <input type="number" class="form-control execution-weight" data-set-index="${setIndex}" value="${currentExercise.completedSets[setIndex]?.weight || set.weight}" placeholder="Peso (kg)" ${setIndex !== currentSetIndex ? 'disabled' : ''}>
-                            <button class="btn btn-success btn-sm complete-set-btn" data-set-index="${setIndex}" ${setIndex !== currentSetIndex ? 'disabled' : ''}>
+                            <input type="number" class="form-control execution-reps" data-set-index="${setIndex}" value="${currentExercise.completedSets[setIndex]?.reps || set.reps}" placeholder="Reps" min="0" ${setIndex !== currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                            <input type="number" class="form-control execution-weight" data-set-index="${setIndex}" value="${currentExercise.completedSets[setIndex]?.weight || set.weight}" placeholder="Peso (kg)" min="0" step="0.5" ${setIndex !== currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                            <button class="btn btn-success btn-sm complete-set-btn" data-set-index="${setIndex}" ${setIndex !== currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
                                 <i class="fas fa-check"></i>
                             </button>
                         </div>
@@ -1668,7 +1687,7 @@
             `;
             executionList.appendChild(exerciseEl);
 
-            // Explicitly set the initial state for the global timer and buttons after rendering the new exercise
+            // Define explicitamente o estado inicial para o timer global e botões após renderizar o novo exercício
             const globalRestTimerActualEl = document.getElementById('global-rest-timer');
             const skipRestBtn = exerciseEl.querySelector('.skip-rest-btn');
             const currentExerciseCompleteBtn = exerciseEl.querySelector('.complete-exercise-btn');
@@ -1680,10 +1699,10 @@
                 globalRestTimerActualEl.querySelector('.countdown').textContent = '00:00';
             }
 
-            // Manage visibility of action buttons
+            // Gerencia a visibilidade dos botões de ação
             if (currentExercise.isCompleted) {
                 if (currentExerciseIndex < currentWorkout.executionExercises.length - 1) {
-                    // Do nothing, will transition to next exercise
+                    // Não faz nada, irá fazer a transição para o próximo exercício
                 } else {
                     if (finishWorkoutBtn) finishWorkoutBtn.style.display = 'inline-flex';
                 }
@@ -1694,14 +1713,14 @@
                         btn.style.display = (idx === currentSetIndex) ? 'inline-flex' : 'none';
                     });
                     if (skipRestBtn) skipRestBtn.style.display = 'none';
-                } else {
+                } else { // Todos os sets concluídos para este exercício
                     if (currentExerciseCompleteBtn) currentExerciseCompleteBtn.style.display = 'inline-flex';
                     completeSetButtons.forEach(btn => btn.style.display = 'none');
                     if (skipRestBtn) skipRestBtn.style.display = 'none';
                 }
             }
 
-            // Attach event listeners for inputs
+            // Anexa listeners de eventos para inputs
             document.querySelectorAll('.execution-reps, .execution-weight').forEach(input => {
                 input.addEventListener('input', function() {
                     const setIndex = parseInt(this.dataset.setIndex);
@@ -1709,12 +1728,15 @@
                     if (!exercise.completedSets[setIndex]) {
                         exercise.completedSets[setIndex] = {};
                     }
-                    exercise.completedSets[setIndex].reps = parseInt(this.value) || 0;
-                    exercise.completedSets[setIndex].weight = parseFloat(this.value) || 0;
+                    if (this.classList.contains('execution-reps')) {
+                        exercise.completedSets[setIndex].reps = parseInt(this.value) || 0;
+                    } else if (this.classList.contains('execution-weight')) {
+                        exercise.completedSets[setIndex].weight = parseFloat(this.value) || 0;
+                    }
                 });
             });
 
-            // Attach "Concluir Set" buttons logic
+            // Anexa a lógica dos botões "Concluir Set"
             completeSetButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const setIndex = parseInt(this.dataset.setIndex);
@@ -1722,26 +1744,30 @@
                 });
             });
 
-            // Attach "Pular Descanso" button logic
+            // Anexa a lógica do botão "Pular Descanso"
             if (skipRestBtn) {
                 skipRestBtn.addEventListener('click', () => {
                     stopGlobalRestTimer();
                 });
             }
 
-            // Attach "Concluir Exercício" button logic
+            // Anexa a lógica do botão "Concluir Exercício"
             if (currentExerciseCompleteBtn) {
                 currentExerciseCompleteBtn.addEventListener('click', () => {
+                    const exercise = currentWorkout.executionExercises[currentExerciseIndex];
+                    exercise.isCompleted = true; // Marca o exercício como concluído
+
                     if (currentExerciseIndex < currentWorkout.executionExercises.length - 1) {
-                        if (currentExercise.rest > 0) {
-                            startGlobalRestTimer(currentExercise.rest, 'exercise');
+                        if (exercise.rest > 0) {
+                            startGlobalRestTimer(exercise.rest, 'exercise');
                         } else {
                             loadNextExercise();
                         }
                     } else {
-                        loadNextExercise();
+                        // Este é o último exercício, então passa para o estado "todos concluídos"
+                        loadNextExercise(); // Isso incrementará currentExerciseIndex, tornando-o fora dos limites
                     }
-                    showToast(`Exercício "${currentExercise.name}" concluído!`, 'success');
+                    showToast(`Exercício "${exercise.name}" concluído!`, 'success');
                 });
             }
         }
@@ -1757,14 +1783,14 @@
             const weightInput = currentSetInputDiv.querySelector('.execution-weight');
             const completeSetBtn = currentSetInputDiv.querySelector('.complete-set-btn');
 
-            // Capture data for the completed set
+            // Captura os dados para o set concluído
             if (!exercise.completedSets[setIndex]) {
                 exercise.completedSets[setIndex] = {};
             }
             exercise.completedSets[setIndex].reps = parseInt(repsInput.value) || 0;
             exercise.completedSets[setIndex].weight = parseFloat(weightInput.value) || 0;
 
-            // Disable inputs and button for the just completed set
+            // Desabilita os inputs e o botão para o set recém-concluído
             repsInput.disabled = true;
             weightInput.disabled = true;
             completeSetBtn.disabled = true;
@@ -1772,9 +1798,9 @@
             currentSetInputDiv.classList.remove('current-set-highlight');
             currentSetInputDiv.classList.add('completed-set-overlay');
 
-            // Check if there are more sets in the current exercise
+            // Verifica se há mais sets no exercício atual
             if (setIndex < exercise.sets.length - 1) {
-                // Not the last set, move to next set or start rest
+                // Não é o último set, passa para o próximo set ou inicia o descanso
                 currentSetIndex++;
                 if (exercise.rest > 0) {
                     startGlobalRestTimer(exercise.rest, 'set');
@@ -1783,13 +1809,13 @@
                 }
                 showToast(`Série ${setIndex + 1} de "${exercise.name}" concluída!`, 'success');
             } else {
-                // Last set of the current exercise
+                // Último set do exercício atual
                 exercise.isCompleted = true;
-                currentSetIndex = 0;
+                currentSetIndex = 0; // Reinicia o índice do set para o próximo exercício
 
                 showToast(`Exercício "${exercise.name}" concluído!`, 'success');
 
-                // Decide whether to start exercise rest or move to next exercise/finish workout
+                // Decide se deve iniciar o descanso do exercício ou passar para o próximo exercício/finalizar o treino
                 if (currentExerciseIndex < currentWorkout.executionExercises.length - 1) {
                     if (exercise.rest > 0) {
                         startGlobalRestTimer(exercise.rest, 'exercise');
@@ -1797,7 +1823,8 @@
                         loadNextExercise();
                     }
                 } else {
-                    loadNextExercise();
+                    // Este é o último exercício e o último set, então é o fim do treino
+                    loadNextExercise(); // Isso acionará o estado "todos os exercícios concluídos" em renderWorkoutExecution
                 }
             }
         }
@@ -1823,7 +1850,7 @@
             }
             if (skipRestBtn) skipRestBtn.style.display = 'inline-flex';
 
-            // Hide general action buttons during rest
+            // Oculta os botões de ação gerais durante o descanso
             if (completeExerciseBtn) completeExerciseBtn.style.display = 'none';
             document.querySelectorAll('.complete-set-btn').forEach(btn => btn.style.display = 'none');
 
@@ -1836,11 +1863,7 @@
                 if (globalRestSeconds <= 0) {
                     stopGlobalRestTimer();
                     showToast('Descanso concluído!', 'info');
-                    if (globalRestType === 'set') {
-                        renderWorkoutExecution();
-                    } else if (globalRestType === 'exercise') {
-                        loadNextExercise();
-                    }
+                    // A ação (renderWorkoutExecution ou loadNextExercise) agora é tratada por stopGlobalRestTimer
                 }
             }, 1000);
         }
@@ -1855,7 +1878,6 @@
             }
             const globalRestTimerEl = document.getElementById('global-rest-timer');
             const skipRestBtn = document.querySelector('.exercise-execution-actions .skip-rest-btn');
-            const completeExerciseBtn = document.querySelector('.exercise-execution-actions .complete-exercise-btn');
 
             if (globalRestTimerEl) {
                 globalRestTimerEl.style.display = 'none';
@@ -1863,21 +1885,13 @@
             }
             if (skipRestBtn) skipRestBtn.style.display = 'none';
 
-            // Re-show appropriate buttons based on state *after* the rest
-            const exercise = currentWorkout.executionExercises[currentExerciseIndex];
-
-            if (globalRestType === 'set' && currentSetIndex < exercise.sets.length) {
+            // Determina o que fazer com base em globalRestType após o descanso ser parado
+            if (globalRestType === 'set') {
                 renderWorkoutExecution();
             } else if (globalRestType === 'exercise') {
-                if (currentExerciseIndex < currentWorkout.executionExercises.length) {
-                    loadNextExercise();
-                }
-            } else {
-                if (exercise.isCompleted && currentExerciseIndex === currentWorkout.executionExercises.length - 1) {
-                    if (completeExerciseBtn) completeExerciseBtn.style.display = 'inline-flex';
-                }
+                loadNextExercise();
             }
-            globalRestType = null;
+            globalRestType = null; // Reinicia o tipo de descanso
         }
 
         /**
@@ -1911,13 +1925,13 @@
             }
         }
 
-        // Event listener for finishing workout
+        // Event listener para finalizar o treino
         document.getElementById('finish-workout-btn').addEventListener('click', () => {
             showConfirmModal('Tem certeza que deseja finalizar este treino e salvá-lo no histórico?', () => {
                 stopTotalWorkoutTimer();
-                stopGlobalRestTimer();
+                stopGlobalRestTimer(); // Garante que o timer seja parado se o modal for confirmado durante o descanso
 
-                // Save completed workout to history
+                // Salva o treino concluído no histórico
                 const completedWorkout = {
                     id: 'workout-' + Date.now(),
                     date: new Date().toISOString(),
@@ -1925,7 +1939,8 @@
                     durationMinutes: Math.round(totalWorkoutSeconds / 60),
                     exercises: currentWorkout.executionExercises.map(ex => ({
                         name: ex.name,
-                        sets: ex.completedSets.filter(s => s && s.reps > 0 && s.weight >= 0),
+                        // Garante que apenas sets válidos e concluídos sejam salvos
+                        sets: ex.completedSets.filter(s => s && (s.reps > 0 || s.weight > 0)),
                         image: ex.image || 'N/A'
                     }))
                 };
@@ -1936,7 +1951,7 @@
             });
         });
 
-        // Event listener for cancelling workout
+        // Event listener para cancelar o treino
         document.getElementById('cancel-workout-btn').addEventListener('click', () => {
             showConfirmModal('Tem certeza que deseja cancelar este treino? Ele não será salvo.', () => {
                 stopTotalWorkoutTimer();
@@ -1947,7 +1962,7 @@
             });
         });
 
-        // --- History View ---
+        // --- View de Histórico ---
 
         /**
          * Renderiza o histórico de treinos concluídos.
@@ -1961,7 +1976,7 @@
                 return;
             }
 
-            // Sort history from most recent to oldest
+            // Ordena o histórico do mais recente para o mais antigo
             const sortedHistory = [...workoutHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
 
             sortedHistory.forEach(workout => {
@@ -1988,7 +2003,7 @@
                 historyList.appendChild(historyItem);
             });
 
-            // Add event listeners for delete buttons
+            // Adiciona listeners de eventos para os botões de exclusão
             document.querySelectorAll('.delete-history-item').forEach(button => {
                 button.addEventListener('click', function() {
                     const workoutIdToDelete = this.dataset.id;
@@ -2011,7 +2026,7 @@
             });
         }
 
-        // --- Dashboard View ---
+        // --- View de Dashboard ---
 
         /**
          * Atualiza e renderiza todos os gráficos da dashboard.
@@ -2021,13 +2036,14 @@
             const dashboardGrid = dashboardView.querySelector('.dashboard-grid');
 
             if (workoutHistory.length === 0) {
-                dashboardGrid.innerHTML = '<p>Nenhum dado de treino para exibir na dashboard ainda. Complete alguns treinos para ver sua evolução!</p>';
+                dashboardGrid.innerHTML = '<p style="text-align: center; color: var(--dark-color);">Nenhum dado de treino para exibir na dashboard ainda. Complete alguns treinos para ver sua evolução!</p>';
                 if(volumeChartInstance) volumeChartInstance.destroy();
                 if(prChartInstance) prChartInstance.destroy();
                 if(frequentExercisesChartInstance) frequentExercisesChartInstance.destroy();
                 if(averageWorkoutTimeChartInstance) averageWorkoutTimeChartInstance.destroy();
                 return;
             } else {
+                // Re-create the structure to ensure canvases are fresh
                 dashboardGrid.innerHTML = `
                     <div class="chart-card">
                         <h3>Volume Total de Treino (kg)</h3>
@@ -2039,7 +2055,7 @@
                             <p>Selecione um exercício para ver a progressão:</p>
                             <select id="exercise-select" class="form-control"></select>
                             <canvas id="prChart" style="display: none;"></canvas>
-                            <p id="no-pr-data" style="display: none;">Nenhum dado de PR para este exercício.</p>
+                            <p id="no-pr-data" style="display: none;"></p>
                         </div>
                     </div>
                     <div class="chart-card">
@@ -2103,14 +2119,14 @@
                     datasets: [{
                         label: 'Volume Total (kg)',
                         data: data,
-                        borderColor: 'var(--accent-color)',
-                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointBackgroundColor: 'var(--accent-color)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'var(--accent-color)'
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'),
+                        backgroundColor: 'transparent',
+                        fill: false,
+                        tension: 0.3, /* Smooth lines */
+                        pointBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'),
+                        pointBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--light-color'),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
                     }]
                 },
                 options: {
@@ -2120,8 +2136,35 @@
                         legend: {
                             display: true,
                             labels: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 14
+                                }
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return `Data: ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('pt-BR', { style: 'unit', unit: 'kilogram' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'),
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
                         }
                     },
                     scales: {
@@ -2130,26 +2173,42 @@
                             title: {
                                 display: true,
                                 text: 'Volume (kg)',
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
                             },
                             ticks: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40', /* lighter grid lines */
+                                drawBorder: false
                             }
                         },
                         x: {
                             title: {
                                 display: true,
                                 text: 'Data do Treino',
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
                             },
                             ticks: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
+                                drawBorder: false
                             }
                         }
                     }
@@ -2184,7 +2243,8 @@
                     renderPRChart(selectedExercise);
                 } else {
                     document.getElementById('prChart').style.display = 'none';
-                    document.getElementById('no-pr-data').style.display = 'none';
+                    document.getElementById('no-pr-data').style.display = 'block'; /* Show no data message */
+                    document.getElementById('no-pr-data').textContent = 'Selecione um exercício para ver a progressão.'; /* Update message */
                     if (prChartInstance) {
                         prChartInstance.destroy();
                         prChartInstance = null;
@@ -2239,6 +2299,7 @@
             if (prData.length === 0) {
                 prChartCanvas.style.display = 'none';
                 noPrDataMessage.style.display = 'block';
+                noPrDataMessage.textContent = 'Nenhum dado de PR para este exercício.';
                 return;
             } else {
                 prChartCanvas.style.display = 'block';
@@ -2252,14 +2313,14 @@
                     datasets: [{
                         label: `Peso Máximo (${exerciseName} - kg)`,
                         data: data,
-                        borderColor: 'var(--secondary-color)',
-                        backgroundColor: 'rgba(255, 127, 80, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointBackgroundColor: 'var(--secondary-color)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'var(--secondary-color)'
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'),
+                        backgroundColor: 'transparent',
+                        fill: false,
+                        tension: 0.3,
+                        pointBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'),
+                        pointBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--light-color'),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
                     }]
                 },
                 options: {
@@ -2269,8 +2330,35 @@
                         legend: {
                             display: true,
                             labels: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 14
+                                }
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return `Data: ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('pt-BR', { style: 'unit', unit: 'kilogram' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'),
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
                         }
                     },
                     scales: {
@@ -2279,26 +2367,42 @@
                             title: {
                                 display: true,
                                 text: 'Peso (kg)',
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
                             },
                             ticks: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
+                                drawBorder: false
                             }
                         },
                         x: {
                             title: {
                                 display: true,
                                 text: 'Data do Treino',
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
                             },
                             ticks: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
+                                drawBorder: false
                             }
                         }
                     }
@@ -2344,22 +2448,50 @@
                     datasets: [{
                         label: 'Frequência de Treino',
                         data: data,
-                        backgroundColor: 'var(--success-color)',
-                        borderColor: 'var(--success-color)',
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--success-color'),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--success-color'),
                         borderWidth: 1,
-                        borderRadius: 5
+                        borderRadius: 8, /* Rounded bars */
+                        barThickness: 20, /* Fixed bar thickness */
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
+                    indexAxis: 'y', /* Horizontal bars */
                     plugins: {
                         legend: {
                             display: true,
                             labels: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 14
+                                }
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label;
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += `${context.parsed.x} vezes`;
+                                    }
+                                    return label;
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--success-color'),
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
                         }
                     },
                     scales: {
@@ -2368,22 +2500,34 @@
                             title: {
                                 display: true,
                                 text: 'Número de Vezes Treinado',
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
                             },
                             ticks: {
-                                color: 'var(--dark-color)',
-                                precision: 0
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                precision: 0,
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
+                                drawBorder: false
                             }
                         },
                         y: {
                             ticks: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
+                                drawBorder: false
                             }
                         }
                     }
@@ -2426,14 +2570,14 @@
                     datasets: [{
                         label: 'Duração do Treino (min)',
                         data: data,
-                        borderColor: 'var(--info-color)',
-                        backgroundColor: 'rgba(23, 162, 184, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointBackgroundColor: 'var(--info-color)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'var(--info-color)'
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--info-color'),
+                        backgroundColor: 'transparent',
+                        fill: false,
+                        tension: 0.3,
+                        pointBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--info-color'),
+                        pointBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--light-color'),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
                     }]
                 },
                 options: {
@@ -2443,8 +2587,35 @@
                         legend: {
                             display: true,
                             labels: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 14
+                                }
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return `Data: ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += `${context.parsed.y} minutos`;
+                                    }
+                                    return label;
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--info-color'),
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
                         }
                     },
                     scales: {
@@ -2453,26 +2624,42 @@
                             title: {
                                 display: true,
                                 text: 'Duração (minutos)',
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
                             },
                             ticks: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
+                                drawBorder: false
                             }
                         },
                         x: {
                             title: {
                                 display: true,
                                 text: 'Data do Treino',
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
                             },
                             ticks: {
-                                color: 'var(--dark-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
+                                drawBorder: false
                             }
                         }
                     }
@@ -2480,19 +2667,19 @@
             });
         }
 
-        // --- App Initialization ---
+        // --- Inicialização do Aplicativo ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Load theme preference first
+            // Carrega a preferência de tema primeiro
             const isDarkMode = localStorage.getItem('darkMode') === 'true';
             applyTheme(isDarkMode);
 
-            loadData(); // Load all data from localStorage
-            initWorkoutDays(); // Initialize the main view
+            loadData(); // Carrega todos os dados do localStorage
+            initWorkoutDays(); // Inicializa a view principal
 
-            // Ensure all sections are hidden initially, then show the default view
+            // Garante que todas as seções estejam ocultas inicialmente, depois mostra a view padrão
             showView('days-view');
 
-            // Hide any timers on initial load
+            // Oculta quaisquer temporizadores no carregamento inicial
             document.querySelectorAll('.exercise-timer').forEach(timerEl => {
                 timerEl.style.display = 'none';
                 timerEl.classList.remove('resting');
