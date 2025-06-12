@@ -1,6 +1,47 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { doc, getDoc, setDoc, addDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+
+window.wakeLock = null; // Variável global para armazenar o wake lock
+window.requestWakeLock = async () => {
+    if ('wakeLock' in navigator) {
+        try {
+            window.wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake Lock ativo!');
+            window.showToast('Tela permanecerá ativa durante o treino.', 'success');
+
+            // Adiciona um listener para re-solicitar o wake lock se ele for liberado
+            // (por exemplo, se a tela for desligada manualmente pelo usuário e ligada novamente)
+            window.wakeLock.addEventListener('release', () => {
+                console.log('Wake Lock foi liberado.');
+                window.showToast('Wake Lock liberado (tela pode escurecer).', 'info');
+                window.wakeLock = null;
+            });
+        } catch (err) {
+            console.error(`Falha ao solicitar Wake Lock: ${err.name}, ${err.message}`);
+            window.showToast('Não foi possível manter a tela ativa automaticamente.', 'danger');
+        }
+    } else {
+        console.warn('API Wake Lock não suportada neste navegador.');
+        window.showToast('API Wake Lock não suportada.', 'info');
+    }
+};
+
+/**
+ * Libera o wake lock, permitindo que a tela volte a bloquear.
+ */
+window.releaseWakeLock = async () => {
+    if (window.wakeLock) {
+        try {
+            await window.wakeLock.release();
+            window.wakeLock = null;
+            console.log('Wake Lock liberado com sucesso.');
+            window.showToast('Tela voltará a bloquear normalmente.', 'info');
+        } catch (err) {
+            console.error(`Falha ao liberar Wake Lock: ${err.name}, ${err.message}`);
+        }
+    }
+};
 // Global Helper Functions
 /**
  * Exibe uma mensagem de "toast" temporária na tela.
@@ -368,6 +409,9 @@ window.showView = function(viewId) {
     } else if (viewId === 'profile-view') {
         window.renderUserProfileView();
     }
+	 if (viewId !== 'exercise-execution-view' && window.wakeLock) { // Substitua 'exercise-execution-view' pelo ID da sua seção de execução de treino
+        window.releaseWakeLock();
+    }
 }
 
 // --- Gerenciamento de Dias de Treino (Days View) ---
@@ -436,6 +480,7 @@ window.initWorkoutDays = function() {
         button.addEventListener('click', function() {
             window.editWorkoutDay(this.dataset.id);
         });
+		 window.requestWakeLock(); // Solicita o wake lock
     });
 }
 
@@ -700,6 +745,7 @@ window.renderWorkoutExecution = function() {
     executionList.innerHTML = ''; 
 
     const currentExercise = window.currentWorkout.executionExercises[window.currentExerciseIndex];
+    const totalExercises = window.currentWorkout.executionExercises.length; // Total de exercícios
     const currentExerciseDisplay = document.getElementById('current-exercise-display');
     const finishWorkoutBtn = document.getElementById('finish-workout-btn');
     const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
@@ -715,9 +761,11 @@ window.renderWorkoutExecution = function() {
         window.stopTotalWorkoutTimer();
         return; 
     }
+	
     if (currentExerciseDisplay) {
+        // Atualiza a exibição para incluir o contador
         currentExerciseDisplay.style.display = 'block';
-        currentExerciseDisplay.textContent = `Exercício Atual: ${currentExercise.name} (${window.currentExerciseIndex + 1}/${window.currentWorkout.executionExercises.length})`;
+        currentExerciseDisplay.textContent = `Exercício Atual: ${currentExercise.name} (${window.currentExerciseIndex + 1} de ${totalExercises})`;
     }
     
     const exerciseEl = document.createElement('div');
@@ -794,7 +842,7 @@ window.renderWorkoutExecution = function() {
 
     document.querySelectorAll('.execution-reps, .execution-weight').forEach(input => {
         input.addEventListener('input', function() {
-            const setIndex = parseInt(this.dataset.set-index);
+            const setIndex = parseInt(this.dataset.setIndex); // Corrected access
             const exercise = window.currentWorkout.executionExercises[window.currentExerciseIndex];
             if (!exercise.completedSets[setIndex]) {
                 exercise.completedSets[setIndex] = {};
@@ -809,7 +857,7 @@ window.renderWorkoutExecution = function() {
 
     completeSetButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const setIndex = parseInt(this.dataset.set-index);
+            const setIndex = parseInt(this.dataset.setIndex); // Corrected access
             window.completeSet(setIndex);
         });
     });
@@ -987,7 +1035,7 @@ document.getElementById('finish-workout-btn').addEventListener('click', () => {
     window.showConfirmModal('Tem certeza que deseja finalizar este treino e salvá-lo no histórico?', () => {
         window.stopTotalWorkoutTimer();
         window.stopGlobalRestTimer();
-
+		window.releaseWakeLock(); // Libera o wake lock
         const completedWorkout = {
             id: 'workout-' + Date.now(),
             date: new Date().toISOString(),
@@ -1870,4 +1918,16 @@ document.addEventListener('DOMContentLoaded', () => {
         timerEl.classList.remove('resting');
         timerEl.querySelector('.countdown').textContent = '00:00';
     });
+	// --- PWA Service Worker Registration ---
+	if ('serviceWorker' in navigator) {
+		window.addEventListener('load', () => {
+			navigator.serviceWorker.register('service-worker.js')
+				.then(registration => {
+					console.log('Service Worker registrado com sucesso:', registration.scope);
+				})
+				.catch(error => {
+					console.error('Falha no registro do Service Worker:', error);
+				});
+		});
+	}
 });
