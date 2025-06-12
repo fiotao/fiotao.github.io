@@ -700,7 +700,6 @@ window.renderWorkoutExecution = function() {
     executionList.innerHTML = ''; 
 
     const currentExercise = window.currentWorkout.executionExercises[window.currentExerciseIndex];
-    const totalExercises = window.currentWorkout.executionExercises.length; // Total de exercícios
     const currentExerciseDisplay = document.getElementById('current-exercise-display');
     const finishWorkoutBtn = document.getElementById('finish-workout-btn');
     const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
@@ -716,11 +715,9 @@ window.renderWorkoutExecution = function() {
         window.stopTotalWorkoutTimer();
         return; 
     }
-	alert(currentExerciseDisplay);
     if (currentExerciseDisplay) {
-        // Atualiza a exibição para incluir o contador
         currentExerciseDisplay.style.display = 'block';
-        currentExerciseDisplay.textContent = `Exercício Atual: ${currentExercise.name} (${window.currentExerciseIndex + 1} de ${totalExercises})`;
+        currentExerciseDisplay.textContent = `Exercício Atual: ${currentExercise.name} (${window.currentExerciseIndex + 1}/${window.currentWorkout.executionExercises.length})`;
     }
     
     const exerciseEl = document.createElement('div');
@@ -797,7 +794,7 @@ window.renderWorkoutExecution = function() {
 
     document.querySelectorAll('.execution-reps, .execution-weight').forEach(input => {
         input.addEventListener('input', function() {
-            const setIndex = parseInt(this.dataset.setIndex); // Corrected access
+            const setIndex = parseInt(this.dataset.set-index);
             const exercise = window.currentWorkout.executionExercises[window.currentExerciseIndex];
             if (!exercise.completedSets[setIndex]) {
                 exercise.completedSets[setIndex] = {};
@@ -812,7 +809,7 @@ window.renderWorkoutExecution = function() {
 
     completeSetButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const setIndex = parseInt(this.dataset.setIndex); // Corrected access
+            const setIndex = parseInt(this.dataset.set-index);
             window.completeSet(setIndex);
         });
     });
