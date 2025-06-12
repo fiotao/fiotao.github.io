@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTracker - Offline</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+        .offline-message {
+            background-color: var(--card-background-color);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            max-width: 500px;
+            width: 100%;
+        }
+        .offline-message h2 {
+            color: var(--danger-color);
+            margin-bottom: 20px;
+        }
+        .offline-message p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        .offline-message .btn {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-message">
+        <h2><i class="fas fa-exclamation-triangle"></i> Você está Offline!</h2>
+        <p>Parece que você não tem conexão com a internet.</p>
+        <p>O FitTracker está funcionando offline para as funcionalidades básicas já carregadas.</p>
+        <p>Por favor, verifique sua conexão para acessar todos os recursos.</p>
+        <button class="btn btn-primary" onclick="location.reload()"><i class="fas fa-redo"></i> Tentar Novamente</button>
+    </div>
+</body>
+</html>

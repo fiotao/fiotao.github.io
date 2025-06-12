@@ -11,6 +11,11 @@
     <link rel="manifest" href="manifest.json"> 
 </head>
 <body>
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
     <div class="theme-switcher">
         <span>Modo Escuro</span>
         <label class="switch">
@@ -23,195 +28,167 @@
         <h1>FitTracker</h1>
         <div id="user-display-info" style="text-align: center; font-size: 0.9em; margin-bottom: 10px; color: var(--info-color);"></div>
 
-        <!-- Authentication View -->
         <section id="auth-view" class="app-section">
             <h2><i class="fas fa-user-circle"></i> Login / Cadastro</h2>
             <div class="form-group">
-                <label for="auth-email">Email:</label>
-                <input type="email" id="auth-email" class="form-control" placeholder="seu@email.com">
+                <label for="auth-email">E-mail:</label>
+                <input type="email" id="auth-email" class="form-control" placeholder="Seu e-mail">
             </div>
             <div class="form-group">
                 <label for="auth-password">Senha:</label>
-                <input type="password" id="auth-password" class="form-control" placeholder="••••••••">
+                <input type="password" id="auth-password" class="form-control" placeholder="Sua senha">
             </div>
-
-            <!-- New fields for registration -->
-            <div id="registration-fields" style="display: none;">
-                <div class="form-group">
-                    <label for="reg-name">Nome Completo:</label>
-                    <input type="text" id="reg-name" class="form-control" placeholder="Seu nome">
-                </div>
-                <div class="form-group">
-                    <label for="reg-gender">Gênero:</label>
-                    <select id="reg-gender" class="form-control">
-                        <option value="">Selecione</option>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Feminino">Feminino</option>
-                        <option value="Outro">Outro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="reg-age">Idade:</label>
-                    <input type="number" id="reg-age" class="form-control" placeholder="Sua idade" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="reg-weight">Peso (kg):</label>
-                    <input type="number" id="reg-weight" class="form-control" placeholder="Seu peso" min="0" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label for="reg-height">Altura (cm):</label>
-                    <input type="number" id="reg-height" class="form-control" placeholder="Sua altura" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="reg-goal">Objetivo:</label>
-                    <input type="text" id="reg-goal" class="form-control" placeholder="Ex: Ganhar massa, Perder peso">
-                </div>
+            <div class="actions">
+                <button class="btn btn-primary" id="login-btn"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                <button class="btn btn-secondary" id="signup-btn"><i class="fas fa-user-plus"></i> Cadastrar</button>
+                <button class="btn btn-info" id="logout-btn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
-
-            <button class="btn btn-primary" id="auth-submit-btn">Login</button>
-            <p id="auth-toggle-link">Não tem uma conta? Cadastre-se</p>
         </section>
 
-        <!-- Main App Content (hidden until authenticated) -->
-        <div id="app-content" style="display: none;">
-            <button class="btn btn-secondary" id="logout-btn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        <section id="profile-view" class="app-section" style="display: none;">
+            <h2><i class="fas fa-id-card"></i> Meu Perfil</h2>
+            <div id="profile-details" class="profile-details">
+                <p><strong>Nome:</strong> <span id="display-name"></span></p>
+                <p><strong>Gênero:</strong> <span id="display-gender"></span></p>
+                <p><strong>Idade:</strong> <span id="display-age"></span> anos</p>
+                <p><strong>Peso:</strong> <span id="display-weight"></span> kg</p>
+                <p><strong>Altura:</strong> <span id="display-height"></span> cm</p>
+                <p><strong>Objetivo:</strong> <span id="display-goal"></span></p>
+                <p><strong>Membro desde:</strong> <span id="display-registered-at"></span></p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" id="edit-profile-btn"><i class="fas fa-edit"></i> Editar Perfil</button>
+                <button class="btn btn-info" onclick="window.showView('days-view')"><i class="fas fa-dumbbell"></i> Meus Treinos</button>
+                <button class="btn btn-success" onclick="window.showView('progress-view')"><i class="fas fa-chart-line"></i> Progresso</button>
+                <button class="btn btn-danger" id="delete-profile-btn"><i class="fas fa-trash-alt"></i> Excluir Perfil</button>
+            </div>
+        </section>
 
-            <!-- View de Dias de Treino -->
-            <section id="days-view" class="app-section">
-                <h2><i class="fas fa-calendar-alt"></i> Dias de Treino</h2>
-                <div id="workout-days-list" class="list-container">
-                    <!-- Dias de treino serão carregados aqui -->
-                </div>
-                <button class="btn btn-success" id="add-day-btn"><i class="fas fa-plus-circle"></i> Adicionar Novo Dia</button>
-                <button class="btn btn-primary" onclick="window.showView('history-view')"><i class="fas fa-history"></i> Ver Histórico</button>
-                <button class="btn btn-info" onclick="window.showView('dashboard-view')"><i class="fas fa-chart-line"></i> Dashboard</button>
-                <button class="btn btn-secondary" onclick="window.showView('profile-view')" id="profile-btn"><i class="fas fa-user-edit"></i> Editar Perfil</button>
-            </section>
+        <section id="edit-profile-view" class="app-section" style="display: none;">
+            <h2><i class="fas fa-edit"></i> Editar Perfil</h2>
+            <div class="form-group">
+                <label for="profile-name">Nome:</label>
+                <input type="text" id="profile-name" class="form-control" placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+                <label for="profile-gender">Gênero:</label>
+                <select id="profile-gender" class="form-control">
+                    <option value="">Selecione</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="profile-age">Idade:</label>
+                <input type="number" id="profile-age" class="form-control" placeholder="Sua idade" min="0">
+            </div>
+            <div class="form-group">
+                <label for="profile-weight">Peso (kg):</label>
+                <input type="number" id="profile-weight" class="form-control" placeholder="Seu peso (kg)" step="0.1" min="0">
+            </div>
+            <div class="form-group">
+                <label for="profile-height">Altura (cm):</label>
+                <input type="number" id="profile-height" class="form-control" placeholder="Sua altura" min="0">
+            </div>
+            <div class="form-group">
+                <label for="profile-goal">Objetivo:</label>
+                <input type="text" id="profile-goal" class="form-control" placeholder="Ex: Ganhar massa, Perder peso">
+            </div>
+            <div class="actions">
+                <button class="btn btn-success" id="save-profile-btn"><i class="fas fa-save"></i> Salvar Perfil</button>
+                <button class="btn btn-secondary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar</button>
+            </div>
+        </section>
 
-            <!-- View de Detalhes do Dia de Treino -->
-            <section id="day-details-view" class="app-section" style="display: none;">
-                <h2 id="day-details-title"></h2>
-                <div class="form-group">
-                    <label for="day-name-input">Nome do Treino:</label>
-                    <input type="text" id="day-name-input" class="form-control" placeholder="e.g., Treino de Peito e Tríceps">
+        <section id="days-view" class="app-section" style="display: none;">
+            <h2><i class="fas fa-calendar-alt"></i> Meus Dias de Treino</h2>
+            <div id="daily-workouts-list">
                 </div>
-                <h3>Exercícios</h3>
-                <div id="exercises-list" class="list-container">
-                    <!-- Exercícios serão carregados aqui -->
+            <div class="actions">
+                <button class="btn btn-primary" id="add-day-btn"><i class="fas fa-plus"></i> Adicionar Dia</button>
+                <button class="btn btn-secondary" onclick="window.showView('profile-view')"><i class="fas fa-arrow-left"></i> Voltar</button>
+            </div>
+        </section>
+
+        <section id="day-view" class="app-section" style="display: none;">
+            <h2 id="day-view-title"><i class="fas fa-calendar-day"></i> Treinos do Dia</h2>
+            <div id="day-workouts-list">
                 </div>
-                <button class="btn btn-success" id="add-exercise-btn"><i class="fas fa-plus-circle"></i> Adicionar Exercício</button>
+            <div class="actions">
+                <button class="btn btn-primary" id="add-exercise-btn"><i class="fas fa-plus"></i> Adicionar Exercício</button>
+                <button class="btn btn-secondary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar</button>
+            </div>
+        </section>
+
+        <section id="exercise-selection-view" class="app-section" style="display: none;">
+            <h2><i class="fas fa-running"></i> Selecionar Exercício</h2>
+            <div class="form-group">
+                <label for="exercise-name-input">Nome do Exercício:</label>
+                <input type="text" id="exercise-name-input" class="form-control" placeholder="Ex: Supino Reto, Agachamento">
+            </div>
+            <div class="form-group">
+                <label for="exercise-muscle-group-input">Grupo Muscular:</label>
+                <input type="text" id="exercise-muscle-group-input" class="form-control" placeholder="Ex: Peito, Pernas">
+            </div>
+            <div class="form-group">
+                <label for="exercise-notes-input">Notas (Opcional):</label>
+                <textarea id="exercise-notes-input" class="form-control" placeholder="Ex: Carga progressiva"></textarea>
+            </div>
+            <div class="actions">
+                <button class="btn btn-success" id="save-exercise-btn"><i class="fas fa-save"></i> Adicionar Exercício</button>
+                <button class="btn btn-secondary" id="cancel-exercise-btn"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </section>
+
+        <section id="exercise-execution-view" class="app-section" style="display: none;">
+            <h2 id="execution-exercise-name"></h2>
+            <p class="current-exercise-display" id="current-exercise-display"></p>
+            
+            <div class="exercise-timer" id="exercise-timer-display">
+                <div class="countdown" id="timer-countdown">00:00</div>
                 <div class="actions">
-                    <button class="btn btn-primary" id="save-day-btn"><i class="fas fa-save"></i> Salvar Treino</button>
-                    <button class="btn btn-secondary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar</button>
-                    <button class="btn btn-danger" id="delete-day-btn" style="display: none;"><i class="fas fa-trash-alt"></i> Excluir Dia</button>
+                    <button class="btn btn-info" id="timer-start-pause"><i class="fas fa-play"></i> Iniciar</button>
+                    <button class="btn btn-secondary" id="timer-reset"><i class="fas fa-redo"></i> Resetar</button>
                 </div>
-            </section>
+            </div>
 
-            <!-- View de Execução de Treino -->
-            <section id="workout-execution-view" class="app-section" style="display: none;">
-                <h2 id="workout-execution-title"></h2>
-                <div class="timer-display" id="workout-total-timer">00:00:00</div>
-				<p id="current-exercise-display" class="current-exercise-status"></p> 
+            <div class="form-group">
+                <label for="execution-weight">Peso (kg):</label>
+                <input type="number" id="execution-weight" class="form-control" placeholder="Peso (kg)" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+                <label for="execution-reps">Repetições:</label>
+                <input type="number" id="execution-reps" class="form-control" placeholder="Repetições" min="0">
+            </div>
 
-                <div id="workout-execution-exercises" class="list-container">
-                    
+            <div id="sets-list" class="sets-list">
                 </div>
-				<div class="exercise-timer" id="global-rest-timer" style="display: none;">
-                    <i class="fas fa-hourglass-half"></i> Descanso: <span class="countdown">00:00</span>
-                </div>
-                <div class="actions">
-                    <button class="btn btn-danger" id="finish-workout-btn"><i class="fas fa-flag-checkered"></i> Finalizar Treino</button>
-                    <button class="btn btn-secondary" id="cancel-workout-btn"><i class="fas fa-times-circle"></i> Cancelar Treino</button>
-                </div>
-            </section>
 
-            <!-- View de Histórico de Treinos -->
-            <section id="history-view" class="app-section" style="display: none;">
-                <h2><i class="fas fa-history"></i> Histórico de Treinos</h2>
-                <div id="history-list" class="list-container">
-                    <!-- Itens do histórico serão carregados aqui pelo JavaScript -->
-                </div>
-                <div class="actions">
-                    <button class="btn btn-info" onclick="window.showView('dashboard-view')"><i class="fas fa-chart-line"></i> Ir para Dashboard</button>
-                    <button class="btn btn-primary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar para Início</button>
-                </div>
-            </section>
+            <div class="exercise-execution-actions">
+                <button class="btn btn-success" id="complete-set-btn"><i class="fas fa-check"></i> Completar Set</button>
+                <button class="btn btn-info" id="add-set-manually-btn"><i class="fas fa-plus"></i> Add Set (Manual)</button>
+                <button class="btn btn-secondary" id="reset-exercise-btn"><i class="fas fa-redo"></i> Resetar Exercício</button>
+                <button class="btn btn-danger" id="finish-exercise-btn"><i class="fas fa-flag-checkered"></i> Finalizar Exercício</button>
+            </div>
+        </section>
 
-            <!-- View de Dashboard de Evolução -->
-            <section id="dashboard-view" class="app-section" style="display: none;">
-                <h2><i class="fas fa-chart-line"></i> Dashboard de Evolução</h2>
-                <div class="dashboard-grid">
-                    <div class="chart-card">
-                        <h3>Volume Total de Treino (kg)</h3>
-                        <canvas id="volumeChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Progressão de Peso (PRs) por Exercício</h3>
-                        <div id="exercise-pr-charts">
-                            <p>Selecione um exercício para ver a progressão:</p>
-                            <select id="exercise-select" class="form-control"></select>
-                            <canvas id="prChart" style="display: none;"></canvas>
-                            <p id="no-pr-data" style="display: none;">Nenhum dado de PR para este exercício.</p>
-                            </div>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Exercícios Mais Frequentes</h3>
-                        <canvas id="frequentExercisesChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Duração do Treino (min)</h3>
-                        <canvas id="averageWorkoutTimeChart"></canvas>
-                    </div>
-                </div>
-                <div class="actions">
-                    <button class="btn btn-info" onclick="window.showView('history-view')"><i class="fas fa-history"></i> Ir para Histórico</button>
-                    <button class="btn btn-primary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar para Início</button>
-                </div>
-            </section>
+        <section id="progress-view" class="app-section" style="display: none;">
+            <h2><i class="fas fa-chart-line"></i> Progresso de Peso</h2>
+            <div class="form-group">
+                <label for="progress-exercise-select">Selecionar Exercício:</label>
+                <select id="progress-exercise-select" class="form-control">
+                    <option value="">Carregando exercícios...</option>
+                </select>
+            </div>
+            <canvas id="progressChart"></canvas>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="window.showView('profile-view')"><i class="fas fa-arrow-left"></i> Voltar</button>
+            </div>
+        </section>
 
-            <!-- View de Perfil do Usuário -->
-            <section id="profile-view" class="app-section" style="display: none;">
-                <h2><i class="fas fa-user-edit"></i> Editar Perfil</h2>
-                <div class="form-group">
-                    <label for="profile-name">Nome Completo:</label>
-                    <input type="text" id="profile-name" class="form-control" placeholder="Seu nome">
-                </div>
-                <div class="form-group">
-                    <label for="profile-gender">Gênero:</label>
-                    <select id="profile-gender" class="form-control">
-                        <option value="">Selecione</option>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Feminino">Feminino</option>
-                        <option value="Outro">Outro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="profile-age">Idade:</label>
-                    <input type="number" id="profile-age" class="form-control" placeholder="Sua idade" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="profile-weight">Peso (kg):</label>
-                    <input type="number" id="profile-weight" class="form-control" placeholder="Seu peso" min="0" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label for="profile-height">Altura (cm):</label>
-                    <input type="number" id="profile-height" class="form-control" placeholder="Sua altura" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="profile-goal">Objetivo:</label>
-                    <input type="text" id="profile-goal" class="form-control" placeholder="Ex: Ganhar massa, Perder peso">
-                </div>
-                <div class="actions">
-                    <button class="btn btn-success" id="save-profile-btn"><i class="fas fa-save"></i> Salvar Perfil</button>
-                    <button class="btn btn-secondary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar</button>
-                </div>
-            </section>
-        </div>
-
-        <!-- Toast Message -->
         <div id="toast-message" class="toast-message"></div>
 
-        <!-- Custom Confirm Modal -->
         <div id="custom-confirm-modal" class="modal" style="display: none;">
             <div class="modal-content card">
                 <p id="confirm-message"></p>
@@ -224,9 +201,7 @@
 
     </div>
 
-    <!-- Firebase Initialization Script -->
     <script type="module" src="firebase-init.js"></script>
-    <!-- Main Application Logic Script -->
     <script type="module" src="main.js"></script>
 </body>
 </html>

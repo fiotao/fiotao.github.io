@@ -188,7 +188,7 @@
             border-top: 4px solid #2ecc71;
         }
         .kpi-despesa {
-            border-top: 4px solid #e74c3c;
+            border-top: 44px solid #e74c3c;
         }
         .kpi-investimento {
             border-top: 4px solid #9b59b6;
@@ -422,6 +422,53 @@
             border-radius: 5px;
             font-weight: bold;
         }
+		/* Adicionar ao final da seção de estilos */
+#import-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+#ofx-preview th, #ofx-preview td {
+    padding: 8px;
+    text-align: left;
+}
+
+#ofx-preview th {
+    background-color: #f8f9fa;
+}
+
+#import-checkbox {
+    text-align: center;
+}
+        /* Estilos para sub-abas */
+        .sub-tabs {
+            display: flex;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .sub-tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background-color: #f8f8f8;
+            margin-right: 3px;
+            border-radius: 4px 4px 0 0;
+            font-size: 14px;
+        }
+        .sub-tab.active {
+            background-color: #3498db;
+            color: white;
+            border-bottom: 1px solid #3498db;
+        }
+        .sub-tab-content {
+            display: none;
+            padding-top: 15px;
+        }
+        .sub-tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -588,6 +635,7 @@
                             <tr>
                                 <th>Conta</th>
                                 <th>Tipo</th>
+                                <th>Banco</th>
                                 <th>Saldo Atual</th>
                                 <th>Variação (Mês)</th>
                                 <th>% do Total</th>
@@ -792,7 +840,7 @@
                 <div class="form-group">
                     <label for="investment-account">Conta Bancária:</label>
                     <select id="investment-account" required>
-                        <option value="">Selecione...</option>
+                        <option value="">Selecione autora...</option>
                         </select>
                 </div>
                 <div class="form-group">
@@ -827,113 +875,172 @@
 
 
         <div id="creditcards-tab" class="tab-content">
-            <form id="creditcard-form">
-                <div class="form-group">
-                    <label for="creditcard-name">Nome do Cartão:</label>
-                    <input type="text" id="creditcard-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="creditcard-bank">Banco:</label>
-                    <input type="text" id="creditcard-bank" required>
-                </div>
-                <div class="form-group">
-                    <label for="creditcard-limit">Limite Total:</label>
-                    <input type="number" id="creditcard-limit" step="0.01" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="creditcard-duedate">Dia do Vencimento:</label>
-                    <input type="number" id="creditcard-duedate" min="1" max="31" required>
-                </div>
-                <div class="form-group">
-                    <label for="creditcard-closing">Dia do Fechamento:</label>
-                    <input type="number" id="creditcard-closing" min="1" max="31" required>
-                </div>
-                <button type="submit" class="btn-success">Adicionar Cartão</button>
-            </form>
+            <h2>Gestão de Cartões de Crédito</h2>
 
-            <div class="dashboard">
-                <div class="dashboard-card">
-                    <div class="dashboard-title">Previsão de Pagamentos</div>
-                    <div class="chart-container">
-                        <canvas id="paymentsChart"></canvas>
+            <div class="sub-tabs">
+                <div class="sub-tab active" onclick="openSubTab(event, 'creditcard-register-section')">Cadastro de Cartões</div>
+                <div class="sub-tab" onclick="openSubTab(event, 'creditcard-ofx-import-section')">Importação OFX</div>
+                <div class="sub-tab" onclick="openSubTab(event, 'creditcard-purchases-section')">Despesas do Cartão</div>
+            </div>
+
+            <div id="creditcard-register-section" class="sub-tab-content active">
+                <form id="creditcard-form">
+                    <div class="form-group">
+                        <label for="creditcard-name">Nome do Cartão:</label>
+                        <input type="text" id="creditcard-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="creditcard-number">Número do Cartão (últimos 4 dígitos):</label>
+                        <input type="text" id="creditcard-number" pattern="\d{4}" maxlength="4" placeholder="1234">
+                    </div>
+                    <div class="form-group">
+                        <label for="creditcard-bank">Banco:</label>
+                        <input type="text" id="creditcard-bank" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="creditcard-limit">Limite Total:</label>
+                        <input type="number" id="creditcard-limit" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="creditcard-duedate">Dia do Vencimento:</label>
+                        <input type="number" id="creditcard-duedate" min="1" max="31" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="creditcard-closing">Dia do Fechamento:</label>
+                        <input type="number" id="creditcard-closing" min="1" max="31" required>
+                    </div>
+                    <button type="submit" class="btn-success">Adicionar Cartão</button>
+                </form>
+
+                <div class="dashboard">
+                    <div class="dashboard-card">
+                        <div class="dashboard-title">Previsão de Pagamentos</div>
+                        <div class="chart-container">
+                            <canvas id="paymentsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <table id="creditcards-table">
+                    <thead>
+                        <tr>
+                            <th>Cartão</th>
+                            <th>Banco</th>
+                            <th>Limite</th>
+                            <th>Disponível</th>
+                            <th>Vencimento</th>
+                            <th>Fechamento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div id="creditcard-ofx-import-section" class="sub-tab-content">
+                <div class="import-section">
+                    <h3>Importar Extrato OFX (Microsoft Money)</h3>
+                    <p>Selecione um arquivo OFX para importar transações do cartão.</p>
+                    
+                    <div class="form-group">
+                        <label for="ofx-file">Arquivo OFX:</label>
+                        <input type="file" id="ofx-file" accept=".ofx,.txt" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ofx-card">Cartão:</label>
+                        <select id="ofx-card" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    
+                    <button id="preview-ofx" class="btn-success">Pré-visualizar Importação</button>
+                </div>
+
+                <div id="ofx-preview" class="import-preview" style="display: none;">
+                    <h3>Pré-visualização da Importação OFX</h3>
+                    <p>Revise as transações antes de confirmar a importação.</p>
+                    <table id="ofx-preview-table">
+                        <thead>
+                            <tr>
+                                <th class="import-checkbox"><input type="checkbox" id="select-all-ofx"></th>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Parcelas</th> <th>Categoria</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="import-actions">
+                        <button id="cancel-ofx" class="btn-danger">Cancelar</button>
+                        <button id="confirm-ofx" class="btn-success">Confirmar Importação</button>
                     </div>
                 </div>
             </div>
 
-            <form id="creditcard-purchase-form">
-                <div class="form-group">
-                    <label for="purchase-card">Cartão:</label>
-                    <select id="purchase-card" required>
-                        <option value="">Selecione...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="purchase-category">Categoria:</label>
-                    <select id="purchase-category" required>
-                        <option value="">Selecione...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="purchase-date">Data da Compra:</label>
-                    <input type="date" id="purchase-date" required>
-                </div>
-                <div class="form-group">
-                    <label for="purchase-description">Descrição:</label>
-                    <input type="text" id="purchase-description" required>
-                </div>
-                <div class="form-group">
-                    <label for="purchase-value">Valor Total:</label>
-                    <input type="number" id="purchase-value" step="0.01" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="purchase-type">Tipo de Compra:</label>
-                    <select id="purchase-type" required>
-                        <option value="">Selecione...</option>
-                        <option value="avista">À Vista</option>
-                        <option value="parcelado">Parcelado</option>
-                    </select>
-                </div>
-                <div class="form-group" id="installment-control" style="display: none;">
-                    <label>Parcelamento:</label>
-                    <div class="installment-control">
-                        <input type="number" id="purchase-installments" min="2" max="24" placeholder="Parcelas">
-                        <span>de</span>
-                        <input type="number" id="purchase-current" min="1" max="24" placeholder="Atual">
+            <div id="creditcard-purchases-section" class="sub-tab-content">
+                <form id="creditcard-purchase-form">
+                    <div class="form-group">
+                        <label for="purchase-card">Cartão:</label>
+                        <select id="purchase-card" required>
+                            <option value="">Selecione...</option>
+                        </select>
                     </div>
-                </div>
-                <button type="submit" class="btn-success">Adicionar Compra</button>
-            </form>
+                    <div class="form-group">
+                        <label for="purchase-category">Categoria:</label>
+                        <select id="purchase-category" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchase-date">Data da Compra:</label>
+                        <input type="date" id="purchase-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchase-description">Descrição:</label>
+                        <input type="text" id="purchase-description" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchase-value">Valor Total:</label>
+                        <input type="number" id="purchase-value" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchase-type">Tipo de Compra:</label>
+                        <select id="purchase-type" required>
+                            <option value="">Selecione...</option>
+                            <option value="avista">À Vista</option>
+                            <option value="parcelado">Parcelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="installment-control" style="display: none;">
+                        <label>Parcelamento:</label>
+                        <div class="installment-control">
+                            <input type="number" id="purchase-installments" min="2" max="24" placeholder="Parcelas">
+                            <span>de</span>
+                            <input type="number" id="purchase-current" min="1" max="24" placeholder="Atual">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-success">Adicionar Compra</button>
+                </form>
 
-            <table id="creditcards-table">
-                <thead>
-                    <tr>
-                        <th>Cartão</th>
-                        <th>Banco</th>
-                        <th>Limite</th>
-                        <th>Disponível</th>
-                        <th>Vencimento</th>
-                        <th>Fechamento</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-
-            <table id="purchases-table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Cartão</th>
-                        <th>Descrição</th>
-                        <th>Categoria</th>
-                        <th>Valor</th>
-                        <th>Parcelas</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+                <table id="purchases-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Cartão</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Valor</th>
+                            <th>Parcelas</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="accounts-tab" class="tab-content">
@@ -980,106 +1087,117 @@
         </div>
 
         <div id="import-tab" class="tab-content">
-            <div class="keyword-config">
-                <h3>Configuração de Palavras-chave</h3>
-                <p>Configure palavras-chave para classificação automática de receitas e despesas.</p>
-
-                <div class="form-group">
-                    <label for="new-keyword">Nova Palavra-chave:</label>
-                    <input type="text" id="new-keyword" placeholder="Digite uma palavra ou frase">
-                </div>
-
-                <div class="form-group">
-                    <label for="keyword-type">Tipo:</label>
-                    <select id="keyword-type">
-                        <option value="receita">Receita</option>
-                        <option value="despesa">Despesa</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="keyword-category">Categoria:</label>
-                    <select id="keyword-category">
-                        <option value="">Selecione...</option>
-                    </select>
-                </div>
-
-                <button id="add-keyword" class="btn-success">Adicionar Palavra-chave</button>
-
-                <div class="keyword-list" id="keywords-list"></div>
-            </div>
-            <div class="import-section">
-                <h2>Importar Lançamentos</h2>
-                <p>Selecione um arquivo CSV com os lançamentos bancários para importar.</p>
-
-                <div class="form-group">
-                    <label for="csv-file">Arquivo CSV:</label>
-                    <input type="file" id="csv-file" accept=".csv" class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label for="import-account">Conta Bancária:</label>
-                    <select id="import-account" required>
-                        <option value="">Selecione...</option>
-                    </select>
-                </div>
-
-                <button id="preview-import" class="btn-success">Pré-visualizar Importação</button>
+            <h2>Ferramentas de Importação</h2>
+            <div class="sub-tabs">
+                <div class="sub-tab active" onclick="openSubTab(event, 'import-keywords-section')">Configuração de Palavras-chave</div>
+                <div class="sub-tab" onclick="openSubTab(event, 'import-csv-section')">Importar Lançamentos (CSV)</div>
             </div>
 
-            <div id="import-preview" class="import-preview" style="display: none;">
-                <h3>Pré-visualização da Importação</h3>
-                <p>Revise e ajuste as classificações antes de confirmar a importação.</p>
+            <div id="import-keywords-section" class="sub-tab-content active">
+                <div class="keyword-config">
+                    <h3>Configuração de Palavras-chave</h3>
+                    <p>Configure palavras-chave para classificação automática de receitas e despesas.</p>
 
-                <div class="import-filter">
                     <div class="form-group">
-                        <label for="preview-filter-type">Tipo:</label>
-                        <select id="preview-filter-type">
-                            <option value="all">Todos</option>
+                        <label for="new-keyword">Nova Palavra-chave:</label>
+                        <input type="text" id="new-keyword" placeholder="Digite uma palavra ou frase">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="keyword-type">Tipo:</label>
+                        <select id="keyword-type">
                             <option value="receita">Receita</option>
                             <option value="despesa">Despesa</option>
                         </select>
                     </div>
+
                     <div class="form-group">
-                        <label for="preview-filter-category">Categoria:</label>
-                        <select id="preview-filter-category">
-                            <option value="all">Todas</option>
+                        <label for="keyword-category">Categoria:</label>
+                        <select id="keyword-category">
+                            <option value="">Selecione...</option>
                         </select>
                     </div>
+
+                    <button id="add-keyword" class="btn-success">Adicionar Palavra-chave</button>
+
+                    <div class="keyword-list" id="keywords-list"></div>
+                </div>
+            </div>
+
+            <div id="import-csv-section" class="sub-tab-content">
+                <div class="import-section">
+                    <h2>Importar Lançamentos (CSV)</h2>
+                    <p>Selecione um arquivo CSV com os lançamentos bancários para importar.</p>
+
                     <div class="form-group">
-                        <label for="preview-filter-duplicates">Mostrar:</label>
-                        <select id="preview-filter-duplicates">
-                            <option value="all">Todos</option>
-                            <option value="duplicates">Apenas possíveis duplicatas</option>
-                            <option value="non-duplicates">Apenas novos</option>
+                        <label for="csv-file">Arquivo CSV:</label>
+                        <input type="file" id="csv-file" accept=".csv" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="import-account">Conta Bancária:</label>
+                        <select id="import-account" required>
+                            <option value="">Selecione...</option>
                         </select>
                     </div>
-                    <button id="apply-preview-filters" class="btn-success">Aplicar Filtros</button>
+
+                    <button id="preview-import" class="btn-success">Pré-visualizar Importação</button>
                 </div>
 
-                <div class="import-selection" id="import-selection">
-                    Selecionados: 0 de 0
-                </div>
+                <div id="import-preview" class="import-preview" style="display: none;">
+                    <h3>Pré-visualização da Importação</h3>
+                    <p>Revise e ajuste as classificações antes de confirmar a importação.</p>
 
-                <table id="preview-table">
-                    <thead>
-                        <tr>
-                            <th class="import-checkbox"><input type="checkbox" id="select-all"></th>
-                            <th>Data</th>
-                            <th>Histórico</th>
-                            <th>Valor</th>
-                            <th>Tipo</th>
-                            <th>Categoria</th>
-                            <th>Descrição</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                    <div class="import-filter">
+                        <div class="form-group">
+                            <label for="preview-filter-type">Tipo:</label>
+                            <select id="preview-filter-type">
+                                <option value="all">Todos</option>
+                                <option value="receita">Receita</option>
+                                <option value="despesa">Despesa</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="preview-filter-category">Categoria:</label>
+                            <select id="preview-filter-category">
+                                <option value="all">Todas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="preview-filter-duplicates">Mostrar:</label>
+                            <select id="preview-filter-duplicates">
+                                <option value="all">Todos</option>
+                                <option value="duplicates">Apenas possíveis duplicatas</option>
+                                <option value="non-duplicates">Apenas novos</option>
+                            </select>
+                        </div>
+                        <button id="apply-preview-filters" class="btn-success">Aplicar Filtros</button>
+                    </div>
 
-                <div class="import-actions">
-                    <button id="cancel-import" class="btn-danger">Cancelar</button>
-                    <button id="confirm-import" class="btn-success">Confirmar Importação</button>
+                    <div class="import-selection" id="import-selection">
+                        Selecionados: 0 de 0
+                    </div>
+
+                    <table id="preview-table">
+                        <thead>
+                            <tr>
+                                <th class="import-checkbox"><input type="checkbox" id="select-all"></th>
+                                <th>Data</th>
+                                <th>Histórico</th>
+                                <th>Valor</th>
+                                <th>Tipo</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+                    <div class="import-actions">
+                        <button id="cancel-import" class="btn-danger">Cancelar</button>
+                        <button id="confirm-import" class="btn-success">Confirmar Importação</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1118,6 +1236,8 @@
         let creditPurchases = [];
         let accounts = [];
         let monthlyBudgets = {}; // Novo objeto para armazenar orçamentos mensais
+        let ofxData = []; // Variável global para armazenar os dados do OFX
+        let selectedOfxItems = []; // Adicionado para OFX preview
 
         // Contas padrão
         const defaultAccounts = [
@@ -1231,16 +1351,38 @@
         const budgetMonthInput = document.getElementById('budget-month');
         const loadBudgetBtn = document.getElementById('load-budget');
         const saveBudgetBtn = document.getElementById('save-budget');
-        const budgetCategoriesList = document.getElementById('budget-categories-list');
+        const budgetCategoriesList = document.getElementById('budget-categories-list'); // Corrigido o ID
         const totalBudgetedSpan = document.getElementById('total-budgeted');
         const totalSpentBudgetSpan = document.getElementById('total-spent-budget');
         const totalRemainingSpan = document.getElementById('total-remaining');
 
+        // Elementos de importação OFX
+        const ofxFileInput = document.getElementById('ofx-file');
+        const ofxCardSelect = document.getElementById('ofx-card');
+        const previewOfxButton = document.getElementById('preview-ofx');
+        const ofxPreviewDiv = document.getElementById('ofx-preview');
+        const ofxPreviewTableBody = document.querySelector('#ofx-preview-table tbody');
+        const cancelOfxButton = document.getElementById('cancel-ofx');
+        const confirmOfxButton = document.getElementById('confirm-ofx');
+        const selectAllOfxCheckbox = document.getElementById('select-all-ofx');
 
         // Gráficos
         let incomeVsExpensesChart, expensesByCategoryChart, incomeByCategoryChart, balanceEvolutionChart, paymentsChart;
 		let annualTrendChart, netWorthChart, creditCardsUsageChart, spendingByCardChart, budgetVsActualChart; // Alterado financialGoalsChart para budgetVsActualChart
 		let expensesByTypeChart, topExpensesByGroupChart;
+
+        // Função para popular o select de cartões na importação OFX
+        function populateOfxCardSelect() {
+            const select = document.getElementById('ofx-card');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            
+            creditCards.forEach(card => {
+                const option = document.createElement('option');
+                option.value = card.id;
+                option.textContent = `${card.name} (${card.bank})`;
+                select.appendChild(option);
+            });
+        }
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function () {
@@ -1264,7 +1406,7 @@
             loadKeywordCategories();
 
             renderKeywords();
-			renderCreditCards();
+			renderCreditCards(); // Esta função agora chama populateOfxCardSelect, que está definida acima
 
             // Carrega os dados do localStorage
             loadLocalStorageData();
@@ -1302,6 +1444,11 @@
             
             // Renderiza o orçamento inicial
             renderBudgetCategories(budgetMonthInput.value);
+
+            // Inicializa a primeira sub-aba de cartões
+            openSubTab(null, 'creditcard-register-section');
+            // Inicializa a primeira sub-aba de importação
+            openSubTab(null, 'import-keywords-section');
         });
 
     // Adicionar estas novas funções para manipulação de cartões:
@@ -1311,17 +1458,20 @@
         const limit = parseFloat(document.getElementById('creditcard-limit').value);
         const dueDate = parseInt(document.getElementById('creditcard-duedate').value);
         const closing = parseInt(document.getElementById('creditcard-closing').value);
+	    const number = document.getElementById('creditcard-number').value.trim();
 
-        if (!name || !bank || isNaN(limit) || limit <= 0 || isNaN(dueDate) || dueDate < 1 || dueDate > 31 || 
-            isNaN(closing) || closing < 1 || closing > 31) {
-            showStatus('Por favor, preencha todos os campos corretamente.', 'error');
-            return;
-        }
+
+         if (!name || !bank || isNaN(limit) || limit <= 0 || isNaN(dueDate) || dueDate < 1 || dueDate > 31 || 
+			isNaN(closing) || closing < 1 || closing > 31 || !number || number.length !== 4) {
+			showStatus('Por favor, preencha todos os campos corretamente. Número deve ter 4 dígitos.', 'error');
+			return;
+    }
 
         const card = {
             id: Date.now(),
             name,
             bank,
+	        number, // Adicionado número do cartão
             limit,
             dueDate,
             closing,
@@ -1338,40 +1488,41 @@
         showStatus('Cartão adicionado com sucesso!', 'success');
     }
 
-    function renderCreditCards() {
-        const tbody = document.querySelector('#creditcards-table tbody');
-        tbody.innerHTML = '';
+function renderCreditCards() {
+    const tbody = document.querySelector('#creditcards-table tbody');
+    tbody.innerHTML = '';
 
-        creditCards.forEach(card => {
-            const row = document.createElement('tr');
-            const formattedLimit = card.limit.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-            const formattedAvailable = card.available.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-
-            row.innerHTML = `
-                <td>${card.name}</td>
-                <td>${card.bank}</td>
-                <td>${formattedLimit}</td>
-                <td>${formattedAvailable}</td>
-                <td>${card.dueDate}</td>
-                <td>${card.closing}</td>
-                <td>
-                    <button class="btn-edit" onclick="editCreditCard(${card.id})">Editar</button>
-                    <button class="btn-danger" onclick="deleteCreditCard(${card.id})">Excluir</button>
-                </td>
-            `;
-
-            tbody.appendChild(row);
+    creditCards.forEach(card => {
+        const row = document.createElement('tr');
+        const formattedLimit = card.limit.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
         });
-        
-        // Atualiza o select de cartões para compras
-        updateCreditCardSelect();
-    }
+        const formattedAvailable = card.available.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+
+        row.innerHTML = `
+            <td>${card.name} (****${card.number})</td> <td>${card.bank}</td>
+            <td>${formattedLimit}</td>
+            <td>${formattedAvailable}</td>
+            <td>${card.dueDate}</td>
+            <td>${card.closing}</td>
+            <td>
+                <button class="btn-edit" onclick="editCreditCard(${card.id})">Editar</button>
+                <button class="btn-danger" onclick="deleteCreditCard(${card.id})">Excluir</button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+    
+    // Atualiza os selects de cartões
+    updateCreditCardSelect();
+    populateOfxCardSelect(); // Atualizado para chamar a função correta
+}
+
 
     function updateCreditCardSelect() {
         const select = document.getElementById('purchase-card');
@@ -1394,26 +1545,26 @@
             showStatus('Cartão excluído com sucesso!', 'success');
         }
     };
+window.editCreditCard = function(id) {
+    const card = creditCards.find(c => c.id === id);
+    if (!card) return;
 
-    window.editCreditCard = function(id) {
-        const card = creditCards.find(c => c.id === id);
-        if (!card) return;
+    // Preenche o formulário com os dados do cartão
+    document.getElementById('creditcard-name').value = card.name;
+    document.getElementById('creditcard-bank').value = card.bank;
+    document.getElementById('creditcard-number').value = card.number; // Novo campo
+    document.getElementById('creditcard-limit').value = card.limit;
+    document.getElementById('creditcard-duedate').value = card.dueDate;
+    document.getElementById('creditcard-closing').value = card.closing;
 
-        // Preenche o formulário com os dados do cartão
-        document.getElementById('creditcard-name').value = card.name;
-        document.getElementById('creditcard-bank').value = card.bank;
-        document.getElementById('creditcard-limit').value = card.limit;
-        document.getElementById('creditcard-duedate').value = card.dueDate;
-        document.getElementById('creditcard-closing').value = card.closing;
-
-        // Remove o cartão da lista
-        creditCards = creditCards.filter(c => c.id !== id);
-        
-        // Rola a página até o formulário
-        document.getElementById('creditcard-form').scrollIntoView({ behavior: 'smooth' });
-        
-        showStatus('Cartão carregado para edição. Faça as alterações e clique em "Adicionar Cartão" para salvar.', 'success');
-    };
+    // Remove o cartão da lista
+    creditCards = creditCards.filter(c => c.id !== id);
+    
+    // Rola a página até o formulário
+    document.getElementById('creditcard-form').scrollIntoView({ behavior: 'smooth' });
+    
+    showStatus('Cartão carregado para edição. Faça as alterações e clique em "Adicionar Cartão" para salvar.', 'success');
+};
 
         // Função para adicionar investimento
         function addInvestment() {
@@ -1571,7 +1722,7 @@
             showStatus('Investimento carregado para edição. Faça as alterações e clique em "Adicionar Investimento" para salvar.', 'success');
         };
 
-        // Funções para abas
+        // Funções para abas principais
         function openTab(event, tabId) {
             // Esconde todas as abas
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1592,10 +1743,54 @@
                 updateFullDashboard();
             } else if (tabId === 'budget-tab') {
                 renderBudgetCategories(budgetMonthInput.value);
+            } else if (tabId === 'creditcards-tab') {
+                // Ao abrir a aba de cartões, abre a primeira sub-aba por padrão
+                openSubTab(null, 'creditcard-register-section');
+            } else if (tabId === 'import-tab') { // Adicionado para a aba de importação
+                // Ao abrir a aba de importação, abre a primeira sub-aba por padrão
+                openSubTab(null, 'import-keywords-section');
             }
             // Adiciona a classe active na tab clicada
-            event.currentTarget.classList.add('active');
+            if (event) { // Check if event is not null (for initial load)
+                event.currentTarget.classList.add('active');
+            }
         }
+
+        // Nova função para abas secundárias (sub-abas)
+        window.openSubTab = function(event, subTabId) {
+            // Esconde todas as sub-abas de conteúdo
+            document.querySelectorAll('.sub-tab-content').forEach(subTabContent => {
+                subTabContent.classList.remove('active');
+            });
+
+            // Remove a classe active de todas as sub-tabs
+            document.querySelectorAll('.sub-tab').forEach(subTab => {
+                subTab.classList.remove('active');
+            });
+
+            // Mostra a sub-aba de conteúdo selecionada
+            document.getElementById(subTabId).classList.add('active');
+
+            // Adiciona a classe active na sub-tab clicada
+            if (event) { // Check if event is not null (for initial load)
+                event.currentTarget.classList.add('active');
+            }
+
+            // Ações específicas para cada sub-aba
+            if (subTabId === 'creditcard-register-section') {
+                renderCreditCards();
+            } else if (subTabId === 'creditcard-ofx-import-section') {
+                populateOfxCardSelect();
+            } else if (subTabId === 'creditcard-purchases-section') {
+                renderPurchasesTable();
+            } else if (subTabId === 'import-keywords-section') { // Para a sub-aba de palavras-chave
+                renderKeywords();
+            } else if (subTabId === 'import-csv-section') { // Para a sub-aba de importação CSV
+                // Nenhuma ação específica de renderização inicial necessária aqui,
+                // pois a pré-visualização é acionada pelo botão.
+            }
+        }
+
         // Nova função para carregar contas na tela de investimentos
         function loadInvestmentAccounts() {
             const investmentAccountSelect = document.getElementById('investment-account');
@@ -1712,7 +1907,8 @@
                 category,
                 account,
                 date,
-                value,
+                // Valor original, não Math.abs()
+                value, 
                 description
             };
 
@@ -1978,6 +2174,18 @@
                     option.textContent = category;
                     keywordCategory.appendChild(option);
                 });
+
+            // Atualiza o select de categorias para o formulário de compras de cartão
+            const purchaseCategorySelect = document.getElementById('purchase-category');
+            if (purchaseCategorySelect) {
+                purchaseCategorySelect.innerHTML = '<option value="">Selecione...</option>';
+                categoryTypes.despesa.sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    purchaseCategorySelect.appendChild(option);
+                });
+            }
         }
 
         function loadAccounts() {
@@ -2010,7 +2218,7 @@
         }
 
         function loadKeywordCategories() {
-            keywordCategory.innerHTML = '<option value="">Selecione...</option>';
+            keywordCategory.innerHTML = '<option value="">Selecione autora...</option>';
 
             const allCategories = [...new Set([...categoryTypes.receita, ...categoryTypes.despesa])];
             allCategories.sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -2023,18 +2231,19 @@
             });
         }
 
-        function updateAccountBalance(accountName, amount, isEdit = false, oldTransaction = null) {
-            const account = accounts.find(acc => acc.name === accountName);
-            if (account) {
-                // Se for uma edição, primeiro reverte o valor antigo
-                if (isEdit && oldTransaction) {
-                    account.balance += oldTransaction.type === 'receita' ? oldTransaction.value : -oldTransaction.value;
-                }
-                // Aplica o novo valor
-                account.balance += amount;
-                saveLocalStorageData();
-            }
+function updateAccountBalance(accountName, amount, isEdit = false, oldTransaction = null) {
+    const account = accounts.find(acc => acc.name === accountName);
+    if (account) {
+        // Se for uma edição, primeiro reverte o valor antigo
+        if (isEdit && oldTransaction) {
+            account.balance += oldTransaction.type === 'receita' ? -oldTransaction.value : oldTransaction.value;
         }
+        // Aplica o novo valor
+        account.balance += amount;
+        saveLocalStorageData();
+        updateBalance(); // Atualiza o saldo exibido
+    }
+}
 
          function renderKeywords() {
             keywordsList.innerHTML = '';
@@ -2210,7 +2419,7 @@
             importData.forEach(item => {
                 const historicoLower = item.historico.toLowerCase();
 
-                if (historicoLower.includes('saldo') || historicoLower.includes('s a l d o')) {
+                if (historicoLower.includes('saldo') || historicoLower.includes('s a l d o') || historicoLower.includes('BB Rende')) {
                     return false;
                 }
 
@@ -2280,68 +2489,75 @@
             }
         }
 
-           // Corrigir a função loadLocalStorageData para carregar todas as tabelas:
-    function loadLocalStorageData() {
-        try {
-            const savedData = localStorage.getItem('financeData');
-            if (!savedData) {
-                // Se não há dados salvos, usa as contas padrão
-                accounts = [...defaultAccounts];
-                return;
-            }
-
-            const data = JSON.parse(savedData);
-
-            if (data.transactions) transactions = data.transactions;
-            if (data.investments) investments = data.investments;
-            if (data.creditCards) creditCards = data.creditCards;
-            if (data.creditPurchases) creditPurchases = data.creditPurchases;
-            if (data.monthlyBudgets) monthlyBudgets = data.monthlyBudgets; // Carrega os orçamentos mensais
-            
-            // Garante que as contas padrão sempre existam, mesclando com as salvas
-            if (data.accounts && data.accounts.length > 0) {
-                accounts = [...defaultAccounts];
-                // Mescla contas salvas que não são padrão
-                data.accounts.forEach(savedAccount => {
-                    if (!accounts.some(acc => acc.name === savedAccount.name)) {
-                        accounts.push(savedAccount);
-                    }
-                });
-            } else {
-                accounts = [...defaultAccounts];
-            }
-
-            if (data.categoryTypes) {
-                categoryTypes.receita = data.categoryTypes.receita || categoryTypes.receita;
-                categoryTypes.despesa = data.categoryTypes.despesa || categoryTypes.despesa;
-            }
-            if (data.keywordRules) {
-                keywordRules.receita = data.keywordRules.receita || keywordRules.receita;
-                keywordRules.despesa = data.keywordRules.despesa || keywordRules.despesa;
-            }
-
-            // Renderizar todos os dados
-            loadCategories();
-            loadAccounts();
-            loadKeywordCategories();
-            renderKeywords();
-            renderTransactions();
-            renderInvestments();
-            renderCreditCards();
-            renderAccounts();
-            updateBalance();
-            updateDashboard();
-			updateFullDashboard(); // Adicionado esta linha
-            renderBudgetCategories(budgetMonthInput.value); // Renderiza os orçamentos após carregar os dados
-
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            showStatus('Erro ao carregar dados salvos.', 'error');
-            // Carrega contas padrão em caso de erro
+          function loadLocalStorageData() {
+    try {
+        const savedData = localStorage.getItem('financeData');
+        if (!savedData) {
+            // Se não há dados salvos, usa as contas padrão
             accounts = [...defaultAccounts];
-            loadAccounts();
+            return;
         }
+
+        const data = JSON.parse(savedData);
+
+        if (data.transactions) transactions = data.transactions;
+        if (data.investments) investments = data.investments;
+        if (data.creditCards) {
+            creditCards = data.creditCards.map(card => {
+                if (!card.number) {
+                    card.number = '0000'; // Valor padrão para cartões antigos
+                }
+                return card;
+            });
+        }
+        if (data.creditPurchases) creditPurchases = data.creditPurchases;
+        if (data.monthlyBudgets) monthlyBudgets = data.monthlyBudgets;
+        
+        // Garante que as contas padrão sempre existam, mesclando com as salvas
+        if (data.accounts && data.accounts.length > 0) {
+            accounts = [...defaultAccounts];
+            // Mescla contas salvas que não são padrão
+            data.accounts.forEach(savedAccount => {
+                if (!accounts.some(acc => acc.name === savedAccount.name)) {
+                    accounts.push(savedAccount);
+                }
+            });
+        } else {
+            accounts = [...defaultAccounts];
+        }
+
+        if (data.categoryTypes) {
+            categoryTypes.receita = data.categoryTypes.receita || categoryTypes.receita;
+            categoryTypes.despesa = data.categoryTypes.despesa || categoryTypes.despesa;
+        }
+        if (data.keywordRules) {
+            keywordRules.receita = data.keywordRules.receita || keywordRules.receita;
+            keywordRules.despesa = data.keywordRules.despesa || keywordRules.despesa;
+        }
+
+        // Renderizar todos os dados
+        loadCategories();
+        loadAccounts();
+        loadKeywordCategories();
+        renderKeywords();
+        renderTransactions();
+        renderInvestments();
+        renderCreditCards();
+        renderPurchasesTable();
+        renderAccounts();
+        updateBalance();
+        updateDashboard();
+        updateFullDashboard();
+        renderBudgetCategories(budgetMonthInput.value);
+
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        showStatus('Erro ao carregar dados salvos.', 'error');
+        // Carrega contas padrão em caso de erro
+        accounts = [...defaultAccounts];
+        loadAccounts();
     }
+}
 
         // Funções para o dashboard
         function updateDashboard() {
@@ -2404,104 +2620,102 @@ function renderTransactions() {
         transactionsTable.appendChild(row);
     });
 }
-        function generateDashboardData() {
-            // Filtra transações do mês atual
-            const currentMonth = filterDate.value || new Date().toISOString().substring(0, 7);
-            const allTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
-            
-            // Separa receitas e despesas
-            const incomes = allTransactions.filter(t => t.type === 'receita');
-            const expenses = allTransactions.filter(t => t.type === 'despesa');
-            
-            // Calcula totais
-            const totalIncome = incomes.reduce((sum, t) => sum + t.value, 0);
-            const totalExpense = expenses.reduce((sum, t) => sum + t.value, 0);
-            const currentBalance = totalIncome - totalExpense;
-            
-            // Calcula variação em relação ao mês anterior
-            const prevMonthData = getPreviousMonthData(currentMonth);
-            const incomeVariation = prevMonthData.totalIncome > 0 ? 
-                ((totalIncome - prevMonthData.totalIncome) / prevMonthData.totalIncome) * 100 : 0;
-            const expenseVariation = prevMonthData.totalExpense > 0 ? 
-                ((totalExpense - prevMonthData.totalExpense) / prevMonthData.totalExpense) * 100 : 0;
-            const balanceVariation = prevMonthData.balance !== 0 ? 
-                ((currentBalance - prevMonthData.balance) / Math.abs(prevMonthData.balance)) * 100 : 0;
-            
-            // Agrupa por categoria
-            const incomeByCategory = {};
-            incomes.forEach(t => {
-                incomeByCategory[t.category] = (incomeByCategory[t.category] || 0) + t.value;
-            });
-            
-            const expenseByCategory = {};
-            expenses.forEach(t => {
-                expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + t.value;
-            });
-            
-            // Ordena categorias por valor
-            const sortedIncomeCategories = Object.keys(incomeByCategory).sort(
-                (a, b) => incomeByCategory[b] - incomeByCategory[a]
-            );
-            const sortedExpenseCategories = Object.keys(expenseByCategory).sort(
-                (a, b) => expenseByCategory[b] - expenseByCategory[a]
-            );
-            
-            // Top 5 despesas
-            const topExpenses = [...expenses]
-                .sort((a, b) => b.value - a.value)
-                .slice(0, 5);
-            
-            // Dados históricos (últimos 6 meses)
-            const last6Months = getLast6Months(currentMonth);
-            const monthlyData = {
-                labels: last6Months.map(m => formatMonthLabel(m)),
-                income: [],
-                expense: [],
-                balance: []
-            };
-            
-            last6Months.forEach(month => {
-                const monthIncomes = transactions
-                    .filter(t => t.type === 'receita' && t.date.startsWith(month))
-                    .reduce((sum, t) => sum + t.value, 0);
-                
-                const monthExpenses = transactions
-                    .filter(t => t.type === 'despesa' && t.date.startsWith(month))
-                    .reduce((sum, t) => sum + t.value, 0);
-                
-                monthlyData.income.push(monthIncomes);
-                monthlyData.expense.push(monthExpenses);
-                monthlyData.balance.push(monthIncomes - monthExpenses);
-            });
-            
-            // Total investimentos
-            const totalInvestments = investments.reduce((sum, i) => sum + i.value, 0);
-            const prevMonthInvestments = getPreviousMonthInvestments(currentMonth);
-            const investmentVariation = prevMonthInvestments > 0 ? 
-                ((totalInvestments - prevMonthInvestments) / prevMonthInvestments) * 100 : 0;
-            
-            return {
-                currentMonth,
-                totalIncome,
-                totalExpense,
-                currentBalance,
-                incomeVariation,
-                expenseVariation,
-                balanceVariation,
-                incomeByCategory: {
-                    labels: sortedIncomeCategories,
-                    data: sortedIncomeCategories.map(c => incomeByCategory[c])
-                },
-                expenseByCategory: {
-                    labels: sortedExpenseCategories,
-                    data: sortedExpenseCategories.map(c => expenseByCategory[c])
-                },
-                monthlyData,
-                topExpenses,
-                totalInvestments,
-                investmentVariation
-            };
-        }
+function generateDashboardData() {
+    // Filtra transações do mês atual
+    const currentMonth = filterDate.value || new Date().toISOString().substring(0, 7);
+    const allTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+    
+    // Separa receitas e despesas
+    const incomes = allTransactions.filter(t => t.type === 'receita');
+    const expenses = allTransactions.filter(t => t.type === 'despesa');
+    
+    // Calcula totais
+    const totalIncome = incomes.reduce((sum, t) => sum + t.value, 0);
+    const totalExpense = expenses.reduce((sum, t) => sum + t.value, 0);
+    const accountsBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const currentBalance = accountsBalance + (totalIncome - (totalExpense * -1));
+
+    // Calcula variação em relação ao mês anterior
+    const prevMonthData = getPreviousMonthData(currentMonth);
+    const incomeVariation = prevMonthData.totalIncome > 0 ? 
+        ((totalIncome - prevMonthData.totalIncome) / prevMonthData.totalIncome) * 100 : 0;
+    const expenseVariation = prevMonthData.totalExpense > 0 ? 
+        ((totalExpense - prevMonthData.totalExpense) / (prevMonthData.totalExpense * -1)) * 100 : 0;
+    const balanceVariation = prevMonthData.balance !== 0 ? 
+        ((currentBalance - prevMonthData.balance) / Math.abs(prevMonthData.balance)) * 100 : 0;
+    
+    // Agrupa por categoria
+    const incomeByCategory = {};
+    incomes.forEach(t => {
+        incomeByCategory[t.category] = (incomeByCategory[t.category] || 0) + t.value;
+    });
+    
+    const expenseByCategory = {};
+    expenses.forEach(t => {
+        expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + t.value;
+    });
+    
+    // Ordena categorias por valor
+    const sortedIncomeCategories = Object.keys(incomeByCategory).sort(
+        (a, b) => incomeByCategory[b] - incomeByCategory[a]
+    );
+    const sortedExpenseCategories = Object.keys(expenseByCategory).sort(
+        (a, b) => expenseByCategory[b] - expenseByCategory[a]
+    );
+    
+    // Top 5 despesas - CORRIGIDO para ordenar pelo valor absoluto
+    const topExpenses = [...expenses]
+        .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+        .slice(0, 5);
+    
+ // Dados históricos (últimos 6 meses)
+    const last6Months = getLast6Months(currentMonth);
+    const monthlyData = last6Months.map(month => {
+        const monthIncomes = transactions
+            .filter(t => t.type === 'receita' && t.date.startsWith(month))
+            .reduce((sum, t) => sum + t.value, 0);
+        
+        const monthExpenses = transactions
+            .filter(t => t.type === 'despesa' && t.date.startsWith(month))
+            .reduce((sum, t) => sum + t.value, 0);
+        
+        return {
+            month: formatMonthLabel(month),
+            income: monthIncomes,
+            expense: monthExpenses,
+            balance: monthIncomes - monthExpenses
+        };
+    });
+    
+    // Total investimentos
+    const totalInvestments = investments.reduce((sum, i) => sum + i.value, 0);
+    const prevMonthInvestments = getPreviousMonthInvestments(currentMonth);
+    const investmentVariation = prevMonthInvestments > 0 ? 
+        ((totalInvestments - prevMonthInvestments) / prevMonthInvestments) * 100 : 0;
+    
+    return {
+        currentMonth,
+        totalIncome,
+        totalExpense,
+        currentBalance,
+        accountsBalance,
+        incomeVariation,
+        expenseVariation,
+        balanceVariation,
+        incomeByCategory: {
+            labels: sortedIncomeCategories,
+            data: sortedIncomeCategories.map(c => incomeByCategory[c])
+        },
+        expenseByCategory: {
+            labels: sortedExpenseCategories,
+            data: sortedExpenseCategories.map(c => expenseByCategory[c])
+        },
+        monthlyData,
+        topExpenses,
+        totalInvestments,
+        investmentVariation
+    };
+}
         
         function getPreviousMonthData(currentMonth) {
             const [year, month] = currentMonth.split('-').map(Number);
@@ -2548,19 +2762,12 @@ function renderTransactions() {
         }
         
         function getLast6Months(currentMonth) {
-            const [year, month] = currentMonth.split('-').map(Number);
+            const [year, month] = currentMonth.split('-');
             const months = [];
             
             for (let i = 5; i >= 0; i--) {
-                let m = month - i;
-                let y = year;
-                
-                if (m < 1) {
-                    m += 12;
-                    y--;
-                }
-                
-                months.push(`${y}-${m.toString().padStart(2, '0')}`);
+                let d = new Date(year, parseInt(month) - 1 - i, 1);
+                months.push(`${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`);
             }
             
             return months;
@@ -2572,27 +2779,27 @@ function renderTransactions() {
             return `${monthNames[parseInt(month) - 1]}/${year.substring(2)}`;
         }
         
-        function updateKPIs(data) {
-            // Atualiza KPIs
-            document.getElementById('kpi-receita').textContent = 
-                data.totalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            
-            document.getElementById('kpi-despesa').textContent = 
-                data.totalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            
-            document.getElementById('kpi-saldo').textContent = 
-                data.currentBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            
-            document.getElementById('kpi-investimento').textContent = 
-                data.totalInvestments.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            
-            // Atualiza variações
-            updateVariationElement('kpi-receita-variacao', data.incomeVariation, 'mês');
-            updateVariationElement('kpi-despesa-variacao', data.expenseVariation, 'mês');
-            updateVariationElement('kpi-saldo-variacao', data.balanceVariation, 'mês');
-            updateVariationElement('kpi-investimento-variacao', data.investmentVariation, 'mês');
-        }
-        
+       function updateKPIs(data) {
+    // Atualiza KPIs
+    document.getElementById('kpi-receita').textContent = 
+        data.totalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    document.getElementById('kpi-despesa').textContent = 
+        data.totalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    // Corrigido: mostra receitas - despesas (saldo líquido)
+    document.getElementById('kpi-saldo').textContent = 
+        data.currentBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    document.getElementById('kpi-investimento').textContent = 
+        data.totalInvestments.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    // Atualiza variações
+    updateVariationElement('kpi-receita-variacao', data.incomeVariation, 'mês');
+    updateVariationElement('kpi-despesa-variacao', data.expenseVariation, 'mês');
+    updateVariationElement('kpi-saldo-variacao', data.balanceVariation, 'mês');
+    updateVariationElement('kpi-investimento-variacao', data.investmentVariation, 'mês');
+}
         function updateVariationElement(elementId, variation, period) {
             const element = document.getElementById(elementId);
             const absVariation = Math.abs(variation);
@@ -2657,31 +2864,32 @@ function renderTransactions() {
             };
 
             // Gráfico Receitas vs Despesas
-            const incomeVsExpensesCtx = document.getElementById('incomeVsExpensesChart').getContext('2d');
-            if (incomeVsExpensesChart) incomeVsExpensesChart.destroy();
-            incomeVsExpensesChart = new Chart(incomeVsExpensesCtx, {
-                type: 'bar',
-                data: {
-                    labels: dashboardData.monthlyData.labels,
-                    datasets: [
-                        {
-                            label: 'Receitas',
-                            data: dashboardData.monthlyData.income,
-                            backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                            borderColor: 'rgba(46, 204, 113, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Despesas',
-                            data: dashboardData.monthlyData.expense,
-                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
-                            borderColor: 'rgba(231, 76, 60, 1)',
-                            borderWidth: 1
-                        }
-                    ]
+             const incomeVsExpensesCtx = document.getElementById('incomeVsExpensesChart').getContext('2d');
+    if (incomeVsExpensesChart) incomeVsExpensesChart.destroy();
+    incomeVsExpensesChart = new Chart(incomeVsExpensesCtx, {
+        type: 'bar',
+        data: {
+            labels: dashboardData.monthlyData.map(m => m.month),
+            datasets: [
+                {
+                    label: 'Receitas',
+                    data: dashboardData.monthlyData.map(m => m.income),
+                    backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    borderWidth: 1
                 },
-                options: chartOptions
-            });
+                {
+                    label: 'Despesas',
+                    data: dashboardData.monthlyData.map(m => m.expense),
+                    backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: chartOptions
+    });
+
 
             // Gráfico Despesas por Categoria
             const expensesByCategoryCtx = document.getElementById('expensesByCategoryChart').getContext('2d');
@@ -2733,125 +2941,204 @@ function renderTransactions() {
                 options: chartOptions
             });
 
-            // Gráfico Evolução do Saldo
-            const balanceEvolutionCtx = document.getElementById('balanceEvolutionChart').getContext('2d');
-            if (balanceEvolutionChart) balanceEvolutionChart.destroy();
-            balanceEvolutionChart = new Chart(balanceEvolutionCtx, {
-                type: 'line',
-                data: {
-                    labels: dashboardData.monthlyData.labels,
-                    datasets: [{
-                        label: 'Evolução do Saldo',
-                        data: dashboardData.monthlyData.balance,
-                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: {
-                            beginAtZero: false
+             const balanceEvolutionCtx = document.getElementById('balanceEvolutionChart').getContext('2d');
+    if (balanceEvolutionChart) balanceEvolutionChart.destroy();
+    
+    // Calcula saldo acumulado mês a mês
+    let runningBalance = dashboardData.accountsBalance;
+    const cumulativeBalance = dashboardData.monthlyData.map(month => {
+        runningBalance += (month.income - month.expense);
+        return runningBalance;
+    });
+
+    balanceEvolutionChart = new Chart(balanceEvolutionCtx, {
+        type: 'line',
+        data: {
+            labels: dashboardData.monthlyData.map(m => m.month),
+            datasets: [{
+                label: 'Saldo Acumulado (Contas + Transações)',
+                data: cumulativeBalance,
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                borderColor: 'rgba(52, 152, 219, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Saldo Acumulado: ' + context.raw.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL'
+                            });
                         }
                     }
                 }
-            });
+            }
         }
+    });
+        }
+// Lista de descrições que devem ser ignoradas na importação
+const excludedItems = [
+    'BB Rende Fácil',
+    'Rende Facil',
+    'saldo',
+    's a l d o',
+    'S A L D O',
+    'SALDO INICIAL',
+    'SALDO FINAL',
+    'SALDO ANTERIOR',
+    'SALDO ATUAL',
+    'SALDO DO DIA',
+    'SALDO DISPONIVEL',
+    'SALDO BLOQUEADO',
+    'SALDO PROJETADO',
+    'RESGATE AUTOMATICO',
+    'RENDIMENTO',
+    'JUROS',
+    'I.R.F.',
+    'I.O.F.',
+    'TARIFA',
+    'TAXA',
+    'ANUIDADE'
+];
 
-        function parseCSV(csvText) {
-            const lines = csvText.split('\n').filter(line => line.trim() !== '');
-            if (lines.length === 0) return [];
+function parseCSV(csvText) {
+    const lines = csvText.split('\n').filter(line => line.trim() !== '');
+    if (lines.length === 0) return [];
 
-            const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
-            const headerMap = {
-                'data': 'data',
-                'histórico': 'historico',
-                'histrico': 'historico',
-                'histýrico': 'historico',
-                'valor': 'valor'
-            };
+    // Tenta detectar o separador analisando a primeira linha
+    const firstLine = lines[0];
+    const commaCount = (firstLine.match(/,/g) || []).length;
+    const semicolonCount = (firstLine.match(/;/g) || []).length;
+    const separator = semicolonCount > commaCount ? ';' : ',';
+    
+    // Extrai cabeçalhos e remove aspas e espaços em branco
+    const headers = firstLine.split(separator).map(h => 
+        h.trim().replace(/"/g, '').toLowerCase()
+    );
 
-            const normalizedHeaders = headers.map(header => {
-                const cleanHeader = header.toLowerCase().replace(/[^\w\s]/gi, '').trim();
-                return headerMap[cleanHeader] || header;
-            });
+    // Mapeamento mais flexível de cabeçalhos
+    const headerMap = {
+        'data': 'data',
+        'histórico': 'historico',
+        'histrico': 'historico',
+        'histýrico': 'historico',
+        'valor': 'valor'      
+    };
 
-            const requiredColumns = ['data', 'historico', 'valor'];
-            const missingColumns = requiredColumns.filter(col => !normalizedHeaders.includes(col));
-            if (missingColumns.length > 0) {
-                throw new Error(`Colunas obrigatórias não encontradas: ${missingColumns.join(', ')}`);
+    // Normaliza os cabeçalhos
+    const normalizedHeaders = headers.map(header => {
+        const cleanHeader = header.toLowerCase().replace(/[^\w\s]/gi, '').trim();
+        return headerMap[cleanHeader] || cleanHeader;
+    });
+
+    // Verifica se temos pelo menos data, histórico e valor
+    const hasData = normalizedHeaders.includes('data');
+    const hasHistorico = normalizedHeaders.includes('historico');
+    const hasValor = normalizedHeaders.includes('valor');
+    
+    if (!hasData || !hasHistorico || !hasValor) {
+        throw new Error(`Colunas obrigatórias não encontradas: ${!hasData ? 'data' : ''}${!hasHistorico ? (!hasData ? ', ' : '') + 'Histórico' : ''}${!hasValor ? ((!hasData || !hasHistorico) ? ', ' : '') + 'valor' : ''}`);
+    }
+
+    const dataIndex = normalizedHeaders.indexOf('data');
+    const historicoIndex = normalizedHeaders.indexOf('historico');
+    const valorIndex = normalizedHeaders.indexOf('valor');
+
+    const results = [];
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+
+        // Divide a linha considerando aspas e separadores dentro de aspas
+        let values = [];
+        let inQuotes = false;
+        let currentValue = '';
+        
+        for (let char of lines[i]) {
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if ((char === separator || char === ',') && !inQuotes) {
+                values.push(currentValue.trim());
+                currentValue = '';
+            } else {
+                currentValue += char;
+            }
+        }
+        values.push(currentValue.trim()); // Adiciona o último valor
+        
+        // Remove aspas extras dos valores
+        values = values.map(v => v.replace(/^"|"$/g, ''));
+
+        if (values.length <= Math.max(dataIndex, historicoIndex, valorIndex)) continue;
+
+        const historico = values[historicoIndex];
+		const shouldExclude = excludedItems.some(excluded => 
+            historico.toLowerCase().includes(excluded.toLowerCase())
+        );
+        
+        if (shouldExclude) continue;
+		
+        const dateParts = values[dataIndex].split(/[\/\-]/); // Aceita / ou - como separador de data
+        if (dateParts.length === 3) {
+            const day = dateParts[0].padStart(2, '0');
+            const month = dateParts[1].padStart(2, '0');
+            const year = dateParts[2].length === 2 ? '20' + dateParts[2] : dateParts[2]; // Assume século 21 para anos de 2 dígitos
+            const formattedDate = `${year}-${month}-${day}`;
+
+            const rawValue = values[valorIndex];
+            let cleanValueString = rawValue.trim();
+
+            // Trata valores negativos em diferentes formatos
+            let isNegative = false;
+            if (cleanValueString.startsWith('-')) {
+                isNegative = true;
+                cleanValueString = cleanValueString.substring(1);
+            } else if (cleanValueString.endsWith('-')) {
+                isNegative = true;
+                cleanValueString = cleanValueString.substring(0, cleanValueString.length - 1);
+            } else if (cleanValueString.startsWith('(') && cleanValueString.endsWith(')')) {
+                isNegative = true;
+                cleanValueString = cleanValueString.substring(1, cleanValueString.length - 1);
             }
 
-            const dataIndex = normalizedHeaders.indexOf('data');
-            const historicoIndex = normalizedHeaders.indexOf('historico');
-            const valorIndex = normalizedHeaders.indexOf('valor');
+            // Remove pontos de milhar e substitui vírgula decimal por ponto
+            cleanValueString = cleanValueString.replace('.', ',');
 
-            const results = [];
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
+            let valor = parseFloat(cleanValueString);
 
-                const values = lines[i].split(';').map(v => v.trim());
-                if (values.length <= Math.max(dataIndex, historicoIndex, valorIndex)) continue;
-
-                const historico = values[historicoIndex]; // Keep original case for historico
-                if (historico.toLowerCase().includes('saldo') || historico.toLowerCase().includes('s a l d o')) continue;
-
-                const dateParts = values[dataIndex].split('/');
-                if (dateParts.length === 3) {
-                    const day = dateParts[0].padStart(2, '0');
-                    const month = dateParts[1].padStart(2, '0');
-                    const formattedDate = `${dateParts[2]}-${month}-${day}`;
-
-                    const rawValue = values[valorIndex];
-                    let cleanValueString = rawValue.trim();
-
-                    // Explicitly handle common negative formats: (value), -value, value-
-                    let isNegative = false;
-                    if (cleanValueString.startsWith('-')) {
-                        isNegative = true;
-                        cleanValueString = cleanValueString.substring(1);
-                    } else if (cleanValueString.endsWith('-')) {
-                        isNegative = true;
-                        cleanValueString = cleanValueString.substring(0, cleanValueString.length - 1);
-                    } else if (cleanValueString.startsWith('(') && cleanValueString.endsWith(')')) {
-                        isNegative = true;
-                        cleanValueString = cleanValueString.substring(1, cleanValueString.length - 1);
-                    }
-
-                    // Remove thousands separators (dots) and replace decimal comma with dot
-                    cleanValueString = cleanValueString.replace('.', ',');
-
-                    let valor = parseFloat(cleanValueString);
-
-                    if (isNaN(valor)) {
-                        console.warn(`Skipping invalid value: '${rawValue}' after cleaning to '${cleanValueString}'`);
-                        continue;
-                    }
-
-                    if (isNegative) {
-                        valor = -Math.abs(valor); // Ensure it's negative if marked as such
-                    } else {
-                        valor = Math.abs(valor); // Ensure it's positive if not marked negative
-                    }
-
-                    const type = valor >= 0 ? 'receita' : 'despesa';
-                    results.push({
-                        originalDate: values[dataIndex],
-                        date: formattedDate,
-                        description: historico, // Use original historico for description
-                        historico: historico,
-                        value: valor, // Use the correctly signed value
-                        type: type,
-                        category: ''
-                    });
-                }
+            if (isNaN(valor)) {
+                console.warn(`Valor inválido ignorado: '${rawValue}' (transformado em '${cleanValueString}')`);
+                continue;
             }
 
-            return results;
+            if (isNegative) {
+                valor = -Math.abs(valor);
+            }
+
+            results.push({
+                originalDate: values[dataIndex],
+                date: formattedDate,
+                description: historico,
+                historico: historico,
+                value: valor,
+                type: valor >= 0 ? 'receita' : 'despesa',
+                category: ''
+            });
         }
+    }
+
+    return results;
+}
 
         // Funções globais
         window.deleteTransaction = function (id) {
@@ -3045,34 +3332,45 @@ function renderTransactions() {
         });
 
         // Atualiza o saldo
-        function updateBalance() {
-            const typeFilter = filterType.value;
-            const categoryFilter = filterCategory.value;
-            const accountFilter = filterAccount.value;
-            const dateFilter = filterDate.value;
-            const descriptionSearch = filterDescriptionSearch.value.toLowerCase();
+function updateBalance() {
+    const typeFilter = filterType.value;
+    const categoryFilter = document.getElementById('filter-category').value; // Use o elemento correto
+    const accountFilter = filterAccount.value;
+    const dateFilter = filterDate.value;
+    const descriptionSearch = filterDescriptionSearch.value.toLowerCase();
 
-            const filteredTransactions = transactions.filter(transaction => {
-                if (typeFilter !== 'all' && transaction.type !== typeFilter) return false;
-                if (categoryFilter !== 'all' && transaction.category !== categoryFilter) return false;
-                if (accountFilter !== 'all' && transaction.account !== accountFilter) return false;
-                if (dateFilter && !transaction.date.startsWith(dateFilter)) return false;
-                if (descriptionSearch && !transaction.description.toLowerCase().includes(descriptionSearch)) return false;
-                return true;
-            });
+    // Calcula o saldo das transações filtradas
+    const transactionsBalance = transactions
+        .filter(transaction => {
+            if (typeFilter !== 'all' && transaction.type !== typeFilter) return false;
+            if (categoryFilter !== 'all' && transaction.category !== categoryFilter) return false;
+            if (accountFilter !== 'all' && transaction.account !== accountFilter) return false;
+            if (dateFilter && !transaction.date.startsWith(dateFilter)) return false;
+            if (descriptionSearch && !transaction.description.toLowerCase().includes(descriptionSearch)) return false;
+            return true;
+        })
+        .reduce((total, transaction) => {
+            return transaction.type === 'receita' ? total + transaction.value : total - transaction.value;
+        }, 0);
 
-            const balance = filteredTransactions.reduce((total, transaction) => {
-                return transaction.type === 'receita' ? total + transaction.value : total - transaction.value;
-            }, 0);
+    // Calcula o saldo total das contas (incluindo saldos iniciais e investimentos)
+    const accountsBalance = accounts.reduce((total, account) => {
+        // Verifica se a conta está no filtro
+        if (accountFilter !== 'all' && account.name !== accountFilter) return total;
+        return total + account.balance;
+    }, 0);
 
-            const formattedBalance = balance.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            });
+    // Saldo total = saldo das contas + saldo das transações filtradas
+    const totalBalance = accountsBalance + transactionsBalance;
 
-            balanceElement.textContent = `Saldo: ${formattedBalance}`;
-            balanceElement.className = balance >= 0 ? 'saldo positivo' : 'saldo negativo';
-        }
+    const formattedBalance = totalBalance.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+
+    balanceElement.textContent = `Saldo: ${formattedBalance}`;
+    balanceElement.className = totalBalance >= 0 ? 'saldo positivo' : 'saldo negativo';
+}
         
         window.editTransaction = function(id) {
             const transaction = transactions.find(t => t.id === id);
@@ -3108,15 +3406,14 @@ function updateFullDashboard() {
     updateAccountsSummary(dashboardData);
 }
 
-// Gera dados para o dashboard completo
 function generateFullDashboardData() {
     const currentYear = new Date().getFullYear();
     const currentYearStr = currentYear.toString();
     const lastYearStr = (currentYear - 1).toString();
     
     // Filtra transações do ano atual
-    const currentYearTransactions = transactions.filter(t => t.date.startsWith(currentYearStr));
-    const lastYearTransactions = transactions.filter(t => t.date.startsWith(lastYearStr));
+    const currentYearTransactions = transactions.filter(t => new Date(t.date).getFullYear() === currentYear);
+    const lastYearTransactions = transactions.filter(t => new Date(t.date).getFullYear() === (currentYear - 1));
     
     // Separa receitas e despesas
     const currentYearIncomes = currentYearTransactions.filter(t => t.type === 'receita');
@@ -3127,21 +3424,55 @@ function generateFullDashboardData() {
     // Calcula totais
     const totalIncomeCurrentYear = currentYearIncomes.reduce((sum, t) => sum + t.value, 0);
     const totalExpenseCurrentYear = currentYearExpenses.reduce((sum, t) => sum + t.value, 0);
-    const currentYearBalance = totalIncomeCurrentYear - totalExpenseCurrentYear;
     
     const totalIncomeLastYear = lastYearIncomes.reduce((sum, t) => sum + t.value, 0);
     const totalExpenseLastYear = lastYearExpenses.reduce((sum, t) => sum + t.value, 0);
-    const lastYearBalance = totalIncomeLastYear - totalExpenseLastYear;
     
-    // Calcula variação anual
-    const incomeVariation = totalIncomeLastYear > 0 ? 
-        ((totalIncomeCurrentYear - totalIncomeLastYear) / totalIncomeLastYear) * 100 : 0;
-    const expenseVariation = totalExpenseLastYear > 0 ? 
-        ((totalExpenseCurrentYear - totalExpenseLastYear) / totalExpenseLastYear) * 100 : 0;
-    const balanceVariation = lastYearBalance !== 0 ? 
-        ((currentYearBalance - lastYearBalance) / Math.abs(lastYearBalance)) * 100 : 0;
+    // Calculate the total balance of all accounts at the very beginning of the current year.
+    // This involves taking the current accounts balance and reversing all transactions from the current year.
+    let totalAccountsBalanceAtStartOfYear = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+    // Reverse the current year's transactions to get the balance at the start of the year
+    currentYearTransactions.forEach(t => {
+        totalAccountsBalanceAtStartOfYear -= (t.type === 'receita' ? t.value : -t.value);
+    });
+
+    let runningAccumulatedBalance = totalAccountsBalanceAtStartOfYear;
+
+    const monthlyAccumulatedBalanceData = [];
+    for (let month = 1; month <= 12; month++) {
+        const monthStr = month.toString().padStart(2, '0');
+        const monthKey = `${currentYearStr}-${monthStr}`;
+
+        const monthIncomes = currentYearTransactions
+            .filter(t => t.type === 'receita' && t.date.startsWith(monthKey))
+            .reduce((sum, t) => sum + t.value, 0);
+
+        const monthExpenses = currentYearTransactions
+            .filter(t => t.type === 'despesa' && t.date.startsWith(monthKey))
+            .reduce((sum, t) => sum + t.value, 0);
+
+        const netMonthlyChange = monthIncomes - monthExpenses;
+        runningAccumulatedBalance += netMonthlyChange;
+
+        monthlyAccumulatedBalanceData.push({
+            month: formatMonthLabel(monthKey),
+            accumulatedBalance: runningAccumulatedBalance
+        });
+    }
+
+    // Calculate annual variation for accumulated balance (Net Worth)
+    const currentYearEndBalance = runningAccumulatedBalance; // This is the balance at the end of the current year (or last processed month)
+
+    // To get previous year's end balance, we need to sum up all transactions before current year and add to initial accounts balance
+    // This is equivalent to totalAccountsBalanceAtStartOfYear
+    const prevYearEndBalanceForVariation = totalAccountsBalanceAtStartOfYear;
+
+    const annualAccumulatedBalanceVariation = prevYearEndBalanceForVariation !== 0 ?
+        ((currentYearEndBalance - prevYearEndBalanceForVariation) / Math.abs(prevYearEndBalanceForVariation)) * 100 :
+        (currentYearEndBalance > 0 ? 100 : 0); // If previous was 0, and current is positive, 100% growth.
     
-    // Dados mensais para o ano atual
+    // Dados mensais para o ano atual (para o gráfico Receitas vs Despesas)
     const monthlyData = [];
     for (let month = 1; month <= 12; month++) {
         const monthStr = month.toString().padStart(2, '0');
@@ -3156,30 +3487,34 @@ function generateFullDashboardData() {
             .reduce((sum, t) => sum + t.value, 0);
         
         monthlyData.push({
-            month: monthStr,
+            month: formatMonthLabel(monthKey),
             income: monthIncomes,
             expense: monthExpenses,
             balance: monthIncomes - monthExpenses
         });
     }
     
-    // Total investimentos
-    const totalInvestments = investments.reduce((sum, i) => sum + i.value, 0);
-    const prevMonthInvestments = getPreviousMonthInvestments(new Date().toISOString().substring(0, 7));
-    const investmentVariation = prevMonthInvestments > 0 ? 
-        ((totalInvestments - prevMonthInvestments) / prevMonthInvestments) * 100 : 0;
-    
-    // Top receitas e despesas do ano
+    // Top 5 receitas do ano
     const topIncomes = [...currentYearIncomes]
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
     
+    // Top 5 despesas do ano - CORRIGIDO
     const topExpenses = [...currentYearExpenses]
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 5);
+        .map(t => ({ ...t, absoluteValue: Math.abs(t.value) })) // Adiciona valor absoluto para ordenação
+        .sort((a, b) => b.absoluteValue - a.absoluteValue) // Ordena pelo maior valor absoluto
+        .slice(0, 5)
+        .map(t => ({
+            date: t.date,
+            description: t.description,
+            category: t.category,
+            value: t.value // Mantém o valor original (negativo)
+        }));
+    
+    // Agrupa despesas por categoria
     const expenseByCategory = {};
-    currentYearExpenses.forEach(expense => {
-        expenseByCategory[expense.category] = (expenseByCategory[expense.category] || 0) + expense.value;
+    currentYearExpenses.forEach(t => {
+        expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + t.value;
     });
     
     // Ordena categorias por valor
@@ -3213,13 +3548,14 @@ function generateFullDashboardData() {
         return {
             name: account.name,
             type: account.type,
+            bank: account.bank || '-',
             balance: account.balance,
             monthVariation: monthVariation
         };
     });
     
     const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
-
+    
     // Dados para o gráfico de Orçamento vs. Gasto
     const currentBudgetMonth = budgetMonthInput.value || new Date().toISOString().substring(0, 7);
     const currentMonthBudgets = monthlyBudgets[currentBudgetMonth] || {};
@@ -3235,9 +3571,9 @@ function generateFullDashboardData() {
 
     allExpenseCategories.forEach(category => {
         const budgetedAmount = currentMonthBudgets[category] || 0;
-        const spentAmount = transactions
+        const spentAmount = Math.abs(transactions
             .filter(t => t.type === 'despesa' && t.category === category && t.date.startsWith(currentBudgetMonth))
-            .reduce((sum, t) => sum + t.value, 0);
+            .reduce((sum, t) => sum + t.value, 0));
         
         budgetVsActualData.labels.push(category);
         budgetVsActualData.budgeted.push(budgetedAmount);
@@ -3248,27 +3584,50 @@ function generateFullDashboardData() {
         currentYear: currentYearStr,
         totalIncome: totalIncomeCurrentYear,
         totalExpense: totalExpenseCurrentYear,
-        currentBalance: currentYearBalance,
-        incomeVariation,
-        expenseVariation,
-        balanceVariation,
-        monthlyData,
-        totalInvestments,
-        investmentVariation,
+        currentBalance: currentYearEndBalance, // Este é o saldo acumulado final para o KPI
+        incomeVariation: totalIncomeLastYear > 0 ? ((totalIncomeCurrentYear - totalIncomeLastYear) / totalIncomeLastYear) * 100 : 0,
+        expenseVariation: totalExpenseLastYear > 0 ? ((totalExpenseCurrentYear - totalExpenseLastYear) / Math.abs(totalExpenseLastYear)) * 100 : 0,
+        balanceVariation: annualAccumulatedBalanceVariation, // Variação anual do saldo acumulado
+        monthlyData, // Para o gráfico de Receitas vs Despesas (Evolução Anual)
+        monthlyAccumulatedBalanceData, // Novo: para o gráfico de Patrimônio Líquido / Saldo Acumulado
+        totalInvestments: investments.reduce((sum, i) => sum + i.value, 0), // Total de investimentos acumulados
+        investmentVariation: getInvestmentVariation(), // Variação do total de investimentos
         topIncomes,
         topExpenses,
+        expenseByCategory: {
+            labels: sortedExpenseCategories,
+            data: sortedExpenseCategories.map(c => Math.abs(expenseByCategory[c]))
+        },
         cardsUsage,
         accountsSummary,
-        totalBalance,
-		expenseByCategory: {
-            labels: sortedExpenseCategories,
-            data: sortedExpenseCategories.map(c => expenseByCategory[c])
-        },
-        topExpenses: [...currentYearExpenses]
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 5),
-        budgetVsActualData // Adiciona os dados do orçamento
+        totalBalance, // Saldo atual das contas (não acumulado do ano)
+        budgetVsActualData
     };
+}
+
+// Função auxiliar para calcular variação de investimentos
+function getInvestmentVariation() {
+    const today = new Date();
+    const currentMonth = today.toISOString().substring(0, 7);
+
+    // Calcula o total de investimentos acumulados até o mês atual
+    const totalInvestmentsCurrentMonth = investments
+        .filter(i => new Date(i.date).toISOString().substring(0, 7) <= currentMonth)
+        .reduce((sum, i) => sum + i.value, 0);
+
+    // Calcula o total de investimentos acumulados até o mês anterior
+    let prevMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const prevMonthStr = prevMonthDate.toISOString().substring(0, 7);
+
+    const totalInvestmentsPrevMonth = investments
+        .filter(i => new Date(i.date).toISOString().substring(0, 7) <= prevMonthStr)
+        .reduce((sum, i) => sum + i.value, 0);
+
+    if (totalInvestmentsPrevMonth === 0) {
+        return totalInvestmentsCurrentMonth > 0 ? 100 : 0; // Se não havia investimentos no mês anterior, mas há agora, 100% de crescimento.
+    }
+
+    return ((totalInvestmentsCurrentMonth - totalInvestmentsPrevMonth) / totalInvestmentsPrevMonth) * 100;
 }
 
 // Atualiza os KPIs do dashboard completo
@@ -3357,22 +3716,43 @@ function renderFullCharts(data) {
         options: chartOptions
     });
 
-    // Gráfico de Patrimônio Líquido
+    // Gráfico de Patrimônio Líquido (agora Saldo Acumulado do Ano)
     const netWorthCtx = document.getElementById('netWorthChart').getContext('2d');
     if (netWorthChart) netWorthChart.destroy();
     netWorthChart = new Chart(netWorthCtx, {
-        type: 'bar',
+        type: 'line', // Alterado para linha para representar o acumulado
         data: {
-            labels: data.monthlyData.map(m => formatMonthLabel(`${data.currentYear}-${m.month}`)),
+            labels: data.monthlyAccumulatedBalanceData.map(m => m.month),
             datasets: [{
-                label: 'Patrimônio Líquido',
-                data: data.monthlyData.map(m => m.balance),
-                backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                label: 'Saldo Acumulado', // Rótulo alterado
+                data: data.monthlyAccumulatedBalanceData.map(m => m.accumulatedBalance),
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
                 borderColor: 'rgba(52, 152, 219, 1)',
-                borderWidth: 1
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
             }]
         },
-        options: chartOptions
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Saldo Acumulado: ' + context.raw.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL'
+                            });
+                        }
+                    }
+                }
+            }
+        }
     });
 
     // Gráfico de Utilização de Cartões
@@ -3556,37 +3936,7 @@ function renderFullCharts(data) {
     });
 }
 
-// Atualiza as tabelas de top receitas/despesas anuais
 function updateAnnualTopTables(data) {
-    // Top receitas
-    const incomesTbody = document.querySelector('#topIncomesTable tbody');
-    incomesTbody.innerHTML = '';
-    
-    data.topIncomes.forEach(income => {
-        const row = document.createElement('tr');
-        const date = new Date(income.date);
-        const formattedDate = date.toLocaleDateString('pt-BR');
-        const formattedValue = income.value.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        });
-        
-        row.innerHTML = `
-            <td>${formattedDate}</td>
-            <td>${income.description}</td>
-            <td>${income.category}</td>
-            <td class="receita">${formattedValue}</td>
-        `;
-        
-        incomesTbody.appendChild(row);
-    });
-    
-    if (data.topIncomes.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="4" style="text-align: center;">Nenhuma receita registrada este ano</td>';
-        incomesTbody.appendChild(row);
-    }
-    
     // Top despesas
     const expensesTbody = document.querySelector('#topExpensesAnnualTable tbody');
     expensesTbody.innerHTML = '';
@@ -3595,7 +3945,8 @@ function updateAnnualTopTables(data) {
         const row = document.createElement('tr');
         const date = new Date(expense.date);
         const formattedDate = date.toLocaleDateString('pt-BR');
-        const formattedValue = expense.value.toLocaleString('pt-BR', {
+        // Usamos Math.abs() apenas para exibição, mantendo o valor original negativo
+        const formattedValue = Math.abs(expense.value).toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL'
         });
@@ -3604,8 +3955,7 @@ function updateAnnualTopTables(data) {
             <td>${formattedDate}</td>
             <td>${expense.description}</td>
             <td>${expense.category}</td>
-            <td class="despesa">${formattedValue}</td>
-        `;
+            <td class="despesa">-${formattedValue}</td> `;
         
         expensesTbody.appendChild(row);
     });
@@ -3643,6 +3993,7 @@ function updateAccountsSummary(data) {
         row.innerHTML = `
             <td>${account.name}</td>
             <td>${account.type}</td>
+            <td>${account.bank}</td>
             <td>${formattedBalance}</td>
             <td style="color: ${variationColor}">${variationSymbol}${formattedVariation}</td>
             <td>${percentage}</td>
@@ -3839,13 +4190,13 @@ function simplifyDescription(desc) {
     let simplified = desc.toLowerCase()
         .replace(/[0-9]/g, '')
         .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, ' ')
+        .replace(/\s+/g, '') // Remove todos os espaços
         .trim();
     
     // Remove palavras comuns que não ajudam no agrupamento
     const stopWords = ['pagamento', 'de', 'da', 'do', 'das', 'dos', 'ref', 'referente', 'compra', 'cartao', 'credito', 'debito', 'transf', 'transferencia', 'pix'];
     simplified = simplified.split(' ').filter(word => 
-        word.length > 2 && !stopWords.includes(word)).join(' '); // Reduzido o tamanho mínimo da palavra para 2
+        word.length > 2 && !stopWords.includes(word)).join(''); // Reduzido o tamanho mínimo da palavra para 2
     
     return simplified;
 }
@@ -3936,6 +4287,426 @@ function renderRecurringExpensesTable() {
 document.getElementById('analyze-recurring').addEventListener('click', function() {
     renderRecurringExpensesTable();
 });
+
+// Event listener para o botão de pré-visualização OFX
+previewOfxButton.addEventListener('click', () => {
+    const file = ofxFileInput.files[0];
+    if (!file) {
+        showStatus('Por favor, selecione um arquivo OFX.', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const ofxContent = e.target.result;
+        ofxData = parseOFX(ofxContent); // Suponha que parseOFX retorna um array de transações
+
+        if (ofxData && ofxData.length > 0) {
+            renderOfxPreview();
+            ofxPreviewDiv.style.display = 'block';
+        } else {
+            showStatus('Não foi possível processar o arquivo OFX ou não há transações para importar.', 'error');
+        }
+    };
+    reader.readAsText(file);
+});
+
+// Função para parsear o arquivo OFX
+function parseOFX(ofxContent) {
+    const transactions = [];
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(ofxContent, "application/xml");
+
+    // Verifica se houve erro de parsing
+    const errorNode = xmlDoc.querySelector("parsererror");
+    if (errorNode) {
+        console.error("Erro ao parsear OFX:", errorNode.textContent);
+        showStatus("Erro ao ler o arquivo OFX. Verifique se é um arquivo OFX válido.", "error");
+        return [];
+    }
+
+    const stmttrnElements = xmlDoc.getElementsByTagName("STMTTRN");
+
+    for (let i = 0; i < stmttrnElements.length; i++) {
+        const trnTypeElement = stmttrnElements[i].getElementsByTagName("TRNTYPE")[0];
+        const dtPostedElement = stmttrnElements[i].getElementsByTagName("DTPOSTED")[0];
+        const trnAmtElement = stmttrnElements[i].getElementsByTagName("TRNAMT")[0];
+        const memoElement = stmttrnElements[i].getElementsByTagName("MEMO")[0];
+        const nameElement = stmttrnElements[i].getElementsByTagName("NAME")[0]; // NAME é mais comum para descrição
+
+        const type = trnTypeElement ? trnTypeElement.textContent : '';
+        const rawDate = dtPostedElement ? dtPostedElement.textContent : '';
+        const amount = trnAmtElement ? parseFloat(trnAmtElement.textContent) : 0; // CORRIGIDO: trnAmtMElement para trnAmtElement
+        const description = (nameElement ? nameElement.textContent.trim() : '') || (memoElement ? memoElement.textContent.trim() : '');
+          const shouldExclude = excludedItems.some(excluded => 
+            description.toLowerCase().includes(excluded.toLowerCase())
+        );
+        
+        if (shouldExclude) continue;
+		
+        // Formata a data (OFX usa formatoYYYYMMDD ou紝MMDDHHMMSS)
+        let formattedDate = '';
+        if (rawDate.length >= 8) {
+            const year = rawDate.substring(0, 4);
+            const month = rawDate.substring(4, 6);
+            const day = rawDate.substring(6, 8);
+            formattedDate = `${year}-${month}-${day}`;
+        } else {
+            formattedDate = new Date().toISOString().split('T')[0]; // Fallback para data atual
+        }
+
+        let installments = 1;
+        let currentInstallment = 1;
+
+        // Tenta identificar parcelas na descrição (ex: PARC 08/09)
+        const installmentMatch = description.match(/PARC\s*(\d+)\/(\d+)/i);
+        if (installmentMatch) {
+            currentInstallment = parseInt(installmentMatch[1]);
+            installments = parseInt(installmentMatch[2]);
+        }
+        
+        transactions.push({
+            type,
+            date: formattedDate,
+            description,
+            amount,
+            originalDate: rawDate, // Manter a data original para referência
+            installments,
+            currentInstallment
+        });
+    }
+    
+    return transactions;
+}
+
+// Função para renderizar a pré-visualização OFX
+function renderOfxPreview() {
+    const tbody = document.querySelector('#ofx-preview-table tbody');
+    tbody.innerHTML = '';
+    selectedOfxItems = [];
+    
+    const cardId = parseInt(document.getElementById('ofx-card').value);
+    const card = creditCards.find(c => c.id === cardId);
+    
+    ofxData.forEach((transaction, index) => {
+        const row = document.createElement('tr');
+        const formattedDate = new Date(transaction.date).toLocaleDateString('pt-BR');
+        const formattedAmount = transaction.amount.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+        
+        // Classifica automaticamente baseado nas palavras-chave (apenas despesa para OFX de cartão)
+        let category = 'Outros';
+        const descriptionLower = transaction.description.toLowerCase();
+        
+        for (const rule of keywordRules.despesa) {
+            if (descriptionLower.includes(rule.keyword)) {
+                category = rule.category;
+                break;
+            }
+        }
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.index = index;
+        checkbox.checked = true; // Por padrão, todas as transações são selecionadas
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                selectedOfxItems.push(index);
+            } else {
+                selectedOfxItems = selectedOfxItems.filter(i => i !== index);
+            }
+        });
+        
+        selectedOfxItems.push(index); // Adiciona ao array de selecionados inicialmente
+        
+        const categorySelect = document.createElement('select');
+        categorySelect.className = 'form-control';
+        // Popula o select de categorias com as categorias de despesa
+        categoryTypes.despesa.sort((a,b) => a.localeCompare(b, 'pt-BR')).forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            option.selected = cat === category; // Seleciona a categoria automaticamente classificada
+            categorySelect.appendChild(option);
+        });
+        
+        // Adiciona um listener para atualizar a categoria na ofxData quando o usuário muda
+        categorySelect.addEventListener('change', function() {
+            ofxData[index].category = this.value;
+        });
+
+        const installmentsText = transaction.installments > 1 ? `${transaction.currentInstallment}/${transaction.installments}` : 'À Vista';
+
+        row.innerHTML = `
+            <td class="import-checkbox"></td>
+            <td>${formattedDate}</td>
+            <td>${transaction.description}</td>
+            <td class="despesa">${formattedAmount}</td>
+            <td>${installmentsText}</td> <td></td>
+            <td>Novo</td>
+        `;
+        
+        row.cells[0].appendChild(checkbox);
+        row.cells[5].appendChild(categorySelect); // Categoria agora na célula 5
+        
+        tbody.appendChild(row);
+    });
+    
+    // Event listener para selecionar/deselecionar todos
+    document.getElementById('select-all-ofx').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('#ofx-preview-table tbody input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+            const index = parseInt(checkbox.dataset.index);
+            if (checkbox.checked && !selectedOfxItems.includes(index)) {
+                selectedOfxItems.push(index);
+            } else if (!checkbox.checked) {
+                selectedOfxItems = selectedOfxItems.filter(i => i !== index);
+            }
+        });
+    });
+}
+
+// Event listener para confirmar importação OFX
+document.getElementById('confirm-ofx').addEventListener('click', function() {
+    if (selectedOfxItems.length === 0) {
+        showStatus('Selecione pelo menos uma transação para importar.', 'error');
+        return;
+    }
+
+    const cardId = parseInt(document.getElementById('ofx-card').value);
+    const card = creditCards.find(c => c.id === cardId);
+    
+    if (!card) {
+        showStatus('Cartão não encontrado.', 'error');
+        return;
+    }
+
+    let importedCount = 0;
+    selectedOfxItems.forEach(index => {
+        const item = ofxData[index];
+        // A categoria já está atualizada no item.category pelo listener do select
+        const category = item.category || 'Outros'; 
+        
+        const purchase = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            cardId: card.id,
+            date: item.date,
+            description: item.description,
+            value: Math.abs(item.amount), // OFX usa negativo para débito, positivo para crédito
+            category,
+            installments: item.installments || 1, // Usa as parcelas detectadas ou 1
+            currentInstallment: item.currentInstallment || 1, // Usa a parcela atual detectada ou 1
+            status: 'pending'
+        };
+
+        creditPurchases.push(purchase);
+        
+        // Atualiza o limite disponível do cartão
+        card.available -= purchase.value;
+        if (card.available < 0) card.available = 0;
+        
+        importedCount++;
+    });
+
+    saveLocalStorageData();
+    renderCreditCards();
+    renderPurchasesTable();
+    updateDashboard();
+    
+    // Limpa a importação
+    ofxData = [];
+    selectedOfxItems = [];
+    document.getElementById('ofx-preview').style.display = 'none';
+    document.getElementById('ofx-file').value = '';
+    
+    showStatus(`${importedCount} transações importadas com sucesso para o cartão ${card.name}!`, 'success');
+});
+
+// Event listener para cancelar importação OFX
+document.getElementById('cancel-ofx').addEventListener('click', function() {
+    ofxData = [];
+    selectedOfxItems = [];
+    document.getElementById('ofx-preview').style.display = 'none';
+    document.getElementById('ofx-file').value = '';
+});
+
+// Event listener para o formulário de compras de cartão
+document.getElementById('creditcard-purchase-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    addCreditCardPurchase();
+});
+
+// Função para adicionar compra de cartão de crédito
+function addCreditCardPurchase() {
+    const cardId = parseInt(document.getElementById('purchase-card').value);
+    const category = document.getElementById('purchase-category').value;
+    const date = document.getElementById('purchase-date').value;
+    const description = document.getElementById('purchase-description').value.trim();
+    const value = parseFloat(document.getElementById('purchase-value').value);
+    const type = document.getElementById('purchase-type').value;
+    const installments = type === 'parcelado' ? parseInt(document.getElementById('purchase-installments').value) : 1;
+    const currentInstallment = type === 'parcelado' ? parseInt(document.getElementById('purchase-current').value) : 1;
+
+    if (!cardId || !category || !date || !description || isNaN(value) || value <= 0 || !type || 
+        (type === 'parcelado' && (isNaN(installments) || installments < 1 || isNaN(currentInstallment) || currentInstallment < 1 || currentInstallment > installments))) {
+        showStatus('Por favor, preencha todos os campos da compra corretamente.', 'error');
+        return;
+    }
+
+    const card = creditCards.find(c => c.id === cardId);
+    if (!card) {
+        showStatus('Cartão selecionado não encontrado.', 'error');
+        return;
+    }
+
+    const purchase = {
+        id: Date.now(),
+        cardId: card.id,
+        date,
+        description,
+        value,
+        category,
+        installments,
+        currentInstallment,
+        status: 'pending' // Sempre pendente ao adicionar
+    };
+
+    creditPurchases.push(purchase);
+    card.available -= value; // Diminui o limite disponível
+    if (card.available < 0) card.available = 0; // Garante que não fique negativo
+
+    saveLocalStorageData();
+    renderCreditCards(); // Atualiza a tabela de cartões
+    renderPurchasesTable(); // Atualiza a tabela de compras
+    updateDashboard();
+
+    // Limpa o formulário
+    document.getElementById('creditcard-purchase-form').reset();
+    document.getElementById('purchase-date').valueAsDate = new Date();
+    document.getElementById('installment-control').style.display = 'none';
+
+    showStatus('Compra de cartão adicionada com sucesso!', 'success');
+}
+
+// Função para renderizar a tabela de compras de cartão
+function renderPurchasesTable() {
+    const tbody = document.querySelector('#purchases-table tbody');
+    tbody.innerHTML = '';
+
+    // Ordena por data (mais recente primeiro)
+    creditPurchases.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    creditPurchases.forEach(purchase => {
+        const card = creditCards.find(c => c.id === purchase.cardId);
+        const cardName = card ? card.name : 'Cartão Desconhecido';
+
+        const row = document.createElement('tr');
+        const formattedDate = new Date(purchase.date).toLocaleDateString('pt-BR');
+        const formattedValue = purchase.value.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+        const installmentsText = purchase.installments > 1 ? `${purchase.currentInstallment}/${purchase.installments}` : 'À Vista';
+        
+        let statusClass = '';
+        if (purchase.status === 'paid') {
+            statusClass = 'status-paid';
+        } else if (purchase.status === 'pending') {
+            statusClass = 'status-pending';
+        } else if (purchase.status === 'overdue') { // Adicionado status 'overdue'
+            statusClass = 'status-overdue';
+        }
+
+        row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td>${cardName}</td>
+            <td>${purchase.description}</td>
+            <td>${purchase.category}</td>
+            <td class="despesa">${formattedValue}</td>
+            <td>${installmentsText}</td>
+            <td><span class="payment-status ${statusClass}">${purchase.status === 'pending' ? 'Pendente' : (purchase.status === 'paid' ? 'Pago' : 'Atrasado')}</span></td>
+            <td>
+                <button class="btn-edit" onclick="editCreditPurchase(${purchase.id})">Editar</button>
+                <button class="btn-danger" onclick="deleteCreditPurchase(${purchase.id})">Excluir</button>
+                ${purchase.status === 'pending' ? `<button class="btn-success" onclick="markPurchaseAsPaid(${purchase.id})">Pagar</button>` : ''}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Função para editar compra de cartão
+window.editCreditPurchase = function(id) {
+    const purchase = creditPurchases.find(p => p.id === id);
+    if (!purchase) return;
+
+    // Preenche o formulário
+    document.getElementById('purchase-card').value = purchase.cardId;
+    document.getElementById('purchase-category').value = purchase.category;
+    document.getElementById('purchase-date').value = purchase.date;
+    document.getElementById('purchase-description').value = purchase.description;
+    document.getElementById('purchase-value').value = purchase.value;
+    document.getElementById('purchase-type').value = purchase.installments > 1 ? 'parcelado' : 'avista';
+    
+    const installmentControl = document.getElementById('installment-control');
+    if (purchase.installments > 1) {
+        installmentControl.style.display = 'block';
+        document.getElementById('purchase-installments').value = purchase.installments;
+        document.getElementById('purchase-current').value = purchase.currentInstallment;
+    } else {
+        installmentControl.style.display = 'none';
+    }
+
+    // Remove a compra da lista (será readicionada ao salvar)
+    creditPurchases = creditPurchases.filter(p => p.id !== id);
+    
+    // Restaura o limite do cartão
+    const card = creditCards.find(c => c.id === purchase.cardId);
+    if (card) {
+        card.available += purchase.value;
+        if (card.available > card.limit) card.available = card.limit; // Não exceder o limite
+    }
+
+    saveLocalStorageData();
+    renderCreditCards();
+    renderPurchasesTable();
+    showStatus('Compra carregada para edição. Faça as alterações e clique em "Adicionar Compra" para salvar.', 'success');
+};
+
+// Função para deletar compra de cartão
+window.deleteCreditPurchase = function(id) {
+    if (confirm('Tem certeza que deseja excluir esta compra?')) {
+        const purchase = creditPurchases.find(p => p.id === id);
+        if (purchase) {
+            // Restaura o limite do cartão
+            const card = creditCards.find(c => c.id === purchase.cardId);
+            if (card) {
+                card.available += purchase.value;
+                if (card.available > card.limit) card.available = card.limit;
+            }
+            creditPurchases = creditPurchases.filter(p => p.id !== id);
+            saveLocalStorageData();
+            renderCreditCards();
+            renderPurchasesTable();
+            updateDashboard();
+            showStatus('Compra excluída com sucesso!', 'success');
+        }
+    }
+};
+
+// Função para marcar compra como paga
+window.markPurchaseAsPaid = function(id) {
+    const purchase = creditPurchases.find(p => p.id === id);
+    if (purchase) {
+        purchase.status = 'paid';
+        saveLocalStorageData();
+        renderPurchasesTable();
+        showStatus('Compra marcada como paga!', 'success');
+    }
+};
 
     </script>
 </body>
