@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="manifest" href="manifest.json"> 
 </head>
 <body>
     <div class="theme-switcher">
@@ -110,9 +111,10 @@
             <section id="workout-execution-view" class="app-section" style="display: none;">
                 <h2 id="workout-execution-title"></h2>
                 <div class="timer-display" id="workout-total-timer">00:00:00</div>
+				<p id="current-exercise-display" class="current-exercise-status"></p> 
 
                 <div id="workout-execution-exercises" class="list-container">
-                    <div id="current-exercise-display" class="current-exercise-display" style="display: none;"></div>
+                    
                 </div>
 				<div class="exercise-timer" id="global-rest-timer" style="display: none;">
                     <i class="fas fa-hourglass-half"></i> Descanso: <span class="countdown">00:00</span>
