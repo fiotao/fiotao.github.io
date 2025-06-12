@@ -18,29 +18,78 @@ let firebaseConfig = {
     authDomain: "fittracker-1a6a5.firebaseapp.com",
     projectId: "fittracker-1a6a5",
     storageBucket: "fittracker-1a6a5.firebaseapp.com",
-    messagingSenderId: "80264175702"
+    messagingSenderId: "802641757021",
+    appId: "1:802641757021:web:336e9d45be31128fc71eb4",
+    measurementId: "G-7G8YL9GK5X"
 };
 
-try {
-    // Initialize Firebase
-    window.firebaseApp = initializeApp(firebaseConfig);
-    window.auth = getAuth(window.firebaseApp);
-    window.db = getFirestore(window.firebaseApp);
-    window.isFirebaseInitialized = true; // Mark as initialized
+// Check for projectId in firebaseConfig
+if (!firebaseConfig.projectId) {
+    window.showToast('Erro ao carregar o Firebase: projectId ausente na configuração estática.', 'danger');
+    // Fallback to dummy values to prevent the app from crashing on initializeApp
+    firebaseConfig = {
+        apiKey: "dummy-api-key",
+        authDomain: "dummy-auth-domain.firebaseapp.com",
+        projectId: "dummy-project-id",
+        storageBucket: "dummy-storage-bucket.appspot.com",
+        messagingSenderId: "1234567890",
+        appId: "1:1234567890:web:dummy",
+        measurementId: "G-DUMMY"
+    };
+}
 
-    // Set up real-time authentication state listener
+try {
+    window.firebaseApp = initializeApp(firebaseConfig);
+    window.db = getFirestore(window.firebaseApp);
+    window.auth = getAuth(window.firebaseApp);
+    window.isFirebaseInitialized = true;
+
+    // Listen for auth state changes
     onAuthStateChanged(window.auth, async (user) => {
-        window.isAuthReady = true; // Auth state is settled
+        window.isAuthReady = true; // Auth state is now determined
+        const userDisplayInfo = document.getElementById('user-display-info');
+        const authView = document.getElementById('auth-view');
+        const appContent = document.getElementById('app-content');
+        const logoutBtn = document.getElementById('logout-btn');
+
         if (user) {
             window.currentUserId = user.uid;
-            // Load user profile if user exists
-            await window.loadUserProfile();
-            window.showView('days-view'); // Show main app view
+            // Fetch user profile data
+            const userProfileRef = doc(window.db, `artifacts/${appId}/users/${window.currentUserId}/profile`, 'data');
+            const userProfileSnap = await getDoc(userProfileRef);
+
+            if (userProfileSnap.exists()) {
+                window.userProfile = userProfileSnap.data();
+                userDisplayInfo.textContent = `Bem-vindo(a), ${window.userProfile.name || user.email}!`;
+            } else {
+                window.userProfile = {};
+                userDisplayInfo.textContent = `Usuário ID: ${window.currentUserId}`;
+            }
+
+            authView.style.display = 'none';
+            appContent.style.display = 'block';
+            logoutBtn.style.display = 'inline-flex';
+            
+            if (window.isFirebaseInitialized && window.db) {
+                 await window.loadData();
+                 window.initWorkoutDays();
+                 window.showView('days-view');
+            } else {
+                window.showToast('Erro: Não foi possível carregar dados do usuário. Tente recarregar a página.', 'danger');
+            }
+
         } else {
             window.currentUserId = null;
-            window.userProfile = {}; // Clear profile on sign out
-            window.showView('auth-view'); // Show auth view if no user
-            window.showToast('Você foi desconectado. Faça login para usar o FitTracker.', 'info');
+            window.userProfile = {}; // Clear user profile on logout
+            userDisplayInfo.textContent = 'Usuário: Desconectado';
+            authView.style.display = 'block';
+            appContent.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            // Clear local data if no user is logged in to prevent mix-ups
+            window.allWorkoutData = {}; 
+            window.workoutHistory = []; 
+            window.initWorkoutDays(); // This should still work as it doesn't depend on Firestore directly
+            window.showToast('Por favor, faça login ou cadastre-se para usar o FitTracker.', 'info');
         }
     });
 
@@ -68,23 +117,9 @@ try {
     });
 
 } catch (error) {
-    // Ensure DOM elements exist before trying to manipulate them
-    document.addEventListener('DOMContentLoaded', () => {
-        const userDisplayInfo = document.getElementById('user-display-info');
-        const authView = document.getElementById('auth-view');
-        const appContent = document.getElementById('app-content');
-
-        if (userDisplayInfo) {
-            userDisplayInfo.textContent = 'Erro grave ao carregar o Firebase.';
-        }
-        if (authView) {
-            authView.style.display = 'block';
-        }
-        if (appContent) {
-            appContent.style.display = 'none';
-        }
-        window.showToast('Erro crítico ao carregar o Firebase. Verifique a console para detalhes.', 'danger');
-    });
-
+    document.getElementById('user-display-info').textContent = 'Erro grave ao carregar o Firebase.';
+    document.getElementById('auth-view').style.display = 'block';
+    document.getElementById('app-content').style.display = 'none';
+    window.showToast('Erro crítico ao carregar o Firebase. Verifique a console para detalhes.', 'danger');
     window.isFirebaseInitialized = false; // Mark as not initialized
 }
