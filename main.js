@@ -15,7 +15,34 @@ window.showToast = function(message, type = 'info') {
         toast.classList.remove('show');
     }, 3000);
 };
+/**
+ * Encontra os dados do último treino para um exercício específico
+ * @param {string} exerciseName - Nome do exercício a ser buscado
+ * @returns {Object|null} Retorna os dados do último treino ou null se não encontrado
+ */
+window.findLastWorkoutDataForExercise = function(exerciseName) {
+    if (!window.workoutHistory || window.workoutHistory.length === 0) {
+        return null;
+    }
 
+    // Ordena o histórico por data (do mais recente para o mais antigo)
+    const sortedHistory = [...window.workoutHistory].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+    );
+
+    // Procura pelo exercício no histórico
+    for (const workout of sortedHistory) {
+        const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+        if (exercise && Array.isArray(exercise.sets) && exercise.sets.length > 0) {
+            return {
+                sets: exercise.sets,
+                date: workout.date
+            };
+        }
+    }
+
+    return null;
+};
 /**
  * Formata segundos em HH:MM:SS.
  * @param {number} seconds - Número total de segundos.
@@ -660,19 +687,58 @@ document.getElementById('delete-day-btn').addEventListener('click', () => {
 window.startWorkout = function(dayId) {
     window.currentWorkout = JSON.parse(JSON.stringify(window.allWorkoutData[dayId])); // Cópia profunda
     window.currentWorkout.originalId = dayId; // Mantém o control do ID do template original
-    window.currentWorkout.executionExercises = window.currentWorkout.exercises.map(ex => ({
-        ...ex,
-        completedSets: Array.from({ length: ex.sets.length }, () => ({ reps: 0, weight: 0 })), // Inicializa completedSets com objetos vazios
-        isCompleted: false
-    }));
+    
+    window.currentWorkout.executionExercises = window.currentWorkout.exercises.map(ex => {
+        // Busca os dados do último treino para este exercício
+        const lastWorkoutData = window.findLastWorkoutDataForExercise(ex.name);
+        // Se encontrou dados do último treino, usa-os como base
+        const sets = lastWorkoutData 
+            ? lastWorkoutData.sets.map(set => ({ 
+                reps: set.reps || 0, 
+                weight: set.weight || 0 
+            }))
+            : ex.sets.map(set => ({ 
+                reps: typeof set === 'object' ? (set.reps || 0) : 0, 
+                weight: typeof set === 'object' ? (set.weight || 0) : 0 
+            }));
+        
+        return {
+            ...ex,
+            sets: sets,
+            completedSets: Array.from({ length: sets.length }, () => ({ reps: 0, weight: 0 })),
+            isCompleted: false,
+            lastWorkoutDate: lastWorkoutData ? lastWorkoutData.date : null
+        };
+    });
 
     document.getElementById('workout-execution-title').textContent = window.currentWorkout.title || window.currentWorkout.name;
-    window.currentExerciseIndex = 0; // Começa com o primeiro exercício
-    window.currentSetIndex = 0; // Começa com o primeiro set do primeiro exercício
+    window.currentExerciseIndex = 0;
+    window.currentSetIndex = 0;
     
     window.showView('workout-execution-view');
     window.renderWorkoutExecution();
     window.startTotalWorkoutTimer();
+};
+
+/**
+ * Atualiza a exibição do próximo exercício
+ */
+window.updateNextExerciseDisplay = function() {
+    const nextExerciseDisplay = document.getElementById('next-exercise-display');
+    if (!nextExerciseDisplay) return;
+
+    if (!window.currentWorkout || !Array.isArray(window.currentWorkout.executionExercises)) {
+        nextExerciseDisplay.textContent = '';
+        return;
+    }
+
+    const nextExerciseIndex = window.currentExerciseIndex + 1;
+    if (nextExerciseIndex < window.currentWorkout.executionExercises.length) {
+        const nextExercise = window.currentWorkout.executionExercises[nextExerciseIndex];
+        nextExerciseDisplay.textContent = `Próximo: ${nextExercise.name}`;
+    } else {
+        nextExerciseDisplay.textContent = 'Último exercício';
+    }
 }
 
 /**
@@ -685,10 +751,12 @@ window.renderWorkoutExecution = function() {
     if (!window.currentWorkout || !Array.isArray(window.currentWorkout.executionExercises)) {
         executionList.innerHTML = '<p style="text-align: center;">Nenhum treino ativo para exibir.</p>';
         const currentExerciseDisplay = document.getElementById('current-exercise-display');
+        const nextExerciseDisplay = document.getElementById('next-exercise-display');
         const finishWorkoutBtn = document.getElementById('finish-workout-btn');
         const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
 
         if (currentExerciseDisplay) currentExerciseDisplay.style.display = 'none';
+        if (nextExerciseDisplay) nextExerciseDisplay.style.display = 'none';
         if (finishWorkoutBtn) finishWorkoutBtn.style.display = 'none';
         if (cancelWorkoutBtn) cancelWorkoutBtn.style.display = 'none';
         
@@ -702,11 +770,13 @@ window.renderWorkoutExecution = function() {
     const currentExercise = window.currentWorkout.executionExercises[window.currentExerciseIndex];
     const totalExercises = window.currentWorkout.executionExercises.length; // Total de exercícios
     const currentExerciseDisplay = document.getElementById('current-exercise-display');
+    const nextExerciseDisplay = document.getElementById('next-exercise-display');
     const finishWorkoutBtn = document.getElementById('finish-workout-btn');
     const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
 
     if (!currentExercise) {
         if (currentExerciseDisplay) currentExerciseDisplay.style.display = 'none';
+        if (nextExerciseDisplay) nextExerciseDisplay.style.display = 'none';
         executionList.innerHTML = '<p style="text-align: center;">Todos os exercícios do treino foram concluídos!</p>';
         
         if (finishWorkoutBtn) finishWorkoutBtn.style.display = 'inline-flex';
@@ -716,13 +786,15 @@ window.renderWorkoutExecution = function() {
         window.stopTotalWorkoutTimer();
         return; 
     }
-	
+    
     if (currentExerciseDisplay) {
-        // Atualiza a exibição para incluir o contador
         currentExerciseDisplay.style.display = 'block';
         currentExerciseDisplay.textContent = `Exercício Atual: ${currentExercise.name} (${window.currentExerciseIndex + 1} de ${totalExercises})`;
     }
-    
+
+    // Atualiza a exibição do próximo exercício
+    window.updateNextExerciseDisplay();
+
     const exerciseEl = document.createElement('div');
     exerciseEl.classList.add('exercise-execution-card', 'card');
     exerciseEl.dataset.index = window.currentExerciseIndex;
@@ -736,26 +808,29 @@ window.renderWorkoutExecution = function() {
 
     exerciseEl.innerHTML = `
         <h3>${currentExercise.name}</h3>
+		 ${currentExercise.lastWorkoutDate ? 
+        `<p class="last-workout-info"><i class="fas fa-history"></i> Último treino: ${new Date(currentExercise.lastWorkoutDate).toLocaleDateString('pt-BR')}</p>` : 
+        ''}
         ${imageHtml}
         <div class="exercise-details-execution">
-            <p>Séries Planejadas: ${currentExercise.sets.length}</p>
-            <p>Repetições Sugeridas: ${currentExercise.reps || 'N/A'}</p>
-            <p>Descanso Sugerido: ${currentExercise.rest || 0} segundos</p>
-            ${currentExercise.description ? `<p>${currentExercise.description}</p>` : ''}
-            ${currentExercise.muscleGroup ? `<p>Músculos: ${currentExercise.muscleGroup}</p>` : ''}
-        </div>
-        <div class="exercise-execution-sets">
-            ${currentExercise.sets.map((set, setIndex) => `
-                <div class="set-input ${setIndex === window.currentSetIndex && !currentExercise.isCompleted ? 'current-set-highlight' : (setIndex < window.currentSetIndex || currentExercise.isCompleted ? 'completed-set-overlay' : '')}">
-                    <span>Set ${setIndex + 1}:</span>
-                    <input type="number" class="form-control execution-reps" data-set-index="${setIndex}" value="${currentExercise.completedSets[setIndex]?.reps || set.reps}" placeholder="Reps" min="0" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
-                    <input type="number" class="form-control execution-weight" data-set-index="${setIndex}" value="${currentExercise.completedSets[setIndex]?.weight || set.weight}" placeholder="Peso (kg)" min="0" step="0.5" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
-                    <button class="btn btn-success btn-sm complete-set-btn" data-set-index="${setIndex}" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
-                        <i class="fas fa-check"></i>
-                    </button>
-                </div>
-            `).join('')}
-        </div>
+        <p>Séries Planejadas: ${currentExercise.sets.length}</p>
+        <p>Repetições Sugeridas: ${currentExercise.reps || 'N/A'}</p>
+        <p>Descanso Sugerido: ${currentExercise.rest || 0} segundos</p>
+        ${currentExercise.description ? `<p>${currentExercise.description}</p>` : ''}
+        ${currentExercise.muscleGroup ? `<p>Músculos: ${currentExercise.muscleGroup}</p>` : ''}
+    </div>
+      <div class="exercise-execution-sets">
+        ${currentExercise.sets.map((set, setIndex) => `
+            <div class="set-input ${setIndex === window.currentSetIndex && !currentExercise.isCompleted ? 'current-set-highlight' : (setIndex < window.currentSetIndex || currentExercise.isCompleted ? 'completed-set-overlay' : '')}">
+                <span>Set ${setIndex + 1}:</span>
+                <input type="number" class="form-control execution-reps" data-set-index="${setIndex}" value="${set.reps || 0}" placeholder="Reps" min="0" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                <input type="number" class="form-control execution-weight" data-set-index="${setIndex}" value="${set.weight || 0}" placeholder="Peso (kg)" min="0" step="0.5" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                <button class="btn btn-success btn-sm complete-set-btn" data-set-index="${setIndex}" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+        `).join('')}
+    </div>
         <div class="exercise-execution-actions">
             <button class="btn btn-info skip-rest-btn" style="display: none;"><i class="fas fa-forward"></i> Pular Descanso</button>
             ${currentExercise.videoUrl ? `<a href="${currentExercise.videoUrl}" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-video"></i> Ver Vídeo</a>` : ''}
