@@ -109,86 +109,424 @@ window.averageWorkoutTimeChartInstance = null;
 
 // --- Predefined Workout Templates ---
 const predefinedWorkoutTemplates = [
+  {
+    "day": 1,
+    "title": "Peito, Tr\u00edceps e Abd\u00f4men inferior",
+    "image": "https://images.unsplash.com/photo-1605296867304-46d5465a13f1",
+    "exercises": [
+      {
+        "name": "Supino reto com barra",
+        "sets": 4,
+        "reps": "6-8",
+        "rest": 90,
+        "image": "./images/supino_reto_barra.png",
+        "description": "Exerc\u00edcio composto para peitoral maior, for\u00e7a e volume.",
+        "videoUrl": "https://musclewiki.com/barbell/male/chest/barbell-bench-press/",
+        "muscleGroup": "Peito"
+      },
+      {
+        "name": "Supino inclinado com halteres",
+        "sets": 3,
+        "reps": "8-10",
+        "rest": 60,
+        "image": "./images/supino_inclinado_halteres.png",
+        "description": "Foco na parte superior do peitoral com maior amplitude.",
+        "videoUrl": "https://musclewiki.com/dumbbells/male/chest/dumbbell-incline-bench-press/",
+        "muscleGroup": "Peito (Superior)"
+      },
+      {
+        "name": "Crucifixo reto",
+        "sets": 3,
+        "reps": "10-12",
+        "rest": 60,
+        "image": "./images/crucifixo_reto.png",
+        "description": "Isolamento do peitoral com foco na fase exc\u00eantrica.",
+        "videoUrl": "https://www.youtube.com/watch?v=eozdVDA78K0",
+        "muscleGroup": "Peito"
+      },
+      {
+        "name": "Tr\u00edceps na polia com corda",
+        "sets": 3,
+        "reps": "10-12",
+        "rest": 45,
+        "image": "./images/triceps_polia_corda.png",
+        "description": "Isolamento do tr\u00edceps com foco na contra\u00e7\u00e3o final.",
+        "videoUrl": "https://www.youtube.com/watch?v=vB5OHsJ3EME",
+        "muscleGroup": "Tr\u00edceps"
+      },
+      {
+        "name": "Tr\u00edceps franc\u00eas unilateral",
+        "sets": 2,
+        "reps": "12",
+        "rest": 45,
+        "image": "./images/triceps_frances_unilateral.png",
+        "description": "Foco na cabe\u00e7a longa do tr\u00edceps com controle unilaterial.",
+        "videoUrl": "https://www.youtube.com/watch?v=6SSdFf1Abao",
+        "muscleGroup": "Tr\u00edceps"
+      },
+	  {
+	  "name": "Rosca punho com barra",
+	  "sets": 3,
+	  "reps": "15-20",
+	  "rest": 30,
+	  "image": "./images/rosca_punho_barra.png",
+	  "description": "Foco nos músculos flexores do antebraço com alta repetição.",
+	  "videoUrl": "https://www.youtube.com/watch?v=0G2_XV7slIg",
+	  "muscleGroup": "Antebraço"
+	},
+	{
+	  "name": "Extensão de punho com barra",
+	  "sets": 3,
+	  "reps": "15-20",
+	  "rest": 30,
+	  "image": "./images/extensao_punho_barra.png",
+	  "description": "Trabalha os extensores do antebraço e melhora o equilíbrio muscular.",
+	  "videoUrl": "https://www.youtube.com/watch?v=K2R3M0WjU_k",
+	  "muscleGroup": "Antebraço"
+	},
+      {
+        "name": "Eleva\u00e7\u00e3o de pernas",
+        "sets": 3,
+        "reps": "15",
+        "rest": 30,
+        "image": "./images/elevacao_pernas.png",
+        "description": "Exerc\u00edcio de peso corporal para abd\u00f4men inferior.",
+        "videoUrl": "https://www.youtube.com/watch?v=l4kQd9eWclE",
+        "muscleGroup": "Abd\u00f4men inferior"
+      },
+      {
+        "name": "Prancha frontal",
+        "sets": 3,
+        "reps": "30-40s",
+        "rest": 30,
+        "image": "./images/prancha_frontal.png",
+        "description": "Exerc\u00edcio isom\u00e9trico para ativa\u00e7\u00e3o do core.",
+        "videoUrl": "https://www.youtube.com/watch?v=pSHjTRCQxIw",
+        "muscleGroup": "Core"
+      }
+    ]
+  },{
+  "day": 2,
+  "title": "Costas, Bíceps e Lombar",
+  "image": "https://images.unsplash.com/photo-1549476468-382a93796d11",
+  "exercises": [
     {
-        day: 1,
-        title: "Peito, ombro, tríceps e antebraço",
-        image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        exercises: [
-            { name: "Supino máquina", sets: 3, reps: "6-8", rest: 60, image: "./images/supino_maquina.png", description: "Foco no peitoral e ombros, com segurança da máquina.", videoUrl: "https://musclewiki.com/exercises/female/chest", muscleGroup: "Peito, Ombro, Tríceps" },
-            { name: "Supino inclinado", sets: 2, reps: "8-10", rest: 60, image: "./images/supino_inclinado.png", description: "Trabalha a parte superior do peitoral.", videoUrl: "https://musclewiki.com/barbell/male/anterior-deltoid/barbell-incline-bench-press/", muscleGroup: "Peito (Superior), Ombro, Tríceps" },
-            { name: "Crucifixo com halter", sets: 2, reps: "8-12", rest: 60, image: "./images/cruxifixo_halter.png", description: "Isolamento do peitoral, alongando as fibras musculares.", videoUrl: "https://www.youtube.com/watch?v=_kpKlYexyXs", muscleGroup: "Peito" },
-            { name: "Desenvolvimento com halteres", sets: 3, reps: "6-10", rest: 60, image: "./images/desenvolvimento_halteres.png", description: "Exercício composto para ombros, trabalha deltoides.", videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-shoulder-press/", muscleGroup: "Ombro, Tríceps" },
-            { name: "Elevação lateral", sets: 3, reps: "10-12", rest: 45, image: "./images/elevacao_lateral.png", description: "Isolamento deltoide lateral para maior largura.", videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-lateral-raise/", muscleGroup: "Ombro" },
-            { name: "Tríceps paralela", sets: 3, reps: "8-12", rest: 45, image: "./images/triceps_paralela.png", description: "Exercício eficaz para o tríceps, pode ser feito em máquina ou barra.", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", muscleGroup: "Tríceps" },
-            { name: "Tríceps francês na polia", sets: 2, reps: "8-12", rest: 45, image: "./images/triceps_frances.png", description: "Foco na cabeça longa do tríceps.", videoUrl: "https://musclewiki.com/pt-br/cables/male/triceps/cable-rope-overhead-tricep-extension/", muscleGroup: "Tríceps" },
-            { name: "Rosca punho inversa", sets: 3, reps: "12-15", rest: 30, image: "./images/rosca_punho_inversa.png", description: "Fortalecimento dos extensores do antebraço.", videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I", muscleGroup: "Antebraço" },
-            { name: "Rosca punho", sets: 3, reps: "12-15", rest: 30, image: "./images/rosca_punho.png", description: "Fortalecimento dos flexores do antebraço.", videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I", muscleGroup: "Antebraço" }
-        ]
+      "name": "Puxada frente com triângulo",
+      "sets": 4,
+      "reps": "8",
+      "rest": 90,
+      "image": "./images/puxada_triangulo.png",
+      "description": "Trabalha a largura das costas e ativa o latíssimo do dorso.",
+      "videoUrl": "https://www.youtube.com/watch?v=CAwf7n6Luuc",
+      "muscleGroup": "Costas"
     },
     {
-        day: 2,
-        title: "Costas, bíceps e ombro",
-        image: "https://images.unsplash.com/photo-1549476468-382a93796d11?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        exercises: [
-            { name: "Puxada triângulo", sets: 3, reps: "6-8", rest: 60, image: "./images/puxada_triangulo.png", description: "Trabalha a largura das costas, com foco nos dorsais.", videoUrl: "https://musclewiki.com/barbell/male/biceps/barbell-bent-over-row", muscleGroup: "Costas, Bíceps" },
-            { name: "Remada curvada", sets: 3, reps: "6-10", rest: 60, image: "./images/remada_curvada.png", description: "Exercício composto para espessura das costas.", videoUrl: "https://musclewiki.com/Barbell/Female/Shoulders/Barbell-Upright-Row", muscleGroup: "Costas, Bíceps" },
-            { name: "Remada aberta", sets: 3, reps: "8-10", rest: 60, image: "./images/remada_aberta.png", description: "Foco na parte superior das costas e trapézio.", videoUrl: "https://musclewiki.com/barbell/male/lats/barbell-bent-over-row/", muscleGroup: "Costas" },
-            { name: "Rosca scott", sets: 3, reps: "8-12", rest: 45, image: "./images/rosca_scott.png", description: "Isolamento do bíceps, com apoio para evitar roubo.", videoUrl: "https://musclewiki.com/pt-br/barbell/male/biceps/ez-bar-reverse-preacher-curl", muscleGroup: "Bíceps" },
-            { name: "Rosca no banco inclinado", sets: 2, reps: "8-12", rest: 45, image: "./images/rosca_banco_inclinado.png", description: "Alongamento máximo do bíceps, ideal para pico.", videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-seated-single-arm-arnold-press", muscleGroup: "Bíceps" },
-            { name: "Elevação frontal", sets: 3, reps: "10-12", rest: 45, image: "./images/elevacao_frontal.png", description: "Foco na parte anterior do ombro.", videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-front-raise/", muscleGroup: "Ombro" },
-            { name: "Remada alta", sets: 3, reps: "8-10", rest: 60, image: "./images/remada_alta.png", description: "Trabalha os trapézios e deltoides laterais.", videoUrl: "https://musclewiki.com/barbell/male/traps/barbell-upright-row/", muscleGroup: "Ombro, Trapézio" }
-        ]
+      "name": "Remada curvada com barra",
+      "sets": 3,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/remada_curvada_barra.png",
+      "description": "Constrói espessura nas costas e ativa a lombar.",
+      "videoUrl": "https://www.youtube.com/watch?v=vT2GjY_Umpw",
+      "muscleGroup": "Costas"
     },
     {
-        day: 3,
-        title: "Pernas completo 1",
-        image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        exercises: [
-            { name: "Agachamento livre", sets: 4, reps: "6-8", rest: 90, image: "./images/agachamento_livre.png", description: "Exercício fundamental para pernas e glúteos.", videoUrl: "https://musclewiki.com/barbell/male/quadriceps/barbell-back-squat/", muscleGroup: "Pernas, Glúteos" },
-            { name: "Stiff com barra", sets: 3, reps: "6-8", rest: 60, image: "./images/stiff_barra.png", description: "Trabalha isquiotibiais e glúteos, com foco na posterior.", videoUrl: "https://musclewiki.com/barbell/male/gluteus-maximus/barbell-stiff-leg-deadlifts", muscleGroup: "Isquiotibiais, Glúteos" },
-            { name: "Cadeira extensora", sets: 3, reps: "8-12", rest: 45, image: "./images/cadeira_extensora.png", description: "Isolamento do quadríceps.", videoUrl: "https://totalpass.com/br/blog/atividade-fisica/cadeira-extensora-o-que-e-e-como-fazer/", muscleGroup: "Quadríceps" },
-            { name: "Cadeira flexora", sets: 3, reps: "8-12", rest: 45, image: "./images/cadeira_flexora.png", description: "Isolamento dos isquiotibiais.", videoUrl: "https://www.youtube.com/watch?v=e0_xHkXw350", muscleGroup: "Isquiotibiais" },
-            { name: "Afundo com halteres", sets: 3, reps: "8-10", rest: 60, image: "./images/afundo_halteres.png", description: "Exercício unilateral para pernas e glúteos.", videoUrl: "https://musclewiki.com/dumbbells/male/quadriceps/dumbbell-lunges/", muscleGroup: "Pernas, Glúteos" },
-            { name: "Panturrilha no leg press", sets: 4, reps: "15-20", rest: 30, image: "./images/panturrilha_legpress.png", description: "Amplitude maior para trabalhar a panturrilha.", videoUrl: "https://www.youtube.com/watch?v=Gf7B6Mr4fC4", muscleGroup: "Panturrilha" },
-            { name: "Panturrilha sentado", sets: 4, reps: "15-20", rest: 30, image: "./images/panturrilha_sentado.png", description: "Foco no sóleo (parte inferior da panturrilha).", videoUrl: "https://www.youtube.com/watch?v=Bx6elAOgxMI", muscleGroup: "Panturrilha" },                  
-            { name: "Panturrilha em pé", sets: 4, reps: "15-20", rest: 30, image: "./images/panturrilha_pe.png", description: "Foco no gastrocnêmio (parte superior da panturrilha).", videoUrl: "https://musclewiki.com/bodyweight/male/calves/standing-calf-raise/", muscleGroup: "Panturrilha" },
-            { name: "Abdominal supra", sets: 3, reps: "12-15", rest: 30, image: "./images/abdominal_supra.png", description: "Trabalha a parte superior do abdômen.", videoUrl: "https://musclewiki.com/bodyweight/male/abdominals/2", muscleGroup: "Abdômen" }
-        ]
+      "name": "Pulldown unilateral",
+      "sets": 3,
+      "reps": "10",
+      "rest": 60,
+      "image": "./images/pulldown_unilateral.png",
+      "description": "Ativação assimétrica do grande dorsal.",
+      "videoUrl": "https://www.youtube.com/watch?v=0zJ3JTfRLVQ",
+      "muscleGroup": "Costas"
     },
     {
-        day: 4,
-        title: "Superiores completo e antebraço",
-        image: "https://images.unsplash.com/photo-1541592106381-b31649479354?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        exercises: [
-            { name: "Supino máquina", sets: 3, reps: "6-8", rest: 60, image: "./images/supino_maquina.png", description: "Foco no peitoral e ombros, com segurança da máquina.", videoUrl: "https://musclewiki.com/exercises/female/chest", muscleGroup: "Peito, Ombro, Tríceps" },
-            { name: "Supino inclinado", sets: 2, reps: "8-10", rest: 60, image: "./images/supino_inclinado.png", description: "Variação para a parte superior do peito.", videoUrl: "https://musclewiki.com/barbell/male/anterior-deltoid/barbell-incline-bench-press/", muscleGroup: "Peito (Superior), Ombro, Tríceps" },
-            { name: "Puxada triângulo", sets: 3, reps: "6-8", rest: 60, image: "./images/puxada_triangulo.png", description: "Trabalha a largura das costas, com foco nos dorsais.", videoUrl: "https://musclewiki.com/barbell/male/biceps/barbell-bent-over-row", muscleGroup: "Costas, Bíceps" },
-            { name: "Remada aberta", sets: 2, reps: "8-10", rest: 60, image: "./images/remada_aberta.png", description: "Foco na parte superior das costas e trapézio.", videoUrl: "https://musclewiki.com/barbell/male/lats/barbell-bent-over-row/", muscleGroup: "Costas" },
-            { name: "Desenvolvimento Arnold", sets: 3, reps: "8-10", rest: 60, image: "./images/desenvolvimento_arnold.png", description: "Variação completa para ombros com rotação.", videoUrl: "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-arnold-press/", muscleGroup: "Ombro" },
-            { name: "Elevação lateral inclinada", sets: 3, reps: "10-12", rest: 45, image: "./images/elevacao_lateral_inclinada.png", description: "Maior ênfase na parte posterior do deltoide.", videoUrl: "https://www.youtube.com/watch?v=Z2G8DBaT9U4", muscleGroup: "Ombro" },
-            { name: "Tríceps na polia", sets: 2, reps: "8-12", rest: 45, image: "./images/triceps_polia.png", description: "Variação para o tríceps, com foco na contração.", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", muscleGroup: "Tríceps" },
-            { name: "Rosca punho inversa", sets: 3, reps: "12-15", rest: 30, image: "./images/rosca_punho_inversa.png", description: "Fortalecimento dos extensores do antebraço.", videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I", muscleGroup: "Antebraço" },
-            { name: "Rosca punho", sets: 3, reps: "12-15", rest: 30, image: "./images/rosca_punho.png", description: "Fortalecimento dos flexores do antebraço.", videoUrl: "https://www.youtube.com/watch?v=EA7u4Q_8j0I", muscleGroup: "Antebraço" }
-        ]
+      "name": "Rosca direta com barra",
+      "sets": 3,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/rosca_direta.png",
+      "description": "Exercício clássico para volume nos bíceps.",
+      "videoUrl": "https://www.youtube.com/watch?v=kwG2ipFRgfo",
+      "muscleGroup": "Bíceps"
     },
     {
-        day: 5,
-        title: "Pernas completo 2",
-        image: "https://images.unsplash.com/photo-1594915447192-d62153549646?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        exercises: [
-            { name: "Leg press 45°", sets: 4, reps: "6-8", rest: 90, image: "./images/leg_press.png", description: "Exercício composto para pernas, com foco em quadríceps e glúteos.", videoUrl: "https://gears.com.br/produto/leg-press-45-gym-line-gears/", muscleGroup: "Pernas, Glúteos" },
-            { name: "Cadeira flexora", sets: 3, reps: "6-10", rest: 60, image: "./images/cadeira_flexora.png", description: "Isolamento dos isquiotibiais.", videoUrl: "https://www.youtube.com/watch?v=e0_xHkXw350", muscleGroup: "Isquiotibiais" },
-            { name: "Cadeira extensora", sets: 3, reps: "8-12", rest: 45, image: "./images/cadeira_extensora.png", description: "Isolamento do quadríceps.", videoUrl: "https://totalpass.com/br/blog/atividade-fisica/cadeira-extensora-o-que-e-e-como-fazer/", muscleGroup: "Quadríceps" },
-            { name: "Mesa flexora", sets: 3, reps: "8-12", rest: 45, image: "./images/mesa_flexora.png", description: "Outra opção para isolar os isquiotibiais, deitado.", videoUrl: "https://www.tuasaude.com/mesa-flexora/", muscleGroup: "Isquiotibiais" },
-            { name: "Agachamento búlgaro", sets: 3, reps: "8-10", rest: 60, image: "./images/agachamento_bulgaro.png", description: "Exercício unilateral intenso para pernas e glúteos.", videoUrl: "https://musclewiki.com/dumbbells/male/quadriceps/dumbbell-bulgarian-split-squat/", muscleGroup: "Pernas, Glúteos" },
-            { name: "Panturrilha unilateral", sets: 4, reps: "12-15", rest: 30, image: "./images/panturrilha_unilateral.png", description: "Trabalho individualizado para cada panturrilha.", videoUrl: "https://www.youtube.com/watch?v=9CPrrmusOu8", muscleGroup: "Panturrilha" },
-            { name: "Panturrilha no burrinho", sets: 4, reps: "15-20", rest: 30, image: "./images/panturrilha_burrinho.png", description: "Exercício tradicional com foco na amplitude.", videoUrl: "https://www.youtube.com/watch?v=JbyjNymZOt0", muscleGroup: "Panturrilha" },
-            { name: "Panturrilha no smith", sets: 4, reps: "15-20", rest: 30, image: "./images/panturrilha_smith.png", description: "Fortalecimento da panturrilha com estabilidade.", videoUrl: "https://musclewiki.com/exercises/male/soleus", muscleGroup: "Panturrilha" },
-            { name: "Abdominal máquina", sets: 3, reps: "12-15", rest: 30, image: "./images/abdominal_maquina.png", description: "Trabalha o abdômen com assistência da máquina.", videoUrl: "https://www.youtube.com/watch?v=4SR93vi2ZKw&pp=0gcJCdgAo7VqN5tD", muscleGroup: "Abdômen" }
-        ]
-    }
-];
+      "name": "Rosca alternada",
+      "sets": 2,
+      "reps": "12",
+      "rest": 45,
+      "image": "./images/rosca_alternada.png",
+      "description": "Trabalho unilateral de bíceps com halteres.",
+      "videoUrl": "https://www.youtube.com/watch?v=av7-8igSXTs",
+      "muscleGroup": "Bíceps"
+    },
+    {
+	  "name": "Rosca punho com barra",
+	  "sets": 3,
+	  "reps": "15-20",
+	  "rest": 30,
+	  "image": "./images/rosca_punho_barra.png",
+	  "description": "Foco nos músculos flexores do antebraço com alta repetição.",
+	  "videoUrl": "https://www.youtube.com/watch?v=0G2_XV7slIg",
+	  "muscleGroup": "Antebraço"
+	},
+	{
+	  "name": "Extensão de punho com barra",
+	  "sets": 3,
+	  "reps": "15-20",
+	  "rest": 30,
+	  "image": "./images/extensao_punho_barra.png",
+	  "description": "Trabalha os extensores do antebraço e melhora o equilíbrio muscular.",
+	  "videoUrl": "https://www.youtube.com/watch?v=K2R3M0WjU_k",
+	  "muscleGroup": "Antebraço"
+	},
 
+    {
+      "name": "Hiperextensão lombar",
+      "sets": 3,
+      "reps": "12",
+      "rest": 45,
+      "image": "./images/hiperextensao.png",
+      "description": "Fortalece a lombar e previne lesões.",
+      "videoUrl": "https://www.youtube.com/watch?v=QSZP3FfT8b0",
+      "muscleGroup": "Lombar"
+    },
+    {
+      "name": "Prancha lateral",
+      "sets": 2,
+      "reps": "30-40s",
+      "rest": 30,
+      "image": "./images/prancha_lateral.png",
+      "description": "Ativação do core lateral e estabilizadores.",
+      "videoUrl": "https://www.youtube.com/watch?v=K2VljzCC16g",
+      "muscleGroup": "Core"
+    }
+  ]
+},
+{
+  "day": 3,
+  "title": "Pernas (Quadríceps e Glúteos)",
+  "image": "https://images.unsplash.com/photo-1594915447192-d62153549646",
+  "exercises": [
+    {
+      "name": "Agachamento livre",
+      "sets": 4,
+      "reps": "6-8",
+      "rest": 90,
+      "image": "./images/agachamento_livre.png",
+      "description": "Base fundamental para força e volume nos membros inferiores.",
+      "videoUrl": "https://www.youtube.com/watch?v=ultWZbUMPL8",
+      "muscleGroup": "Pernas, Glúteos"
+    },
+    {
+      "name": "Cadeira extensora",
+      "sets": 3,
+      "reps": "12",
+      "rest": 45,
+      "image": "./images/cadeira_extensora.png",
+      "description": "Isolamento do quadríceps com foco no controle.",
+      "videoUrl": "https://www.youtube.com/watch?v=8iPEnn-ltC8",
+      "muscleGroup": "Quadríceps"
+    },
+    {
+      "name": "Avanço com halteres",
+      "sets": 3,
+      "reps": "10",
+      "rest": 60,
+      "image": "./images/avanço_halteres.png",
+      "description": "Exercício unilateral para equilíbrio e glúteos.",
+      "videoUrl": "https://www.youtube.com/watch?v=QF0BQS2W80k",
+      "muscleGroup": "Pernas, Glúteos"
+    },
+    {
+      "name": "Leg press 45°",
+      "sets": 3,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/leg_press.png",
+      "description": "Grande ativação de quadríceps com suporte.",
+      "videoUrl": "https://www.youtube.com/watch?v=IZxyjW7MPJQ",
+      "muscleGroup": "Quadríceps, Glúteos"
+    },
+    {
+      "name": "Panturrilha no leg press",
+      "sets": 4,
+      "reps": "20",
+      "rest": 30,
+      "image": "./images/panturrilha_legpress.png",
+      "description": "Fortalecimento e amplitude da panturrilha.",
+      "videoUrl": "https://www.youtube.com/watch?v=YMmgqO8Jo-k",
+      "muscleGroup": "Panturrilha"
+    },
+    {
+      "name": "Abdominal oblíquo com rotação",
+      "sets": 3,
+      "reps": "15",
+      "rest": 30,
+      "image": "./images/abdominal_obliquo.png",
+      "description": "Trabalho funcional para abdômen lateral.",
+      "videoUrl": "https://www.youtube.com/watch?v=twF4Vh5QjIE",
+      "muscleGroup": "Abdômen oblíquo"
+    }
+  ]
+},
+{
+  "day": 4,
+  "title": "Ombros, Posterior e Abdômen",
+  "image": "https://images.unsplash.com/photo-1541592106381-b31649479354",
+  "exercises": [
+    {
+      "name": "Desenvolvimento com halteres",
+      "sets": 4,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/desenvolvimento_halteres.png",
+      "description": "Trabalha os deltoides anterior e lateral com amplitude.",
+      "videoUrl": "https://www.youtube.com/watch?v=B-aVuyhvLHU",
+      "muscleGroup": "Ombros"
+    },
+    {
+      "name": "Elevação lateral",
+      "sets": 3,
+      "reps": "10-12",
+      "rest": 45,
+      "image": "./images/elevacao_lateral.png",
+      "description": "Foco no deltoide lateral para ampliar os ombros.",
+      "videoUrl": "https://www.youtube.com/watch?v=kDqklk1ZESo",
+      "muscleGroup": "Ombros"
+    },
+    {
+      "name": "Elevação posterior (inclinada)",
+      "sets": 3,
+      "reps": "10-12",
+      "rest": 45,
+      "image": "./images/elevacao_posterior.png",
+      "description": "Isolamento do deltoide posterior para postura e equilíbrio.",
+      "videoUrl": "https://www.youtube.com/watch?v=pYcpY20QaE8",
+      "muscleGroup": "Ombros"
+    },
+    {
+      "name": "Stiff com halteres",
+      "sets": 3,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/stiff_halteres.png",
+      "description": "Alongamento e fortalecimento dos isquiotibiais.",
+      "videoUrl": "https://www.youtube.com/watch?v=0WOP9J7QPwI",
+      "muscleGroup": "Posterior de Coxa"
+    },
+    {
+      "name": "Good morning com barra",
+      "sets": 3,
+      "reps": "10",
+      "rest": 60,
+      "image": "./images/good_morning.png",
+      "description": "Ativa a cadeia posterior e fortalece a lombar.",
+      "videoUrl": "https://www.youtube.com/watch?v=vxWjLLx3fVE",
+      "muscleGroup": "Lombar, Posterior"
+    },
+    {
+      "name": "Abdominal prancha com apoio",
+      "sets": 3,
+      "reps": "30-45s",
+      "rest": 30,
+      "image": "./images/prancha_apoio.png",
+      "description": "Ativação do core e estabilizadores da coluna.",
+      "videoUrl": "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+      "muscleGroup": "Core"
+    },
+    {
+      "name": "Abdominal infra na barra",
+      "sets": 3,
+      "reps": "12-15",
+      "rest": 30,
+      "image": "./images/infra_barra.png",
+      "description": "Trabalho do abdômen inferior com peso corporal.",
+      "videoUrl": "https://www.youtube.com/watch?v=tABHnWH2h34",
+      "muscleGroup": "Abdômen inferior"
+    }
+  ]
+},
+{
+  "day": 5,
+  "title": "Posterior de Coxa, Glúteos e Panturrilha",
+  "image": "https://images.unsplash.com/photo-1594915447192-d62153549646",
+  "exercises": [
+    {
+      "name": "Mesa flexora",
+      "sets": 4,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/mesa_flexora.png",
+      "description": "Isolamento dos isquiotibiais com boa ativação.",
+      "videoUrl": "https://www.youtube.com/watch?v=PV4XkZswyHg",
+      "muscleGroup": "Posterior de Coxa"
+    },
+    {
+      "name": "Stiff com barra",
+      "sets": 3,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/stiff_barra.png",
+      "description": "Ênfase no alongamento dos posteriores e glúteos.",
+      "videoUrl": "https://www.youtube.com/watch?v=0WOP9J7QPwI",
+      "muscleGroup": "Posterior de Coxa, Glúteos"
+    },
+    {
+      "name": "Glute bridge (ponte de glúteo)",
+      "sets": 3,
+      "reps": "12",
+      "rest": 45,
+      "image": "./images/ponte_gluteo.png",
+      "description": "Ativa glúteos e core de forma segura.",
+      "videoUrl": "https://www.youtube.com/watch?v=1WT-Fz5ZEFg",
+      "muscleGroup": "Glúteos, Lombar"
+    },
+    {
+      "name": "Agachamento búlgaro",
+      "sets": 3,
+      "reps": "8-10",
+      "rest": 60,
+      "image": "./images/agachamento_bulgaro.png",
+      "description": "Desafio unilateral para pernas e glúteos.",
+      "videoUrl": "https://www.youtube.com/watch?v=2C-uNgKwPLE",
+      "muscleGroup": "Pernas, Glúteos"
+    },
+    {
+      "name": "Panturrilha em pé (barra ou máquina)",
+      "sets": 4,
+      "reps": "15-20",
+      "rest": 30,
+      "image": "./images/panturrilha_pe.png",
+      "description": "Foco no gastrocnêmio com boa amplitude.",
+      "videoUrl": "https://www.youtube.com/watch?v=-M4-G8p8fmc",
+      "muscleGroup": "Panturrilha"
+    },
+    {
+      "name": "Panturrilha sentado",
+      "sets": 4,
+      "reps": "15-20",
+      "rest": 30,
+      "image": "./images/panturrilha_sentado.png",
+      "description": "Ênfase no sóleo, essencial para volume.",
+      "videoUrl": "https://www.youtube.com/watch?v=YMmgqO8Jo-k",
+      "muscleGroup": "Panturrilha"
+    },
+    {
+      "name": "Abdominal máquina",
+      "sets": 3,
+      "reps": "15",
+      "rest": 30,
+      "image": "./images/abdominal_maquina.png",
+      "description": "Trabalha o core com carga controlada.",
+      "videoUrl": "https://www.youtube.com/watch?v=4SR93vi2ZKw",
+      "muscleGroup": "Abdômen"
+    }
+  ]
+}
+
+
+];
 // --- Persistência de Dados (Firebase Firestore) ---
 
 /**
@@ -227,8 +565,7 @@ window.loadData = async function() {
         window.allWorkoutData = {};
         window.workoutHistory = [];
         return;
-    }
-
+    }	
     const userId = window.currentUserId;
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     let loadedWorkoutData = {};
@@ -520,40 +857,97 @@ window.renderExercisesForDay = function(exercises) {
         const exerciseItem = document.createElement('div');
         exerciseItem.classList.add('exercise-item', 'card');
         exerciseItem.dataset.index = exIndex;
+        
+        // Pré-visualização da imagem
+        let imagePreviewHtml = '';
+        if (exercise.image) {
+            imagePreviewHtml = `
+                <div class="current-image-preview">
+                    <p>Imagem atual:</p>
+                    <img src="${exercise.image}" alt="Imagem do exercício" style="max-width: 150px; max-height: 150px;">
+                </div>
+            `;
+        }
+
         exerciseItem.innerHTML = `
             <div>
                 <input type="text" class="form-control exercise-name-input" value="${exercise.name}" placeholder="Nome do Exercício">
+                
+                ${imagePreviewHtml}
+                
+                <div class="form-group">
+                    <label>Imagem do Exercício:</label>
+                    <input type="file" class="form-control exercise-image-input" accept="image/*">
+                </div>
+                
                 <div class="exercise-sets" data-exercise-index="${exIndex}">
                     ${exercise.sets.map((set, setIndex) => `
                         <div class="set-input">
                             <span>Set ${setIndex + 1}:</span>
                             <input type="number" class="form-control set-reps" value="${set.reps}" placeholder="Reps" min="0">
                             <input type="number" class="form-control set-weight" value="${set.weight}" placeholder="Peso (kg)" min="0" step="0.5">
-                            <button class="btn btn-danger btn-sm remove-set-btn" data-exercise-index="${exIndex}" data-set-index="${setIndex}"><i class="fas fa-minus-circle"></i></button>
+                            <button class="btn btn-danger btn-sm remove-set-btn" data-exercise-index="${exIndex}" data-set-index="${setIndex}">
+                                <i class="fas fa-minus-circle"></i>
+                            </button>
                         </div>
                     `).join('')}
-                    <button class="btn btn-success btn-sm add-set-btn" data-exercise-index="${exIndex}"><i class="fas fa-plus-circle"></i> Adicionar Set</button>
+                    <button class="btn btn-success btn-sm add-set-btn" data-exercise-index="${exIndex}">
+                        <i class="fas fa-plus-circle"></i> Adicionar Set
+                    </button>
                 </div>
-                <div class="form-group" style="margin-top: 10px;">
+                
+                <div class="form-group">
                     <label>Descanso (segundos):</label>
                     <input type="number" class="form-control exercise-rest-input" value="${exercise.rest || 0}" min="0">
                 </div>
-                <div class="form-group" style="margin-top: 10px;">
+                
+                <div class="form-group">
                     <label>URL do Vídeo (Opcional):</label>
                     <input type="text" class="form-control exercise-video-url" value="${exercise.videoUrl || ''}" placeholder="URL do vídeo do exercício">
                 </div>
             </div>
             <div class="actions">
-                <button class="btn btn-danger btn-sm remove-exercise-btn" data-index="${exIndex}"><i class="fas fa-trash-alt"></i></button>
+                <button class="btn btn-danger btn-sm remove-exercise-btn" data-index="${exIndex}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </div>
         `;
         exercisesList.appendChild(exerciseItem);
+
+        // Adiciona o event listener para a pré-visualização da imagem
+        const imageInput = exerciseItem.querySelector('.exercise-image-input');
+        const previewContainer = exerciseItem.querySelector('.current-image-preview');
+        
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Atualiza a imagem no objeto do exercício
+                    window.allWorkoutData[window.currentDayId].exercises[exIndex].image = event.target.result;
+                    
+                    // Mostra a pré-visualização
+                    if (!previewContainer) {
+                        const previewHtml = `
+                            <div class="current-image-preview">
+                                <p>Nova imagem:</p>
+                                <img src="${event.target.result}" alt="Pré-visualização" style="max-width: 150px; max-height: 150px;">
+                            </div>
+                        `;
+                        imageInput.insertAdjacentHTML('afterend', previewHtml);
+                    } else {
+                        previewContainer.querySelector('img').src = event.target.result;
+                    }
+                    
+                    window.saveData();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     });
 
-    // Anexa listeners de eventos a elementos dinâmicos
     window.attachExerciseDetailListeners();
-}
-
+};
 /**
  * Anexa listeners de eventos a elementos dinâmicos na view de detalhes do dia.
  */
@@ -564,6 +958,21 @@ window.attachExerciseDetailListeners = function() {
             window.allWorkoutData[window.currentDayId].exercises[exIndex].sets.push({ reps: 0, weight: 0 });
             window.renderExercisesForDay(window.allWorkoutData[window.currentDayId].exercises);
         };
+    });
+ document.querySelectorAll('.exercise-image-input').forEach(input => {
+        input.addEventListener('change', function(e) {
+            const exIndex = parseInt(e.target.closest('.exercise-item').dataset.index);
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    window.allWorkoutData[window.currentDayId].exercises[exIndex].image = event.target.result;
+                    window.saveData();
+                    // Você pode adicionar uma pré-visualização aqui se quiser
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     });
 
     document.querySelectorAll('.remove-set-btn').forEach(button => {

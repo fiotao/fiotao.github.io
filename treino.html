@@ -98,6 +98,14 @@
                 <div id="exercises-list" class="list-container">
                     <!-- Exercícios serão carregados aqui -->
                 </div>
+				<div class="form-group">
+    <label for="exercise-image-input">Imagem do Exercício:</label>
+    <input type="file" id="exercise-image-input" class="form-control" accept="image/*">
+    <small>Envie uma imagem para representar o exercício (opcional)</small>
+    <div id="exercise-image-preview" style="margin-top: 10px; display: none;">
+        <img id="preview-image" src="#" alt="Pré-visualização" style="max-width: 200px; max-height: 200px;">
+    </div>
+</div>
                 <button class="btn btn-success" id="add-exercise-btn"><i class="fas fa-plus-circle"></i> Adicionar Exercício</button>
                 <div class="actions">
                     <button class="btn btn-primary" id="save-day-btn"><i class="fas fa-save"></i> Salvar Treino</button>
