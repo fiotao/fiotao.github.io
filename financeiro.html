@@ -6,6 +6,10 @@
     <title>Controle Financeiro Pessoal</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -262,7 +266,7 @@
             background-color: #2ecc71;
             color: white;
         }
-        .status-overdue { /* Novo estilo para despesas atrasadas */
+        .status-overdue {
             background-color: #e74c3c;
             color: white;
         }
@@ -422,62 +426,36 @@
             border-radius: 5px;
             font-weight: bold;
         }
-		/* Adicionar ao final da seção de estilos */
-#import-section {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-#ofx-preview th, #ofx-preview td {
-    padding: 8px;
-    text-align: left;
-}
-
-#ofx-preview th {
-    background-color: #f8f9fa;
-}
-
-#import-checkbox {
-    text-align: center;
-}
-        /* Estilos para sub-abas */
-        .sub-tabs {
-            display: flex;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
+        /* Estilos para autenticação */
+        #auth-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
         }
-        .sub-tab {
-            padding: 8px 15px;
-            cursor: pointer;
-            background-color: #f8f8f8;
-            margin-right: 3px;
-            border-radius: 4px 4px 0 0;
-            font-size: 14px;
-        }
-        .sub-tab.active {
-            background-color: #3498db;
-            color: white;
-            border-bottom: 1px solid #3498db;
-        }
-        .sub-tab-content {
+        #user-info {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
             display: none;
-            padding-top: 15px;
         }
-        .sub-tab-content.active {
-            display: block;
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container">      
+        <div id="user-info" class="dashboard-card">
+            <h2>Bem-vindo, <span id="user-email"></span></h2>
+            <button id="sign-out-btn" class="btn-danger">Sair</button>
+        </div>
+
         <h1>Controle Financeiro Pessoal</h1>
-        <nav>
-            <a href="index.html" class="nav-link">Página Inicial</a>
-            <a href="treino.html" class="nav-link">Acompanhamento de Treino</a>
-        </nav>
+        
         <div id="status-message" class="status-message"></div>
 
         <div class="tabs">
@@ -486,8 +464,8 @@
             <div class="tab" onclick="openTab(event, 'creditcards-tab')">Cartões</div>
             <div class="tab" onclick="openTab(event, 'accounts-tab')">Contas</div>
             <div class="tab" onclick="openTab(event, 'import-tab')">Importar</div>
-			<div class="tab" onclick="openTab(event, 'full-dashboard-tab')">Dashboard Completo</div>
-			<div class="tab" onclick="openTab(event, 'recurring-expenses-tab')">Despesas Recorrentes</div>
+            <div class="tab" onclick="openTab(event, 'full-dashboard-tab')">Dashboard Completo</div>
+            <div class="tab" onclick="openTab(event, 'recurring-expenses-tab')">Despesas Recorrentes</div>
             <div class="tab" onclick="openTab(event, 'budget-tab')">Orçamento Mensal</div>
         </div>
 
@@ -1383,7 +1361,22 @@
                 select.appendChild(option);
             });
         }
+		// Configuração do Firebase
+		const firebaseConfig = {
+		  apiKey: "AIzaSyBtl8HSLwsqvmT5yBySK4VAccdr9qSU20I",
+		  authDomain: "financeiro-9630f.firebaseapp.com", // Substitua SEU_PROJETO pelo seu ID de Projeto
+		  projectId: "financeiro-9630f",
+		  storageBucket: "financeiro-9630f.appspot.com", // Substitua SEU_PROJETO pelo seu ID de Projeto
+		  messagingSenderId: "106376874316", // Este é geralmente o seu Número do Projeto
+		  appId: "Financeiro" // Você encontrará este ID único nas configurações do seu app web no Console
+		};
 
+		// Inicializa o Firebase
+		firebase.initializeApp(firebaseConfig);
+
+		// Referências aos serviços
+		const db = firebase.firestore();
+		const auth = firebase.auth();
         // Inicialização
         document.addEventListener('DOMContentLoaded', function () {
             // Configura a data atual como padrão
