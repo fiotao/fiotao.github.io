@@ -619,6 +619,7 @@ window.loadData = async function() {
 
     window.allWorkoutData = updatedWorkoutData;
     window.workoutHistory = loadedWorkoutHistory;
+    console.log('Workout History Loaded:', window.workoutHistory); // Adicione esta linha
 
     // Normalize loaded data
     for (const dayId in window.allWorkoutData) {
@@ -727,8 +728,6 @@ window.showView = function(viewId) {
         window.initWorkoutDays();
     } else if (viewId === 'history-view') {
         window.renderHistory();
-    } else if (viewId === 'dashboard-view') {
-        window.updateDashboard();
     } else if (viewId === 'profile-view') {
         window.renderUserProfileView();
     }
@@ -1100,15 +1099,21 @@ window.startWorkout = function(dayId) {
     window.currentWorkout.executionExercises = window.currentWorkout.exercises.map(ex => {
         // Busca os dados do último treino para este exercício
         const lastWorkoutData = window.findLastWorkoutDataForExercise(ex.name);
+        
+        // Debug: Verifique se os dados estão sendo encontrados
+        console.log(`Exercise: ${ex.name}`, lastWorkoutData);
+        
         // Se encontrou dados do último treino, usa-os como base
         const sets = lastWorkoutData 
             ? lastWorkoutData.sets.map(set => ({ 
                 reps: set.reps || 0, 
-                weight: set.weight || 0 
+                weight: set.weight || 0,
+                completed: false
             }))
             : ex.sets.map(set => ({ 
                 reps: typeof set === 'object' ? (set.reps || 0) : 0, 
-                weight: typeof set === 'object' ? (set.weight || 0) : 0 
+                weight: typeof set === 'object' ? (set.weight || 0) : 0,
+                completed: false
             }));
         
         return {
@@ -1217,29 +1222,33 @@ window.renderWorkoutExecution = function() {
 
     exerciseEl.innerHTML = `
         <h3>${currentExercise.name}</h3>
-		 ${currentExercise.lastWorkoutDate ? 
+        ${currentExercise.lastWorkoutDate ? 
         `<p class="last-workout-info"><i class="fas fa-history"></i> Último treino: ${new Date(currentExercise.lastWorkoutDate).toLocaleDateString('pt-BR')}</p>` : 
         ''}
         ${imageHtml}
         <div class="exercise-details-execution">
-        <p>Séries Planejadas: ${currentExercise.sets.length}</p>
-        <p>Repetições Sugeridas: ${currentExercise.reps || 'N/A'}</p>
-        <p>Descanso Sugerido: ${currentExercise.rest || 0} segundos</p>
-        ${currentExercise.description ? `<p>${currentExercise.description}</p>` : ''}
-        ${currentExercise.muscleGroup ? `<p>Músculos: ${currentExercise.muscleGroup}</p>` : ''}
-    </div>
-      <div class="exercise-execution-sets">
-        ${currentExercise.sets.map((set, setIndex) => `
-            <div class="set-input ${setIndex === window.currentSetIndex && !currentExercise.isCompleted ? 'current-set-highlight' : (setIndex < window.currentSetIndex || currentExercise.isCompleted ? 'completed-set-overlay' : '')}">
-                <span>Set ${setIndex + 1}:</span>
-                <input type="number" class="form-control execution-reps" data-set-index="${setIndex}" value="${set.reps || 0}" placeholder="Reps" min="0" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
-                <input type="number" class="form-control execution-weight" data-set-index="${setIndex}" value="${set.weight || 0}" placeholder="Peso (kg)" min="0" step="0.5" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
-                <button class="btn btn-success btn-sm complete-set-btn" data-set-index="${setIndex}" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
-                    <i class="fas fa-check"></i>
-                </button>
-            </div>
-        `).join('')}
-    </div>
+            <p>Séries Planejadas: ${currentExercise.sets.length}</p>
+            <p>Repetições Sugeridas: ${currentExercise.reps || 'N/A'}</p>
+            <p>Descanso Sugerido: ${currentExercise.rest || 0} segundos</p>
+            ${currentExercise.description ? `<p>${currentExercise.description}</p>` : ''}
+            ${currentExercise.muscleGroup ? `<p>Músculos: ${currentExercise.muscleGroup}</p>` : ''}
+        </div>
+        <div class="exercise-execution-sets">
+            ${currentExercise.sets.map((set, setIndex) => `
+                <div class="set-input ${setIndex === window.currentSetIndex && !currentExercise.isCompleted ? 'current-set-highlight' : (setIndex < window.currentSetIndex || currentExercise.isCompleted ? 'completed-set-overlay' : '')}">
+                    <span>Set ${setIndex + 1}:</span>
+                    <input type="number" class="form-control execution-reps" data-set-index="${setIndex}" 
+                           value="${currentExercise.completedSets[setIndex]?.reps || set.reps || 0}" 
+                           placeholder="Reps" min="0" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                    <input type="number" class="form-control execution-weight" data-set-index="${setIndex}" 
+                           value="${currentExercise.completedSets[setIndex]?.weight || set.weight || 0}" 
+                           placeholder="Peso (kg)" min="0" step="0.5" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                    <button class="btn btn-success btn-sm complete-set-btn" data-set-index="${setIndex}" ${setIndex !== window.currentSetIndex || currentExercise.isCompleted ? 'disabled' : ''}>
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            `).join('')}
+        </div>
         <div class="exercise-execution-actions">
             <button class="btn btn-info skip-rest-btn" style="display: none;"><i class="fas fa-forward"></i> Pular Descanso</button>
             ${currentExercise.videoUrl ? `<a href="${currentExercise.videoUrl}" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-video"></i> Ver Vídeo</a>` : ''}
@@ -1337,11 +1346,19 @@ window.completeSet = function(setIndex) {
     const weightInput = currentSetInputDiv.querySelector('.execution-weight');
     const completeSetBtn = currentSetInputDiv.querySelector('.complete-set-btn');
 
+    // Salva os valores atuais antes de desabilitar os inputs
+    const repsValue = parseInt(repsInput.value) || 0;
+    const weightValue = parseFloat(weightInput.value) || 0;
+
     if (!exercise.completedSets[setIndex]) {
         exercise.completedSets[setIndex] = {};
     }
-    exercise.completedSets[setIndex].reps = parseInt(repsInput.value) || 0;
-    exercise.completedSets[setIndex].weight = parseFloat(weightInput.value) || 0;
+    exercise.completedSets[setIndex].reps = repsValue;
+    exercise.completedSets[setIndex].weight = weightValue;
+
+    // Atualiza também o set original para manter os valores
+    exercise.sets[setIndex].reps = repsValue;
+    exercise.sets[setIndex].weight = weightValue;
 
     repsInput.disabled = true;
     weightInput.disabled = true;
@@ -1375,7 +1392,6 @@ window.completeSet = function(setIndex) {
         }
     }
 }
-
 /**
  * Inicia o timer de descanso global.
  * @param {number} duration - Duração do descanso em segundos.
@@ -1561,197 +1577,7 @@ window.deleteWorkoutFromHistory = function(id) {
         window.workoutHistory = window.workoutHistory.filter(workout => workout.id !== id);
         window.saveData();
         window.renderHistory();
-        window.updateDashboard();
         window.showToast('Treino excluído com sucesso!', 'success');
-    });
-}
-
-// --- View de Dashboard ---
-
-/**
- * Atualiza e renderiza todos os gráficos da dashboard.
- */
-window.updateDashboard = function() {
-    const dashboardView = document.getElementById('dashboard-view');
-    const dashboardGrid = dashboardView.querySelector('.dashboard-grid');
-
-    if (window.workoutHistory.length === 0) {
-        dashboardGrid.innerHTML = '<p style="text-align: center; color: var(--dark-color);">Nenhum dado de treino para exibir na dashboard ainda. Complete alguns treinos para ver sua evolução!</p>';
-        if(window.volumeChartInstance) window.volumeChartInstance.destroy();
-        if(window.prChartInstance) window.prChartInstance.destroy();
-        if(window.frequentExercisesChartInstance) window.frequentExercisesChartInstance.destroy();
-        if(window.averageWorkoutTimeChartInstance) window.averageWorkoutTimeChartInstance.destroy();
-        return;
-    } else {
-        dashboardGrid.innerHTML = `
-            <div class="chart-card">
-                <h3>Volume Total de Treino (kg)</h3>
-                <canvas id="volumeChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3>Progressão de Peso (PRs) por Exercício</h3>
-                <div id="exercise-pr-charts">
-                    <p>Selecione um exercício para ver a progressão:</p>
-                    <select id="exercise-select" class="form-control"></select>
-                    <canvas id="prChart" style="display: none;"></canvas>
-                    <p id="no-pr-data" style="display: none;"></p>
-                </div>
-            </div>
-            <div class="chart-card">
-                <h3>Exercícios Mais Frequentes</h3>
-                <canvas id="frequentExercisesChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3>Duração do Treino (min)</h3>
-                <canvas id="averageWorkoutTimeChart"></canvas>
-            </div>
-        `;
-    }
-
-    window.renderVolumeChart();
-    window.populateExerciseSelect();
-    window.renderFrequentExercisesChart();
-    window.renderAverageWorkoutTimeChart();
-}
-
-/**
- * Renderiza o gráfico de Volume Total de Treino.
- */
-window.renderVolumeChart = function() {
-    const canvas = document.getElementById('volumeChart');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    if (window.volumeChartInstance) {
-        window.volumeChartInstance.destroy();
-    }
-
-    const workoutVolumes = window.workoutHistory.map(workout => {
-        let totalVolume = 0;
-        workout.exercises.forEach(exercise => {
-            if (Array.isArray(exercise.sets)) {
-                exercise.sets.forEach(set => {
-                    const weight = parseFloat(set.weight) || 0;
-                    const reps = parseInt(set.reps) || 0;
-                    totalVolume += weight * reps;
-                });
-            }
-        });
-        return { date: new Date(workout.date), volume: totalVolume };
-    }).sort((a, b) => a.date - b.date);
-
-    const labels = workoutVolumes.map(data => data.date.toLocaleDateString('pt-BR'));
-    const data = workoutVolumes.map(data => data.volume);
-
-    if (data.length === 0) {
-        canvas.style.display = 'none';
-        return;
-    } else {
-        canvas.style.display = 'block';
-    }
-
-    window.volumeChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Volume Total (kg)',
-                data: data,
-                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'),
-                backgroundColor: 'transparent',
-                fill: false,
-                tension: 0.3,
-                pointBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'),
-                pointBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--light-color'),
-                pointRadius: 5,
-                pointHoverRadius: 7,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    labels: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
-                        font: {
-                            size: 14
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        title: function(context) {
-                            return `Data: ${context[0].label}`;
-                        },
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed.y !== null) {
-                                label += new Intl.NumberFormat('pt-BR', { style: 'unit', unit: 'kilogram' }).format(context.parsed.y);
-                            }
-                            return label;
-                        }
-                    },
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'),
-                    borderWidth: 1,
-                    cornerRadius: 8,
-                    displayColors: false,
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Volume (kg)',
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
-                    },
-                    ticks: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
-                        font: {
-                            size: 12
-                        }
-                    },
-                    grid: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Data do Treino',
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
-                    },
-                    ticks: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--dark-color'),
-                        font: {
-                            size: 12
-                        }
-                    },
-                    grid: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') + '40',
-                        drawBorder: false
-                    }
-                }
-            }
-        }
     });
 }
 

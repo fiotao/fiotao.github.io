@@ -83,7 +83,6 @@
                 </div>
                 <button class="btn btn-success" id="add-day-btn"><i class="fas fa-plus-circle"></i> Adicionar Novo Dia</button>
                 <button class="btn btn-primary" onclick="window.showView('history-view')"><i class="fas fa-history"></i> Ver Histórico</button>
-                <button class="btn btn-info" onclick="window.showView('dashboard-view')"><i class="fas fa-chart-line"></i> Dashboard</button>
                 <button class="btn btn-secondary" onclick="window.showView('profile-view')" id="profile-btn"><i class="fas fa-user-edit"></i> Editar Perfil</button>
             </section>
 
@@ -142,39 +141,6 @@
                     <!-- Itens do histórico serão carregados aqui pelo JavaScript -->
                 </div>
                 <div class="actions">
-                    <button class="btn btn-info" onclick="window.showView('dashboard-view')"><i class="fas fa-chart-line"></i> Ir para Dashboard</button>
-                    <button class="btn btn-primary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar para Início</button>
-                </div>
-            </section>
-
-            <!-- View de Dashboard de Evolução -->
-            <section id="dashboard-view" class="app-section" style="display: none;">
-                <h2><i class="fas fa-chart-line"></i> Dashboard de Evolução</h2>
-                <div class="dashboard-grid">
-                    <div class="chart-card">
-                        <h3>Volume Total de Treino (kg)</h3>
-                        <canvas id="volumeChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Progressão de Peso (PRs) por Exercício</h3>
-                        <div id="exercise-pr-charts">
-                            <p>Selecione um exercício para ver a progressão:</p>
-                            <select id="exercise-select" class="form-control"></select>
-                            <canvas id="prChart" style="display: none;"></canvas>
-                            <p id="no-pr-data" style="display: none;">Nenhum dado de PR para este exercício.</p>
-                            </div>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Exercícios Mais Frequentes</h3>
-                        <canvas id="frequentExercisesChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Duração do Treino (min)</h3>
-                        <canvas id="averageWorkoutTimeChart"></canvas>
-                    </div>
-                </div>
-                <div class="actions">
-                    <button class="btn btn-info" onclick="window.showView('history-view')"><i class="fas fa-history"></i> Ir para Histórico</button>
                     <button class="btn btn-primary" onclick="window.showView('days-view')"><i class="fas fa-arrow-left"></i> Voltar para Início</button>
                 </div>
             </section>
